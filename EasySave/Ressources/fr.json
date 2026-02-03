@@ -1,0 +1,22 @@
+{
+  "menu_title": "=== EasySave ===",
+  "create_backup": "1. Créer un travail de sauvegarde",
+  "execute_backup": "2. Exécuter un travail",
+  "execute_all": "3. Exécuter tous les travaux",
+  "change_language": "4. Changer de langue",
+  "quit": "5. Quitter",
+  "your_choice": "Votre choix : ",
+  "invalid_choice": "Choix invalide.",
+  "press_key": "Appuyez sur une touche pour continuer...",
+  "select_language": "Sélectionnez une langue :",
+  "lang_french": "1. Français",
+  "lang_english": "2. Anglais",
+  "language_changed": "Langue changée avec succès.",
+  "prompt_name": "Nom du travail : ",
+  "prompt_source": "Répertoire source : ",
+  "prompt_target": "Répertoire cible : ",
+  "prompt_type": "Type (1=Complet, 2=Différentiel) : ",
+  "error_max_jobs": "Maximum 5 travaux atteint.",
+  "success_created": "Travail créé avec succès.",
+  "success_executed": "Sauvegarde terminée."
+}
