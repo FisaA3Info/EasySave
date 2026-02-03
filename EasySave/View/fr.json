@@ -1,0 +1,15 @@
+{
+  "menu_title": "=== EasySave ===",
+  "menu_create": "1. Créer un travail de sauvegarde",
+  "menu_execute": "2. Exécuter un travail",
+  "menu_execute_all": "3. Exécuter tous les travaux",
+  "menu_quit": "4. Quitter",
+  "prompt_name": "Nom du travail : ",
+  "prompt_source": "Répertoire source : ",
+  "prompt_target": "Répertoire cible : ",
+  "prompt_type": "Type (1=Complet, 2=Différentiel) : ",
+  "error_max_jobs": "Maximum 5 travaux atteint.",
+  "error_invalid": "Choix invalide.",
+  "success_created": "Travail créé avec succès.",
+  "success_executed": "Sauvegarde terminée."
+}
