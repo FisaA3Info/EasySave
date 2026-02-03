@@ -1,0 +1,22 @@
+{
+  "menu_title": "=== EasySave ===",
+  "create_backup": "Create a backup job",
+  "execute_backup": "Execute a job",
+  "execute_all": "Execute all jobs",
+  "change_language": "Change language",
+  "quit": "Quit",
+  "your_choice": "Your choice:",
+  "invalid_choice": "Invalid choice.",
+  "press_key": "Press any key to continue...",
+  "select_language": "Select a language:",
+  "lang_french": "French",
+  "lang_english": "English",
+  "language_changed": "Language changed successfully.",
+  "prompt_name": "Job name: ",
+  "prompt_source": "Source directory: ",
+  "prompt_target": "Target directory: ",
+  "prompt_type": "Type (1=Full, 2=Differential): ",
+  "error_max_jobs": "Maximum 5 jobs reached.",
+  "success_created": "Job created successfully.",
+  "success_executed": "Backup completed."
+}

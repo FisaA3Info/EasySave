@@ -9,9 +9,10 @@
 
   <ItemGroup>
     <Folder Include="Controller\" />
-    <Folder Include="Service\" />
     <Folder Include="ViewModel\" />
-    <Folder Include="View\" />
+	<None Update="Ressources\*.json">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
 </Project>
