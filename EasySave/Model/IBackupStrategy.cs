@@ -6,9 +6,7 @@ namespace EasySave.Model
 {
     internal interface IBackupStrategy
     {
-        string name { get; set; }
-        string sourceFilePath { get; set; }
-        string targetFilePath { get; set; }
+        private readonly List<BackupJob.Job>
 
     }
 }

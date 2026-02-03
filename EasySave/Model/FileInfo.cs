@@ -6,13 +6,9 @@ namespace EasySave.Model
 {
     internal class FileInfo
     {
-        public int fileSize { get; set; }
-        public int progress { get; set; }
-        public int nbFilesLeftToDo { get; set; }
-        public int totalFilesSize { get; set; }
-        public int totalFilesToCopy { get; set; }
-        public string? sourceFilePath { get; set; }
-        public string? targetFilePath { get; set; }
-        public string? state { get; set; }
+        public int FileSize { get; set; }
+        public int FileName { get; set; }
+        public string? SourcePath { get; set; }
+        public string? TargetPath { get; set; }
     }
 }
