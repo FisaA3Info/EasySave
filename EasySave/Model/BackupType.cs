@@ -1,0 +1,5 @@
+﻿enum Type
+{
+    Full,
+    Differential
+}
