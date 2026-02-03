@@ -10,12 +10,12 @@ namespace EasySave.View
             while (IsRunning)
             {
                 Console.Clear();
-                Console.WriteLine(language.GetText("menu_title"));
-                Console.WriteLine("1. " + language.GetText("create_backup"));
-                Console.WriteLine("2. " + language.GetText("execute_backup"));
-                Console.WriteLine("3. " + language.GetText("execute_all"));
-                Console.WriteLine("4. " + language.GetText("change_language"));
-                Console.WriteLine("5. " + language.GetText("quit"));
+                DisplayMessage("menu_title");
+                DisplayMessage("create_backup");
+                DisplayMessage("execute_backup");
+                DisplayMessage("execute_all");
+                DisplayMessage("change_language");
+                DisplayMessage("quit");
                 Console.Write(language.GetText("your_choice") + " ");
 
                 IsRunning = UserInput();
@@ -50,11 +50,11 @@ namespace EasySave.View
                     // CHOIX QUITTER
                     return false;
                 default:
-                    Console.WriteLine(language.GetText("invalid_choice"));
+                    DisplayMessage("invalid_choice");
                     break;
             }
 
-            Console.WriteLine(language.GetText("press_key"));
+            DisplayMessage("press_key");
             Console.ReadKey();
             return true;
         }
@@ -62,10 +62,10 @@ namespace EasySave.View
         public void SelectLanguage()
         {
             Console.Clear();
-            Console.WriteLine(language.GetText("select_language"));
+            DisplayMessage("select_language");
             Console.WriteLine();
-            Console.WriteLine("1. " + language.GetText("lang_french"));
-            Console.WriteLine("2. " + language.GetText("lang_english"));
+            DisplayMessage("lang_french");
+            DisplayMessage("lang_english");
             Console.Write(language.GetText("your_choice") + " ");
 
             string choice = Console.ReadLine();
@@ -78,7 +78,7 @@ namespace EasySave.View
                     language.LoadLanguage("en");
                     break;
                 default:
-                    Console.WriteLine(language.GetText("invalid_choice"));
+                    DisplayMessage("invalid_choice");
                     break;
             }
         }
