@@ -4,10 +4,11 @@ using System.Text;
 
 namespace EasySave.Model
 {
-    internal interface ISave
+    internal interface IBackupStrategy
     {
         string name { get; set; }
         string sourceFilePath { get; set; }
         string targetFilePath { get; set; }
+
     }
 }

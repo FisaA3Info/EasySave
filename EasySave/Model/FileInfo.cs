@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EasySave.Model
 {
-    internal class File
+    internal class FileInfo
     {
         public int fileSize { get; set; }
         public int progress { get; set; }
