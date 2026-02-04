@@ -47,6 +47,8 @@ namespace EasySave.View
                 var j = jobs[i];
                 Console.WriteLine($"{i + 1}. {j?.Name} | {j?.Type} | {language.GetText("prompt_source")} {j?.SourceDir} | {language.GetText("prompt_target")} {j?.TargetDir}");
             }
+            Console.WriteLine();
+
         }
 
 
@@ -58,16 +60,16 @@ namespace EasySave.View
             {
                 case "1":
                     // Ask Job info and create
-                    Console.Write(language.GetText("prompt_name"));
+                    DisplayMessage("prompt_name");
                     string name = Console.ReadLine();
 
-                    Console.Write(language.GetText("prompt_source"));
+                    DisplayMessage("prompt_source");
                     string source = Console.ReadLine();
 
-                    Console.Write(language.GetText("prompt_target"));
+                    DisplayMessage("prompt_target");
                     string target = Console.ReadLine();
 
-                    Console.Write(language.GetText("prompt_type"));
+                    DisplayMessage("prompt_type");
                     string TypeChoice = Console.ReadLine();
 
                     BackupType type = TypeChoice == "1" ? BackupType.Full : BackupType.Differential;
@@ -77,29 +79,29 @@ namespace EasySave.View
                     break;
 
                 case "2":
-                    // CHOIX EXECUTE BACKUP
+                    // CHOICE EXECUTE BACKUP
                     DisplayAllJobs();
                     int index = int.Parse(Console.ReadLine());
                     backupManager.ExecuteJob(index);
                     break;
 
                 case "3":
-                    // CHOIX EXECUTE ALL 
+                    // CHOICE EXECUTE ALL 
                     backupManager.ExecuteAllJobs();
                     break;
 
                 case "4":
-                    // CHOIX CHANGE LANGUE
+                    // CHOICE DISPLAY JOBS
                     DisplayAllJobs();
                     break;
 
                 case "5":
-                    // CHOIX CHANGE LANGUE
+                    // CHOICE CHANGE LANGUE
                     SelectLanguage();
                     break;
 
                 case "6":
-                    // CHOIX QUITTER
+                    // CHOICE QUIT
                     return false;
                 default:
                     DisplayMessage("invalid_choice");
