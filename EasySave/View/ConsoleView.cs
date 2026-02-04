@@ -51,6 +51,20 @@ namespace EasySave.View
 
         }
 
+        public bool IsThereAJob()
+        {
+            var jobs = backupManager.BackupJobs;
+            if (jobs == null || jobs.Count == 0)
+            {
+                DisplayMessage("no_jobs");
+                return false;
+            } else
+            {
+                DisplayAllJobs();
+                return true;
+            }
+        }
+
 
         public bool UserInput()
         {
@@ -92,15 +106,10 @@ namespace EasySave.View
 
                 case "2":
                     // CHOICE EXECUTE BACKUP
-                    DisplayAllJobs();
-                    string response = Console.ReadLine();
-                    if (string.IsNullOrWhiteSpace(response))
-                    {
-                        DisplayMessage("no_jobs");
-                        break;
+                    if (IsThereAJob() == true) {
+                        int index = int.Parse(Console.ReadLine());
+                        backupManager.ExecuteJob(index);
                     }
-                    int index = int.Parse(response);
-                    backupManager.ExecuteJob(index);
                     break;
 
                 case "3":
@@ -110,7 +119,7 @@ namespace EasySave.View
 
                 case "4":
                     // CHOICE DISPLAY JOBS
-                    DisplayAllJobs();
+                    IsThereAJob();
                     break;
 
                 case "5":
