@@ -41,7 +41,6 @@ namespace EasySave.Model
                         CurrentSourceFile = file.FullName,
                         CurrentTargetFile = targetFilePath
                     };
-                    stateTracker.UpdateState(activeState);
 
                     // Measure time
                     Stopwatch timer = new Stopwatch();
@@ -64,7 +63,7 @@ namespace EasySave.Model
                     );
 
                     // Send log to the DLL
-                    logger.Log(logEntry);
+                    //logger.Log(logEntry);
                 }
 
                 // Make it recursive for subdirectories

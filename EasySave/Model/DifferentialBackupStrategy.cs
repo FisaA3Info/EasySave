@@ -40,8 +40,6 @@ namespace EasySave.Model
                             CurrentTargetFile = targetPath
                         };
 
-                        // Updating state and creating a stopwatch for each file
-                        stateTracker.UpdateState(activeState);
                         Stopwatch timer = new Stopwatch();
                         
                         //creating directory for subdirectorys, starting timer after to measure copy time only
@@ -61,7 +59,7 @@ namespace EasySave.Model
                             timer.ElapsedMilliseconds
                         );
 
-                        logger.Log(logEntry);
+                        //logger.Log(logEntry);
                     }
                     catch (DirectoryNotFoundException dirNotFound)
                     {
