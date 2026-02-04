@@ -1,4 +1,5 @@
-﻿using EasySave.Service;
+﻿using EasySave.Model;
+using EasySave.Service;
 using EasySave.ViewModel;
 namespace EasySave.View
 {
@@ -36,18 +37,42 @@ namespace EasySave.View
             switch (choice)
             {
                 case "1":
+                    // Ask Job info and create
+                    Console.Write(language.GetText("prompt_name"));
+                    string name = Console.ReadLine();
+
+                    Console.Write(language.GetText("prompt_source"));
+                    string source = Console.ReadLine();
+
+                    Console.Write(language.GetText("prompt_target"));
+                    string target = Console.ReadLine();
+
+                    Console.Write(language.GetText("prompt_type"));
+                    string TypeChoice = Console.ReadLine();
+
+                    BackupType type = TypeChoice == "1" ? BackupType.Full : BackupType.Differential;
+
+                    bool success = backupManager.CreateJob(name, source, target, type);
+                    DisplayMessage(success ? "success_created" : "error_created");
                     break;
+
                 case "2":
                     // CHOIX EXECUTE BACKUP
+                    Console.Write(language.GetText("prompt_index"));
+                    int index = int.Parse(Console.ReadLine());
+                    backupManager.ExecuteJob(index);
                     break;
+
                 case "3":
                     // CHOIX EXECUTE ALL 
                     backupManager.ExecuteAllJobs();
                     break;
+
                 case "4":
                     // CHOIX CHANGE LANGUE
                     SelectLanguage();
                     break;
+
                 case "5":
                     // CHOIX QUITTER
                     return false;

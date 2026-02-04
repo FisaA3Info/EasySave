@@ -19,6 +19,8 @@
   "error_max_jobs": "Maximum 5 travaux atteint.",
   "success_created": "Travail créé avec succès.",
   "success_executed": "Sauvegarde terminée.",
+  "error_created": "Travail échoué.",
+  "error_executed": "Sauvegarde échoué.",
   "creation_job": "Rentrer un nom de fichier, un chemin de destination, un chemin source et un type de sauvegarde",
   "execute_job": ""
 }
