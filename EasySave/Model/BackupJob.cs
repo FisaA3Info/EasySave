@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,7 +16,11 @@ namespace EasySave.Model
 
         public void Execute(Logger logger, StateTracker stateTracker)
         {
+            State = BackupState.Active;
+            Strategy.Execute(SourceDir, TargetDir, logger, stateTracker);
+            State = BackupState.Inactive;
 
         }
+
     }
 }

@@ -1,6 +1,9 @@
-﻿enum State
+﻿namespace EasySave.Model 
 {
-    Active,
-    Inactive,
-    OnError
+    enum BackupState
+    {
+        Active,
+        Inactive,
+        OnError
+    }
 }
