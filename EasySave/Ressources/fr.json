@@ -18,5 +18,7 @@
   "prompt_type": "Type (1=Complet, 2=Différentiel) : ",
   "error_max_jobs": "Maximum 5 travaux atteint.",
   "success_created": "Travail créé avec succès.",
-  "success_executed": "Sauvegarde terminée."
+  "success_executed": "Sauvegarde terminée.",
+  "creation_job": "Rentrer un nom de fichier, un chemin de destination, un chemin source et un type de sauvegarde",
+  "execute_job": ""
 }

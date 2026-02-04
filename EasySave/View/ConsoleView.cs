@@ -1,9 +1,11 @@
 ﻿using EasySave.Service;
+using EasySave.ViewModel;
 namespace EasySave.View
 {
     public class ConsoleView
     {
         private readonly LanguageManager language = new LanguageManager();
+        private readonly BackupManager backupManager = new BackupManager();
         public void DisplayMenu()
         {
             bool IsRunning = true;
@@ -34,13 +36,13 @@ namespace EasySave.View
             switch (choice)
             {
                 case "1":
-                    // CHOIX CREATION BACKUP
                     break;
                 case "2":
                     // CHOIX EXECUTE BACKUP
                     break;
                 case "3":
                     // CHOIX EXECUTE ALL 
+                    backupManager.ExecuteAllJobs();
                     break;
                 case "4":
                     // CHOIX CHANGE LANGUE
