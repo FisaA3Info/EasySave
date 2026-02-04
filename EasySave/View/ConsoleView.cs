@@ -72,16 +72,34 @@ namespace EasySave.View
                     DisplayMessage("prompt_type");
                     string TypeChoice = Console.ReadLine();
 
+                    if (TypeChoice != "1" && TypeChoice != "2")
+                    {
+                        DisplayMessage("error_created");
+                        break;
+                    }
                     BackupType type = TypeChoice == "1" ? BackupType.Full : BackupType.Differential;
 
-                    bool success = backupManager.CreateJob(name, source, target, type);
-                    DisplayMessage(success ? "success_created" : "error_created");
+                    if ((name != null) && (source != null) && (target != null))
+                    {
+                        bool success = backupManager.CreateJob(name, source, target, type);
+                        DisplayMessage(success ? "success_created" : "error_created");
+                    }
+                    else
+                    {
+                        DisplayMessage("error_created");
+                    }
                     break;
 
                 case "2":
                     // CHOICE EXECUTE BACKUP
                     DisplayAllJobs();
-                    int index = int.Parse(Console.ReadLine());
+                    string response = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(response))
+                    {
+                        DisplayMessage("no_jobs");
+                        break;
+                    }
+                    int index = int.Parse(response);
                     backupManager.ExecuteJob(index);
                     break;
 
@@ -106,7 +124,7 @@ namespace EasySave.View
                 default:
                     DisplayMessage("invalid_choice");
                     break;
-            }
+                }
 
             DisplayMessage("press_key");
             Console.ReadKey();
