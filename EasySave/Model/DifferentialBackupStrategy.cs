@@ -33,7 +33,7 @@ namespace EasySave.Model
                     {
                         var activeState = new StateEntry
                         {
-                            JobName = jobName, // Manager will set actual job name 
+                            JobName = jobName,
                             TimeStamp = DateTime.Now,
                             State = BackupState.Active,
                             CurrentSourceFile = fName,
@@ -52,15 +52,16 @@ namespace EasySave.Model
 
                         //write logs
                         var logEntry = new LogEntry
-                        {
-                            Timestamp = DateTime.Now,
-                            JobName = jobName, // Manager will set actual job name 
-                            SourcePath = sourcePath,
-                            TargetPath = targetPath,
-                            FileSize = new FileInfo(sourcePath).Length,
-                            TransferTimeMs = timer.ElapsedMilliseconds
-                        };
-                        logger.Log(logEntry);
+                        (
+                            DateTime.Now,
+                            jobName,
+                            fName,
+                            targetPath,
+                            new FileInfo(targetPath).Length,
+                            timer.ElapsedMilliseconds
+                        );
+
+                        //logger.Log(logEntry);
                     }
                     catch (DirectoryNotFoundException dirNotFound)
                     {
