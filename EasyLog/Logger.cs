@@ -42,7 +42,12 @@ namespace EasyLog
             {
                 try
                 {
-                    string jsonLine = JsonSerializer.Serialize(entry);
+                    //options for a better display
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+                    string jsonLine = JsonSerializer.Serialize(entry, options);
 
                     if (!Directory.Exists(LogDirectory))
                     {
