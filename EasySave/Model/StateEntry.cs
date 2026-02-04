@@ -7,7 +7,7 @@ namespace EasySave.Model
     internal class StateEntry
     {
         public string JobName { get; set; }
-        public DateTime Timestamp { get; set;  }
+        public DateTime TimeStamp { get; set; }
         public BackupState State { get; set; }
         public int TotalFiles { get; set; }
         public long TotalSize { get; set; }
@@ -17,15 +17,23 @@ namespace EasySave.Model
         public string CurrentSourceFile { get; set; }
         public string CurrentTargetFile { get; set; }
 
-
-        public StateEntry(string jobname,BackupState state, int totalfiles, long totalsize, int filesremaining, long sizeremaining,string currentsourcefile,string currenttargetfile)
+        public StateEntry(
+            string jobname,
+            BackupState state, 
+            int totalfiles = 0, 
+            long totalsize =0, 
+            int filesremaining = 0, 
+            long sizeremaining = 0,
+            string currentsourcefile = "",
+            string currenttargetfile = ""
+        )
         {
             this.JobName = jobname;
-            this.Timestamp = DateTime.Now();
+            this.TimeStamp = DateTime.Now;
             this.State = state;
             this.TotalFiles = totalfiles;
             this.TotalSize = totalsize;
-            this.Progress = null;
+            this.Progress = 0;
             this.FilesRemaining = filesremaining;
             this.SizeRemaining = sizeremaining;
             this.CurrentSourceFile = currentsourcefile;
@@ -33,3 +41,4 @@ namespace EasySave.Model
         }
     }
 }
+
