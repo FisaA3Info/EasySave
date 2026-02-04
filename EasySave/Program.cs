@@ -1,4 +1,4 @@
-﻿using EasyLog;
+using EasyLog;
 using EasySave.Model;
 using EasySave.View;
 using EasySave.ViewModel;

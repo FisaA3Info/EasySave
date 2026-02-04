@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -6,24 +6,30 @@ using System.Text.Json;
 
 namespace EasyLog
 {
-    public class Logger
+    //based on a signleton pattern
+    public static class Logger
     {
-        private static string logDir;
+        //============ attributes  =============
+        private static readonly object _lock = new object();
+        private static string _logDir;
+
         public static string LogDirectory 
         {
-            // default path
             get
             {
-                logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasySave");
-                return logDir;
+                if (_logDir == null)
+                {
+                    _logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DailyLog");
+                }
+                return _logDir;
             }
-            // manually added path-
-            set { logDir = value; }
+            set { _logDir = value; }
         }
 
+
+        //============  methods  =================
         private static string GetDailyLogPath()
         {
-            // get the full path based on the current day
             string fileName = $"{DateTime.Now:yyyy-MM-dd}.json";
             string fullPath = Path.Combine(LogDirectory, fileName);
             return fullPath;
@@ -31,14 +37,30 @@ namespace EasyLog
 
         public void Log(LogEntry entry)
         {
-            // get the entry in json
-            string jsonLine = JsonSerializer.Serialize(entry);
+            //protects from concurrent conflicts (in case but will be utile for multithreading)
+            lock (_lock)
+            {
+                try
+                {
+                    //options for a better display
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+                    string jsonLine = JsonSerializer.Serialize(entry, options);
 
-            if (!Directory.Exists(LogDirectory))
-                Directory.CreateDirectory(LogDirectory);
+                    if (!Directory.Exists(LogDirectory))
+                    {
+                        Directory.CreateDirectory(LogDirectory);
+                    }
 
-            // add last data to the file
-            File.AppendAllText(GetDailyLogPath(), jsonLine + Environment.NewLine);
+                    File.AppendAllText(GetDailyLogPath(), jsonLine + Environment.NewLine);
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine($"{e.Message}");
+                }
+            }
         }
    }
 }
