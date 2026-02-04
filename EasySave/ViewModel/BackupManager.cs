@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
 namespace EasySave.ViewModel
 {
@@ -17,29 +18,43 @@ namespace EasySave.ViewModel
 
 
         //================ Contsructor  ===================
-        public BackupManager() { }
+        public BackupManager(Logger logger = null, StateTracker stateTracker = null)
+        {
+            this.logger = logger;
+            this.stateTracker = stateTracker;
+            BackupJobs = new List<BackupJob>();
+        }
 
 
         //================ Methods  =======================
         //Use try catch for the error management (Maybe Error class ?)
         public bool CreateJob(string jobName, string sourcePath, string destinationPath, BackupType type)
         {
+
+            if (string.IsNullOrWhiteSpace(jobName) || string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(destinationPath))
+            {
+                logger?.Log("CreateJob failed: invalid parameters.");
+                return false;
+            }
+
+            if (BackupJobs.Count >= MAX_JOBS)
+            {
+                logger?.Log($"CreateJob failed: max jobs ({MAX_JOBS}) reached.");
+                return false;
+            }
             //uses the managejob constructor if less than 5 jobs
             try
             {
-                if (BackupJobs.Count <= 5)
-                {
-                    BackupJob newJob = new BackupJob(Name => jobName, SourceDir => sourcePath, TargetDir => destinationPath, Type => type);
-                    BackupJobs.Add(newJob);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                var newJob = new BackupJob(jobName, sourcePath, destinationPath, type);
+
+                BackupJobs.Add(newJob);
+                logger?.Log($"Job created: {jobName}");
+                stateTracker?.UpdateState(BackupJobs);
+                return true;
             }
             catch (Exception e)
             {
+                logger?.Log($"CreateJob error: {e.Message}");
                 return false;
             }
         }
@@ -47,15 +62,24 @@ namespace EasySave.ViewModel
         //Deletes an obkect based on the index
         public bool DeleteJob(int index)
         {
+            if (index < 1 || index > BackupJobs.Count)
+            {
+                logger?.Log($"DeleteJob failed: invalid index {index}.");
+                return false;
+            }
+
             try
             {
                 //deletes the job object and removes it from the list²
-                BackupJobs[index] = null;
-                BackupJobs.RemoveAt(index);
+                var removed = BackupJobs[index - 1];
+                BackupJobs.RemoveAt(index - 1);
+                logger?.Log($"Job deleted: {removed?.Name ?? $"#{index}"}");
+                stateTracker?.UpdateState(BackupJobs);
                 return true;
             }
             catch (Exception e)
             {
+                logger?.Log($"DeleteJob error: {e.Message}");
                 return false;
             }
         }
@@ -63,13 +87,28 @@ namespace EasySave.ViewModel
         //uses the managejob method to execute itself
         public bool ExecuteJob(int index)
         {
+
+            if (index < 1 || index > BackupJobs.Count)
+            {
+                logger?.Log($"ExecuteJob failed: invalid index {index}.");
+                return false;
+            }
+
+            var job = BackupJobs[index - 1];
             try
             {
-                BackupJobs[index].Execute(logger, stateTracker);
+                logger?.Log($"Starting job #{index}: {job?.Name}");
+                // L'exécution et la gestion d'état sont déléguées au BackupJob
+                job.Execute(logger, stateTracker);
+                stateTracker?.UpdateState(BackupJobs);
+                logger?.Log($"Finished job #{index}: {job?.Name}");
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                logger?.Log($"ExecuteJob error for #{index}: {ex}");
+                // si BackupJob expose un état, il peut être mis à jour à l'intérieur de job.Execute
+                stateTracker?.UpdateState(BackupJobs);
                 return false;
             }
         }
@@ -77,56 +116,76 @@ namespace EasySave.ViewModel
         //executes all the jobs in the list
         public void ExecuteAllJobs()
         {
-            try
+            logger?.Log("ExecuteAllJobs: starting.");
+            for (int i = 1; i <= BackupJobs.Count; i++)
             {
-                foreach (BackupJob job in BackupJobs)
+                var ok = ExecuteJob(i);
+                if (!ok)
                 {
-                    job.Execute(logger, stateTracker);
+                    logger?.Log($"ExecuteAllJobs: stopped at #{i} due to error.");
+                    break;
                 }
-
             }
-            catch (Exception e)
-            {
-
-            }
+            logger?.Log("ExecuteAllJobs: finished.");
         }
 
         //executes a range of jobs
         public void ExecuteRange(int start, int end)
         {
-            try
+            if (BackupJobs.Count == 0)
             {
-                for (int i = start; i <= end; i++)
+                logger?.Log("ExecuteRange: no jobs to execute.");
+                return;
+            }
+
+            if (start > end) (start, end) = (end, start);
+
+            start = Math.Max(1, start);
+            end = Math.Min(BackupJobs.Count, end);
+
+            logger?.Log($"ExecuteRange: executing jobs {start} to {end}.");
+            for (int i = start; i <= end; i++)
+            {
+                if (!ExecuteJob(i))
                 {
-                    if (!ExecuteJob(i))
-                    {
-                        break;
-                    }
+                    logger?.Log($"ExecuteRange: stopped at job #{i} due to error.");
+                    break;
                 }
             }
-            catch (Exception e)
-            {
-
-            }
+            logger?.Log("ExecuteRange: finished.");
         }
 
         //executes specific jobs by its index
         public void ExecuteSelection(List<int> indexes)
         {
-            try
+            if (indexes == null || indexes.Count == 0)
             {
-                foreach (int i in indexes)
+                logger?.Log("ExecuteSelection: empty selection.");
+                return;
+            }
+
+            var normalized = indexes
+                .Where(i => i >= 1 && i <= BackupJobs.Count)
+                .Distinct()
+                .OrderBy(i => i)
+                .ToList();
+
+            if (!normalized.Any())
+            {
+                logger?.Log("ExecuteSelection: no valid indices.");
+                return;
+            }
+
+            logger?.Log($"ExecuteSelection: executing jobs {string.Join(",", normalized)}.");
+            foreach (var idx in normalized)
+            {
+                if (!ExecuteJob(idx))
                 {
-                    if (!ExecuteJob(i))
-                    {
-                        break;
-                    }
+                    logger?.Log($"ExecuteSelection: stopped at job #{idx} due to error.");
+                    break;
                 }
             }
-            catch (Exception e)
-            {
-
-            }
+            logger?.Log("ExecuteSelection: finished.");
         }
     }
 }
