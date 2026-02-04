@@ -10,6 +10,7 @@
   <ItemGroup>
     <Folder Include="Controller\" />
     <Folder Include="ViewModel\" />
+    <ProjectReference Include="..\EasyLog\EasyLog.csproj" />
 	<None Update="Ressources\*.json">
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</None>
