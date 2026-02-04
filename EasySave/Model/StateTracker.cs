@@ -23,15 +23,17 @@ namespace EasySave.Model
 
         public void AttachObserver(IStateObserver observer)
         {
-            if (!observer.Contains(observer))
+            if(observer == null) return;
+            if (!observers.Contains(observer))
             {
-                observer.Add(observer);
+                observers.Add(observer);
             }
         }
            
         public void DetachObserver(IStateObserver observer)
         {
-            observer.Remove(observer);
+            if (observer == null) return;
+            observers.Remove(observer);
         }
 
         private void NotifyObservers(StateEntry entry)
@@ -47,7 +49,7 @@ namespace EasySave.Model
         
         {
             //Stock the result of FirstOrDefault on States which return the first value that statify the search or return null
-            var existantState = States.FirstOrDefault(search => search.JobName == entry.JobName,null);
+            var existing = States.FirstOrDefault(search => search.JobName == entry.JobName);
             if (existing != null)
             {
                 States.Remove(existing);
@@ -67,15 +69,24 @@ namespace EasySave.Model
         {
             if (File.Exists(FilePath))
             {
-                var json = File.ReadAllLines(FilePath);
+                var json = File.ReadAllText(FilePath);
                 States = JsonSerializer.Deserialize<List<StateEntry>>(json)
                     ?? new List<StateEntry>();
             }
         }
 
-        public StateEntry GetState(string jobName)
+        public StateEntry? GetState(string jobName)
         {
             return States.FirstOrDefault(search => search.JobName == jobName);
+        }
+        public void RemoveState(string jobName)
+        {
+            var existing = States.FirstOrDefault(search => search.JobName == jobName);
+            if (existing != null)
+            {
+                States.Remove(existing);
+                SaveState();
+            }
         }
 
     }
