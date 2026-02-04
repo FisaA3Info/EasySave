@@ -12,16 +12,14 @@ namespace EasySave.ViewModel
     internal class BackupManager
     {
         //=================  attributes ====================
-        private Logger logger;
         private StateTracker stateTracker;
         private const int MAX_JOBS = 5;
         public List<BackupJob> BackupJobs { get; set; }
 
 
         //================ Contsructor  ===================
-        public BackupManager(Logger logger = null, StateTracker stateTracker = null)
+        public BackupManager(StateTracker stateTracker = null)
         {
-            this.logger = logger;
             this.stateTracker = stateTracker;
             BackupJobs = new List<BackupJob>();
         }
@@ -99,7 +97,7 @@ namespace EasySave.ViewModel
             try
             {
                 //logger?.Log($"Starting job #{index}: {job?.Name}");
-                job.Execute(logger, stateTracker);
+                job.Execute(stateTracker);
                 var entry = new StateEntry(job.Name ?? string.Empty, job.State ?? BackupState.Inactive);
                 stateTracker?.UpdateState(entry);
                 //logger?.Log($"Finished job #{index}: {job?.Name}");

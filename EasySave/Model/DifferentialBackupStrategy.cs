@@ -11,7 +11,7 @@ namespace EasySave.Model
 {
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
-        public void Execute(string jobName, string sourceDir, string targetDir, Logger logger, StateTracker stateTracker)
+        public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
         {
             string[] fileList = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
             // Copy files.
@@ -61,7 +61,7 @@ namespace EasySave.Model
                             timer.ElapsedMilliseconds
                         );
 
-                        //logger.Log(logEntry);
+                        Logger.Log(logEntry);
                     }
                     catch (DirectoryNotFoundException dirNotFound)
                     {
