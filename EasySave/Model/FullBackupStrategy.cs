@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.IO; // file operations
-using EasyLog; // logging with DLL
+using System.IO;
+using EasyLog;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
-using System.ComponentModel.DataAnnotations; // performance measurement
+using System.ComponentModel.DataAnnotations;
 
 namespace EasySave.Model
 {
     public class FullBackupStrategy : IBackupStrategy
     {
-        public void Execute(string sourcePath, string targetPath, Logger logger, StateTracker stateTracker)
+        public void Execute(string jobName, string sourcePath, string targetPath, Logger logger, StateTracker stateTracker)
         {
             try
             {
@@ -35,8 +35,8 @@ namespace EasySave.Model
                     // Update state before copying
                     var activeState = new StateEntry
                     {
-                        JobName = "Running...", // Manager will set actual job name
-                        Timestamp = DateTime.Now,
+                        JobName = jobName,
+                        TimeStamp = DateTime.Now,
                         State = BackupState.Active,
                         CurrentSourceFile = file.FullName,
                         CurrentTargetFile = targetFilePath
@@ -54,24 +54,24 @@ namespace EasySave.Model
 
                     // Log creation
                     var logEntry = new LogEntry
-                    {
-                        Timestamp = DateTime.Now,
-                        JobName = "Job", // Manager will set actual job name
-                        sourcePath = file.FullName,
-                        targetPath = targetFilePath,
-                        FileSize = file.Length,
-                        TransferTimeMs = timer.ElapsedMilliseconds
-                    };
+                    (
+                        DateTime.Now,
+                        jobName,
+                        file.FullName,
+                        targetFilePath,
+                        file.Length,
+                        timer.ElapsedMilliseconds
+                    );
 
                     // Send log to the DLL
-                    logger.Log(logEntry);
+                    // logger.Log(logEntry); //TO FIX
                 }
 
                 // Make it recursive for subdirectories
                 foreach (var subDir in sourceDir.GetDirectories())
                 {
                     string newTargetDir = Path.Combine(targetPath, subDir.Name);
-                    Execute(subDir.FullName, newTargetDir, logger, stateTracker);
+                    Execute(jobName, subDir.FullName, newTargetDir, logger, stateTracker);
                 }
             }
             catch (Exception ex)
