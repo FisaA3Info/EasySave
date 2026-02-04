@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EasyLog
 {
-    internal class Logger
+    public class Logger
     {
         private static string logDir;
         public static string LogDirectory 

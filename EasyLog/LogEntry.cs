@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace EasyLog
 {
-    internal class LogEntry
+    public class LogEntry
     {
         public DateTime TimeStamp { get; set;  }
         public string BackupName { get; set; }

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using EasyLog;
 
 namespace EasySave.ViewModel
 {
@@ -33,13 +34,13 @@ namespace EasySave.ViewModel
 
             if (string.IsNullOrWhiteSpace(jobName) || string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(destinationPath))
             {
-                logger?.Log("CreateJob failed: invalid parameters.");
+                //logger?.Log("CreateJob failed: invalid parameters.");
                 return false;
             }
 
             if (BackupJobs.Count >= MAX_JOBS)
             {
-                logger?.Log($"CreateJob failed: max jobs ({MAX_JOBS}) reached.");
+                //logger?.Log($"CreateJob failed: max jobs ({MAX_JOBS}) reached.");
                 return false;
             }
             //uses the managejob constructor if less than 5 jobs
@@ -48,13 +49,13 @@ namespace EasySave.ViewModel
                 var newJob = new BackupJob(jobName, sourcePath, destinationPath, type);
 
                 BackupJobs.Add(newJob);
-                logger?.Log($"Job created: {jobName}");
+                //logger?.Log($"Job created: {jobName}");
                 stateTracker?.UpdateState(BackupJobs);
                 return true;
             }
             catch (Exception e)
             {
-                logger?.Log($"CreateJob error: {e.Message}");
+                //logger?.Log($"CreateJob error: {e.Message}");
                 return false;
             }
         }
@@ -73,13 +74,13 @@ namespace EasySave.ViewModel
                 //deletes the job object and removes it from the list²
                 var removed = BackupJobs[index - 1];
                 BackupJobs.RemoveAt(index - 1);
-                logger?.Log($"Job deleted: {removed?.Name ?? $"#{index}"}");
+                //logger?.Log($"Job deleted: {removed?.Name ?? $"#{index}"}");
                 stateTracker?.UpdateState(BackupJobs);
                 return true;
             }
             catch (Exception e)
             {
-                logger?.Log($"DeleteJob error: {e.Message}");
+                //logger?.Log($"DeleteJob error: {e.Message}");
                 return false;
             }
         }
@@ -90,22 +91,22 @@ namespace EasySave.ViewModel
 
             if (index < 1 || index > BackupJobs.Count)
             {
-                logger?.Log($"ExecuteJob failed: invalid index {index}.");
+                //logger?.Log($"ExecuteJob failed: invalid index {index}.");
                 return false;
             }
 
             var job = BackupJobs[index - 1];
             try
             {
-                logger?.Log($"Starting job #{index}: {job?.Name}");
+                //logger?.Log($"Starting job #{index}: {job?.Name}");
                 job.Execute(logger, stateTracker);
                 stateTracker?.UpdateState(BackupJobs);
-                logger?.Log($"Finished job #{index}: {job?.Name}");
+                //logger?.Log($"Finished job #{index}: {job?.Name}");
                 return true;
             }
             catch (Exception e)
             {
-                logger?.Log($"ExecuteJob error for #{index}: {e}");
+                //logger?.Log($"ExecuteJob error for #{index}: {e}");
                 stateTracker?.UpdateState(BackupJobs);
                 return false;
             }
@@ -114,17 +115,17 @@ namespace EasySave.ViewModel
         //executes all the jobs in the list
         public void ExecuteAllJobs()
         {
-            logger?.Log("ExecuteAllJobs: starting.");
+            //logger?.Log("ExecuteAllJobs: starting.");
             for (int i = 1; i <= BackupJobs.Count; i++)
             {
                 var ok = ExecuteJob(i);
                 if (!ok)
                 {
-                    logger?.Log($"ExecuteAllJobs: stopped at #{i} due to error.");
+                    //logger?.Log($"ExecuteAllJobs: stopped at #{i} due to error.");
                     break;
                 }
             }
-            logger?.Log("ExecuteAllJobs: finished.");
+            //logger?.Log("ExecuteAllJobs: finished.");
         }
 
         //executes a range of jobs
@@ -132,7 +133,7 @@ namespace EasySave.ViewModel
         {
             if (BackupJobs.Count == 0)
             {
-                logger?.Log("ExecuteRange: no jobs to execute.");
+                //logger?.Log("ExecuteRange: no jobs to execute.");
                 return;
             }
 
@@ -141,16 +142,16 @@ namespace EasySave.ViewModel
             start = Math.Max(1, start);
             end = Math.Min(BackupJobs.Count, end);
 
-            logger?.Log($"ExecuteRange: executing jobs {start} to {end}.");
+            //logger?.Log($"ExecuteRange: executing jobs {start} to {end}.");
             for (int i = start; i <= end; i++)
             {
                 if (!ExecuteJob(i))
                 {
-                    logger?.Log($"ExecuteRange: stopped at job #{i} due to error.");
+                    //logger?.Log($"ExecuteRange: stopped at job #{i} due to error.");
                     break;
                 }
             }
-            logger?.Log("ExecuteRange: finished.");
+            //logger?.Log("ExecuteRange: finished.");
         }
 
         //executes specific jobs by its index
@@ -158,7 +159,7 @@ namespace EasySave.ViewModel
         {
             if (indexes == null || indexes.Count == 0)
             {
-                logger?.Log("ExecuteSelection: empty selection.");
+                //logger?.Log("ExecuteSelection: empty selection.");
                 return;
             }
 
@@ -170,20 +171,20 @@ namespace EasySave.ViewModel
 
             if (!normalized.Any())
             {
-                logger?.Log("ExecuteSelection: no valid indices.");
+                //logger?.Log("ExecuteSelection: no valid indices.");
                 return;
             }
 
-            logger?.Log($"ExecuteSelection: executing jobs {string.Join(",", normalized)}.");
+            //logger?.Log($"ExecuteSelection: executing jobs {string.Join(",", normalized)}.");
             foreach (var idx in normalized)
             {
                 if (!ExecuteJob(idx))
                 {
-                    logger?.Log($"ExecuteSelection: stopped at job #{idx} due to error.");
+                    //logger?.Log($"ExecuteSelection: stopped at job #{idx} due to error.");
                     break;
                 }
             }
-            logger?.Log("ExecuteSelection: finished.");
+            //logger?.Log("ExecuteSelection: finished.");
         }
     }
 }
