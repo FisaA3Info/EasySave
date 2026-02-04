@@ -17,7 +17,7 @@ namespace EasySave.Model
         public void Execute(Logger logger, StateTracker stateTracker)
         {
             State = BackupState.Active;
-            Strategy.Execute(SourceDir, TargetDir, logger, stateTracker);
+            Strategy.Execute(Name,SourceDir, TargetDir, logger, stateTracker);
             State = BackupState.Inactive;
 
         }

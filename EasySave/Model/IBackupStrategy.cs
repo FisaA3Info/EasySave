@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using EasyLog;
 
 namespace EasySave.Model
 {
-    public interface IBackupStrategy
+    internal interface IBackupStrategy
     {
-        void Execute(string sourcePath, string targetPath, Logger logger, StateTracker stateTracker);
+        void Execute(string jobName, string sourcePath, string targetPath, Logger logger, StateTracker stateTracker);
     }
 }
