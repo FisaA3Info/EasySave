@@ -1,14 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EasySave.Model
 {
-    internal interface IBackupStrategy
+    public interface IBackupStrategy
     {
-        string name { get; set; }
-        string sourceFilePath { get; set; }
-        string targetFilePath { get; set; }
-
+        void Execute(string sourcePath, string targetPath, Logger logger, StateTracker stateTracker);
     }
 }
