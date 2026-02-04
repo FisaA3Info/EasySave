@@ -7,7 +7,7 @@ namespace EasySave.Model
     internal class StateEntry
     {
         public string JobName { get; set; }
-        public DateTime TimeStamp { get; }
+        public DateTime Timestamp { get; set;  }
         public BackupState State { get; set; }
         public int TotalFiles { get; set; }
         public long TotalSize { get; set; }
