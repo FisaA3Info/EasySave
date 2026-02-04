@@ -3,8 +3,9 @@
   "create_backup": "1. Create a backup job",
   "execute_backup": "2. Execute a job",
   "execute_all": "3. Execute all jobs",
-  "change_language": "4. Change language",
-  "quit": "5. Quit",
+  "list_jobs": "4. List all jobs ",
+  "change_language": "5. Change language",
+  "quit": "6. Quit",
   "your_choice": "Your choice: ",
   "invalid_choice": "Invalid choice.",
   "press_key": "Press any key to continue...",
@@ -20,5 +21,7 @@
   "success_created": "Job created successfully.",
   "success_executed": "Backup completed.",
   "error_created": "Job failed.",
-  "error_executed": "Save failed."
+  "error_executed": "Save failed.",
+  "no_jobs": "None jobs define.",
+  "jobs_header": "List of all jobs"
 }

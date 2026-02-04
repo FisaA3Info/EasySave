@@ -3,8 +3,9 @@
   "create_backup": "1. Créer un travail de sauvegarde",
   "execute_backup": "2. Exécuter un travail",
   "execute_all": "3. Exécuter tous les travaux",
-  "change_language": "4. Changer de langue",
-  "quit": "5. Quitter",
+  "list_jobs": "4. Afficher tous les jobs",
+  "change_language": "5. Changer de langue",
+  "quit": "6. Quitter",
   "your_choice": "Votre choix : ",
   "invalid_choice": "Choix invalide.",
   "press_key": "Appuyez sur une touche pour continuer...",
@@ -21,6 +22,6 @@
   "success_executed": "Sauvegarde terminée.",
   "error_created": "Travail échoué.",
   "error_executed": "Sauvegarde échoué.",
-  "creation_job": "Rentrer un nom de fichier, un chemin de destination, un chemin source et un type de sauvegarde",
-  "execute_job": ""
+  "no_jobs": "Aucun jobs.",
+  "jobs_header": "Liste des jobs"
 }

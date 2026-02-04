@@ -17,6 +17,7 @@ namespace EasySave.View
                 DisplayMessage("create_backup");
                 DisplayMessage("execute_backup");
                 DisplayMessage("execute_all");
+                DisplayMessage("list_jobs");
                 DisplayMessage("change_language");
                 DisplayMessage("quit");
                 Console.Write(language.GetText("your_choice") + " ");
@@ -29,6 +30,25 @@ namespace EasySave.View
         {
             Console.WriteLine(language.GetText(key));
         }
+
+
+        public void DisplayAllJobs()
+        {
+            var jobs = backupManager.BackupJobs;
+            if (jobs == null || jobs.Count == 0)
+            {
+                DisplayMessage("no_jobs");
+                return;
+            }
+
+            DisplayMessage("jobs_header");
+            for (int i = 0; i < jobs.Count; i++)
+            {
+                var j = jobs[i];
+                Console.WriteLine($"{i + 1}. {j?.Name} | {j?.Type} | {language.GetText("prompt_source")} {j?.SourceDir} | {language.GetText("prompt_target")} {j?.TargetDir}");
+            }
+        }
+
 
         public bool UserInput()
         {
@@ -70,10 +90,15 @@ namespace EasySave.View
 
                 case "4":
                     // CHOIX CHANGE LANGUE
-                    SelectLanguage();
+                    DisplayAllJobs();
                     break;
 
                 case "5":
+                    // CHOIX CHANGE LANGUE
+                    SelectLanguage();
+                    break;
+
+                case "6":
                     // CHOIX QUITTER
                     return false;
                 default:
