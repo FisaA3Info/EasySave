@@ -78,7 +78,7 @@ namespace EasySave.View
 
                 case "2":
                     // CHOIX EXECUTE BACKUP
-                    Console.Write(language.GetText("prompt_index"));
+                    DisplayAllJobs();
                     int index = int.Parse(Console.ReadLine());
                     backupManager.ExecuteJob(index);
                     break;
