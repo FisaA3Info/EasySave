@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EasySave.Model
 {
-    internal interface IBackupStrategy
+    public interface IBackupStrategy
     {
-        private readonly List<BackupJob.Job>
-
+        void Execute(string sourcePath, string targetPath, Logger logger, StateTracker stateTracker);
     }
 }
