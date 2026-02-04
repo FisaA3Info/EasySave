@@ -35,7 +35,7 @@ namespace EasyLog
             return fullPath;
         }
 
-        public static void Log(LogEntry entry)
+        public void Log(LogEntry entry)
         {
             //protects from concurrent conflicts (in case but will be utile for multithreading)
             lock (_lock)

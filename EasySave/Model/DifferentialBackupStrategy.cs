@@ -1,4 +1,4 @@
-﻿using EasyLog;
+using EasyLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
