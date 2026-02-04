@@ -98,16 +98,14 @@ namespace EasySave.ViewModel
             try
             {
                 logger?.Log($"Starting job #{index}: {job?.Name}");
-                // L'exécution et la gestion d'état sont déléguées au BackupJob
                 job.Execute(logger, stateTracker);
                 stateTracker?.UpdateState(BackupJobs);
                 logger?.Log($"Finished job #{index}: {job?.Name}");
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                logger?.Log($"ExecuteJob error for #{index}: {ex}");
-                // si BackupJob expose un état, il peut être mis à jour à l'intérieur de job.Execute
+                logger?.Log($"ExecuteJob error for #{index}: {e}");
                 stateTracker?.UpdateState(BackupJobs);
                 return false;
             }
