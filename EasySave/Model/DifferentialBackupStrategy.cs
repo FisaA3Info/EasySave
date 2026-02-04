@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using EasyLog;
 
 namespace EasySave.Model
 {
