@@ -64,7 +64,7 @@ namespace EasySave.Model
                     );
 
                     // Send log to the DLL
-                    // logger.Log(logEntry); //TO FIX
+                    logger.Log(logEntry);
                 }
 
                 // Make it recursive for subdirectories

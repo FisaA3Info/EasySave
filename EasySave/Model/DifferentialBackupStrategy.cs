@@ -61,7 +61,7 @@ namespace EasySave.Model
                             timer.ElapsedMilliseconds
                         );
 
-                        //logger.Log(logEntry);
+                        logger.Log(logEntry);
                     }
                     catch (DirectoryNotFoundException dirNotFound)
                     {

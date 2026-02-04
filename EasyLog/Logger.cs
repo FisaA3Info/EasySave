@@ -29,7 +29,7 @@ namespace EasyLog
             return fullPath;
         }
 
-        public static void Log(LogEntry entry)
+        public void Log(LogEntry entry)
         {
             // get the entry in json
             string jsonLine = JsonSerializer.Serialize(entry);
