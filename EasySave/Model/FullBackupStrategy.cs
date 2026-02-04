@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -11,7 +11,7 @@ namespace EasySave.Model
 {
     internal class FullBackupStrategy : IBackupStrategy
     {
-        public void Execute(string jobName, string sourcePath, string targetPath, Logger logger, StateTracker stateTracker)
+        public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {
             try
             {
@@ -63,14 +63,14 @@ namespace EasySave.Model
                     );
 
                     // Send log to the DLL
-                    //logger.Log(logEntry);
+                    Logger.Log(logEntry);
                 }
 
                 // Make it recursive for subdirectories
                 foreach (var subDir in sourceDir.GetDirectories())
                 {
                     string newTargetDir = Path.Combine(targetPath, subDir.Name);
-                    Execute(jobName, subDir.FullName, newTargetDir, logger, stateTracker);
+                    Execute(jobName, subDir.FullName, newTargetDir, stateTracker);
                 }
             }
             catch (Exception ex)
