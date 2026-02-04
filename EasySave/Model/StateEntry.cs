@@ -17,6 +17,11 @@ namespace EasySave.Model
         public string CurrentSourceFile { get; set; }
         public string CurrentTargetFile { get; set; }
 
+        public StateEntry()
+        {
+            TimeStamp = DateTime.Now;
+        }
+
         public StateEntry(
             string jobname,
             BackupState state, 
