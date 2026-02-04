@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace EasySave.Model
 {
@@ -58,12 +59,24 @@ namespace EasySave.Model
 
         public void SaveState()
         {
-            
+            var json = JsonSerializer.Serialize(States, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(FilePath, json);
         }
 
         public void LoadState()
         {
-            
+            if (File.Exists(FilePath))
+            {
+                var json = File.ReadAllLines(FilePath);
+                States = JsonSerializer.Deserialize<List<StateEntry>>(json)
+                    ?? new List<StateEntry>();
+            }
         }
+
+        public StateEntry GetState(string jobName)
+        {
+            return States.FirstOrDefault(search => search.JobName == jobName);
+        }
+
     }
 }
