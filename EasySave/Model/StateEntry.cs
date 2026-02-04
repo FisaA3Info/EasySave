@@ -19,7 +19,7 @@ namespace EasySave.Model
 
         public StateEntry()
         {
-            this TimeStamp = DateTime.Now;
+            this.TimeStamp = DateTime.Now;
         }
 
         public StateEntry(string jobname,BackupState state, int totalfiles, long totalsize, int filesremaining, long sizeremaining,string currentsourcefile,string currenttargetfile)
