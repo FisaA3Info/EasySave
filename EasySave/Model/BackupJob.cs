@@ -21,8 +21,12 @@ namespace EasySave.Model
             SourceDir = sourceDir;
             TargetDir = targetDir;
             Type = type;
-            State = null;
-            Strategy = null;
+            State = BackupState.Inactive;
+
+            if (type == BackupType.Full)
+                Strategy = new FullBackupStrategy();
+            else
+                Strategy = new DifferentialBackupStrategy();
         }
 
         public void Execute(Logger logger, StateTracker stateTracker)
