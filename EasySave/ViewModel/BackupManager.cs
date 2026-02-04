@@ -50,7 +50,7 @@ namespace EasySave.ViewModel
 
                 BackupJobs.Add(newJob);
                 //logger?.Log($"Job created: {jobName}");
-                stateTracker?.UpdateState(BackupJobs);
+                stateTracker?.UpdateState(new StateEntry(newJob.Name ?? jobName, BackupState.Inactive));
                 return true;
             }
             catch (Exception e)
@@ -65,7 +65,7 @@ namespace EasySave.ViewModel
         {
             if (index < 1 || index > BackupJobs.Count)
             {
-                logger?.Log($"DeleteJob failed: invalid index {index}.");
+                //logger?.Log($"DeleteJob failed: invalid index {index}.");
                 return false;
             }
 
@@ -75,7 +75,7 @@ namespace EasySave.ViewModel
                 var removed = BackupJobs[index - 1];
                 BackupJobs.RemoveAt(index - 1);
                 //logger?.Log($"Job deleted: {removed?.Name ?? $"#{index}"}");
-                stateTracker?.UpdateState(BackupJobs);
+                stateTracker?.RemoveState(removed?.Name ?? string.Empty);
                 return true;
             }
             catch (Exception e)
@@ -100,14 +100,15 @@ namespace EasySave.ViewModel
             {
                 //logger?.Log($"Starting job #{index}: {job?.Name}");
                 job.Execute(logger, stateTracker);
-                stateTracker?.UpdateState(BackupJobs);
+                var entry = new StateEntry(job.Name ?? string.Empty, job.State ?? BackupState.Inactive);
+                stateTracker?.UpdateState(entry);
                 //logger?.Log($"Finished job #{index}: {job?.Name}");
                 return true;
             }
             catch (Exception e)
             {
                 //logger?.Log($"ExecuteJob error for #{index}: {e}");
-                stateTracker?.UpdateState(BackupJobs);
+                var errEntry = new StateEntry(job.Name ?? string.Empty, BackupState.OnError);
                 return false;
             }
         }
@@ -166,8 +167,7 @@ namespace EasySave.ViewModel
             var normalized = indexes
                 .Where(i => i >= 1 && i <= BackupJobs.Count)
                 .Distinct()
-                .OrderBy(i => i)
-                .ToList();
+                .OrderBy(i => i);
 
             if (!normalized.Any())
             {
