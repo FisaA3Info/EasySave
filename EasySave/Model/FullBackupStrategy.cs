@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EasySave.Model
 {
-    public class FullBackupStrategy : IBackupStrategy
+    internal class FullBackupStrategy : IBackupStrategy
     {
         public void Execute(string jobName, string sourcePath, string targetPath, Logger logger, StateTracker stateTracker)
         {
