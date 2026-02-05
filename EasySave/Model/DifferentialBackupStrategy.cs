@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using System.Xml.Linq;
-using EasyLog;
 
 namespace EasySave.Model
 {
@@ -14,57 +11,91 @@ namespace EasySave.Model
         public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
         {
             string[] fileList = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
-            // Copy files.
+
+            // find files that need to be copied
+            List<string> filesToCopy = new List<string>();
+            long totalSize = 0;
+
             foreach (string f in fileList)
             {
-                // Remove path from the file name.
+                string fName = f.Substring(sourceDir.Length + 1);
+                string targetPath = Path.Combine(targetDir, fName);
+
+                if (!File.Exists(targetPath) || File.GetLastWriteTime(f) > File.GetLastWriteTime(targetPath))
+                {
+                    filesToCopy.Add(f);
+                    totalSize += new FileInfo(f).Length;
+                }
+            }
+
+            int totalFiles = filesToCopy.Count;
+            int filesCopied = 0;
+            long sizeCopied = 0;
+
+            // Copy files.
+            foreach (string f in filesToCopy)
+            {
                 string fName = f.Substring(sourceDir.Length + 1);
                 string sourcePath = Path.Combine(sourceDir, fName);
                 string targetPath = Path.Combine(targetDir, fName);
-
-                // For subdirectory -> the subdirectory might not exist on the target folder, so we would need to create it
                 string? targetFolder = Path.GetDirectoryName(targetPath);
 
-                // Use the Path.Combine method to safely append the file name to the path.
+                try
+                {
+                    Stopwatch timer = new Stopwatch();
 
-                // Looking if the file exists, if it does we look if the file has been changes. If yes we copy.
-                if (!File.Exists(targetPath) || File.GetLastWriteTime(sourcePath) > File.GetLastWriteTime(targetPath)) {
-                    try
+                    //creating directory for subdirectorys, starting timer after to measure copy time only
+                    Directory.CreateDirectory(targetFolder);
+                    timer.Start();
+                    File.Copy(sourcePath, targetPath, true);
+                    timer.Stop();
+
+                    // update progress
+                    long fileSize = new FileInfo(targetPath).Length;
+                    filesCopied++;
+                    sizeCopied += fileSize;
+
+                    int progress = 0;
+                    if (totalFiles > 0)
                     {
-                        var activeState = new StateEntry
-                        {
-                            JobName = jobName,
-                            TimeStamp = DateTime.Now,
-                            State = BackupState.Active,
-                            CurrentSourceFile = fName,
-                            CurrentTargetFile = targetPath
-                        };
-
-                        Stopwatch timer = new Stopwatch();
-                        
-                        //creating directory for subdirectorys, starting timer after to measure copy time only
-                        Directory.CreateDirectory(targetFolder);
-                        timer.Start();
-                        File.Copy(sourcePath, targetPath, true);
-                        timer.Stop();
-
-                        //write logs
-                        var logEntry = new LogEntry
-                        (
-                            DateTime.Now,
-                            jobName,
-                            fName,
-                            targetPath,
-                            new FileInfo(targetPath).Length,
-                            timer.ElapsedMilliseconds
-                        );
-
-                        Logger.Log(logEntry);
+                        progress = (filesCopied * 100) / totalFiles;
                     }
-                    catch (DirectoryNotFoundException dirNotFound)
+
+                    var activeState = new StateEntry
                     {
-                        Console.WriteLine(dirNotFound.Message);
+                        JobName = jobName,
+                        TimeStamp = DateTime.Now,
+                        State = BackupState.Active,
+                        TotalFiles = totalFiles,
+                        TotalSize = totalSize,
+                        Progress = progress,
+                        FilesRemaining = totalFiles - filesCopied,
+                        SizeRemaining = totalSize - sizeCopied,
+                        CurrentSourceFile = fName,
+                        CurrentTargetFile = targetPath
+                    };
+
+                    if (stateTracker != null)
+                    {
+                        stateTracker.UpdateState(activeState);
                     }
+
+                    //write logs
+                    var logEntry = new LogEntry
+                    (
+                        DateTime.Now,
+                        jobName,
+                        fName,
+                        targetPath,
+                        fileSize,
+                        timer.ElapsedMilliseconds
+                    );
+
+                    Logger.Log(logEntry);
+                }
+                catch (DirectoryNotFoundException dirNotFound)
+                {
+                    Console.WriteLine(dirNotFound.Message);
                 }
             }
         }
