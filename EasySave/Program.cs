@@ -20,7 +20,7 @@ class Program
         }
         else
         {
-            var view = new ConsoleView();
+            var view = new ConsoleView(manager);
             view.DisplayMenu();
         }
     }
