@@ -55,7 +55,7 @@ namespace EasySave.ViewModel
 			int barWidth = 50;
 			int progress = entry.Progress;
 
-			int filled = (int)(progress / 100 * barWidth);
+			int filled = (progress * barWidth)/100;
 			int empty = barWidth - filled;
 
 			ConsoleColor barColor = GetProgressColor(progress);
