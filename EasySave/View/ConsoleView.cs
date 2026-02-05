@@ -156,20 +156,58 @@ namespace EasySave.View
                     break;
 
                 case "5":
-                    // CHOICE EXECUTE SPECIFIC JOB 
-                    //if(IsThereAJob() == true)
-                    //{
-                    //    List<string> list_string = new List<string>();
-                    //    string nb_selection2 = Console.ReadLine();
-                    //    if (string.IsNullOrEmpty(nb_selection1) || string.IsNullOrEmpty(nb_selection2))
-                    //    {
-                    //        DisplayMessage("invalid_choice");
-                    //        break;
-                    //    }
-                    //    int nb_start_selection = int.Parse(nb_selection1);
-                    //    int nb_end_selection = int.Parse(nb_selection2);
-                    //    backupManager.ExecuteRange(nb_selection1, nb_selection2);
-                    //}
+                    // CHOICE EXECUTE SPECIFIC JOBS
+                    if (IsThereAJob() == false)
+                    {
+                        break;
+                    }
+
+                    List<int> selectedJobs = new List<int>();
+                    DisplayMessage("selection_instructions");
+                    while (true)
+                    {
+                        DisplayMessage("prompt_job_number");
+                        string input = Console.ReadLine();
+                        // Si vide, on a fini
+                        if (string.IsNullOrEmpty(input))
+                        {
+                            break;
+                        }
+                        // Verifier si c'est un nombre
+                        int index;
+                        bool isNumber = int.TryParse(input, out index);
+
+                        if (isNumber == false)
+                        {
+                            DisplayMessage("invalid_choice");
+                            continue;
+                        }
+                        // Verifier si le job existe
+                        if (index < 1 || index > backupManager.BackupJobs.Count)
+                        {
+                            DisplayMessage("job_not_found");
+                            continue;
+                        }
+                        // Verifier si deja selectionne
+                        if (selectedJobs.Contains(index))
+                        {
+                            DisplayMessage("job_already_selected");
+                            continue;
+                        }
+
+                        selectedJobs.Add(index);
+                        Console.WriteLine("  -> Job " + index + " added");
+                    }
+
+                    // Executer si on a des selections
+                    if (selectedJobs.Count > 0)
+                    {
+                        backupManager.ExecuteSelection(selectedJobs);
+                    }
+                    else
+                    {
+                        DisplayMessage("no_selection");
+                    }
                     break;
 
                 case "6":

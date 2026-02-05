@@ -30,5 +30,10 @@
   "delete_job": "Quel job voulez vous supprimer ?",
   "error_delete": "Le job n'a pas réussi à être supprimé.",
   "nb1_range": "Donner le premier nombre : ",
-  "nb2_range": "Donner le deuxieme nombre : "
+  "nb2_range": "Donner le deuxieme nombre : ",
+  "selection_instructions": "Entrez les numéros un par un. Entrée vide pour terminer.",
+  "prompt_job_number": "Numéro du job : ",
+  "job_not_found": "Ce job n'existe pas.",
+  "job_already_selected": "Déjà sélectionné.",
+  "no_selection": "Aucun job sélectionné."
 }
