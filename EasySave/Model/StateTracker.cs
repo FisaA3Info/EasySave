@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -11,8 +12,17 @@ namespace EasySave.Model
         public List<StateEntry> States { get; private set; }
         private List<IStateObserver> observers;
 
-        public StateTracker(string filePath ="state.json")
+        public StateTracker(string filePath = null)
         {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string easySaveFolder = Path.Combine(appDataPath, "EasySave");
+
+                Directory.CreateDirectory(easySaveFolder);
+
+                filePath = Path.Combine(easySaveFolder, "state.json");
+            }
             FilePath = filePath;
             States = new List<StateEntry>();
             observers = new List<IStateObserver>();
