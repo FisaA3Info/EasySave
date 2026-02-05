@@ -3,9 +3,12 @@
   "create_backup": "1. Créer un travail de sauvegarde",
   "execute_backup": "2. Exécuter un travail",
   "execute_all": "3. Exécuter tous les travaux",
-  "list_jobs": "4. Afficher tous les jobs",
-  "change_language": "5. Changer de langue",
-  "quit": "6. Quitter",
+  "execute_range": "4. Exécuter les jobs dans la plage spécifiée",
+  "execute_specific": "5. Exécuter les jobs spécifié",
+  "delete_jobs": "6. Supprimer un job",
+  "list_jobs": "7. Afficher tous les jobs",
+  "change_language": "8. Changer de langue",
+  "quit": "9. Quitter",
   "your_choice": "Votre choix : ",
   "invalid_choice": "Choix invalide.",
   "press_key": "Appuyez sur une touche pour continuer...",
@@ -23,5 +26,9 @@
   "error_created": "Travail échoué.",
   "error_executed": "Sauvegarde échoué.",
   "no_jobs": "Aucun jobs.",
-  "jobs_header": "Liste des jobs"
+  "jobs_header": "Liste des jobs.",
+  "delete_job": "Quel job voulez vous supprimer ?",
+  "error_delete": "Le job n'a pas réussi à être supprimé.",
+  "nb1_range": "Donner le premier nombre : ",
+  "nb2_range": "Donner le deuxieme nombre : "
 }

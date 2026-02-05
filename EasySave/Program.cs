@@ -11,7 +11,7 @@ class Program
         var manager = new BackupManager(stateTracker);
 
         var consoleProgress = new ConsoleProgressDisplay(); 
-        stateTracker.Attach(consoleProgress); 
+        //stateTracker.Attach(consoleProgress); 
         
 
         var view = new ConsoleView();
