@@ -12,8 +12,27 @@ namespace EasySave.ViewModel
 		{
 			if (entry.JobName != lastJobname)
 			{
-				
+				lastJobname = entry.JobName;
+				lastProgress = -1;
 			}
+			Console.WriteLine();//Empty line in start because you know, we never know uh
+			
+			DrawProgressBar(entry);
+			
+			Console.WriteLine($" Files: {entry.TotalFiles - entry.FilesRemaining}/{entry.TotalFiles} | " + 
+				$"Size: {BytesConvert(entry.TotalSize - entry.SizeRemaining)}/{BytesConvert(entry.TotalSize)}");
+
+			if (!string.IsNullOrWhiteSpace(entry.CurrentSourceFile))
+			{
+				//Path.GetFileName is to get the file at the end of the path like C:\Test\notepad.txt return notepad.txt
+				string fileName = Path.GetFileName(entry.CurrentSourceFile);
+				Console.WriteLine($" Current: {TruncateString(fileName, 55)}");
+			}
+
+			Console.WriteLine(); //Yeah empty line again to separate
+
+			lastProgress = entry.Progress;
+			
 		}
 
 		private ConsoleColor GetProgressColor(int progress)
