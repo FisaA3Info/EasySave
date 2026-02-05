@@ -25,7 +25,7 @@ class Program
         }
     }
 
-    /// Parse and execute jobs from CLI argument
+    /// Parse and execute jobs from CLI argument : - or ;
     static void ExecuteFromArgs(string arg, BackupManager manager)
     {
         //check if there are jobs
@@ -39,7 +39,13 @@ class Program
         if (arg.Contains("-"))
         {
             ParseAndExecuteRange(arg, manager);
-        } else
+        }
+        // check for selection format
+        else if (arg.Contains(";"))
+        {
+            ParseAndExecuteSelection(arg, manager);
+        }
+        else
         {
             if (int.TryParse(arg, out int index))
             {
@@ -69,6 +75,22 @@ class Program
             Console.WriteLine($"mauvais range: {arg}");
             DisplayUsage();
         }
+    }
+
+
+    /// Parse selection and execute
+
+    static void ParseAndExecuteSelection(string arg, BackupManager manager)
+    {
+        string[] parts = arg.Split(";");
+        List<int> indices = new List<int>();
+
+        foreach (string part in parts)
+        {
+            int index = int.Parse(part);
+            indices.Add(index);
+        }
+        manager.ExecuteSelection(indices);
     }
 
     static void DisplayUsage()
