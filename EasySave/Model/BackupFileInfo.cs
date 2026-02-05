@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EasySave.Model
 {
-    internal class FileInfo
+    internal class BackupFileInfo
     {
         public int FileSize { get; set; }
         public int FileName { get; set; }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using EasyLog;
 
 namespace EasySave.Model
 {
@@ -14,10 +15,24 @@ namespace EasySave.Model
         public BackupState? State { get; set; }
         public IBackupStrategy? Strategy { get; set; }
 
-        public void Execute(Logger logger, StateTracker stateTracker)
+        public BackupJob(string name, string sourceDir, string targetDir, BackupType type)
+        {
+            Name = name;
+            SourceDir = sourceDir;
+            TargetDir = targetDir;
+            Type = type;
+            State = BackupState.Inactive;
+
+            if (type == BackupType.Full)
+                Strategy = new FullBackupStrategy();
+            else
+                Strategy = new DifferentialBackupStrategy();
+        }
+
+        public void Execute(StateTracker stateTracker)
         {
             State = BackupState.Active;
-            Strategy.Execute(SourceDir, TargetDir, logger, stateTracker);
+            Strategy.Execute(Name,SourceDir, TargetDir, stateTracker);
             State = BackupState.Inactive;
 
         }
