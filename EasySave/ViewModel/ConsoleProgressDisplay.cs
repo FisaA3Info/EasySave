@@ -10,13 +10,14 @@ namespace EasySave.ViewModel
 		private string lastJobname = "";
 		public void OnStateChanged(StateEntry entry)
 		{
-			if (entry.JobName != lastJobName)
+			if (entry.JobName != lastJobname)
 			{
-
+				
 			}
 		}
 
 		private ConsoleColor GetProgressColor(int progress)
+			//return a color depending of the actual progression
 		{
 			if (progress < 33) return ConsoleColor.Red;
 			if (progress < 66) return ConsoleColor.Yellow;
@@ -26,6 +27,7 @@ namespace EasySave.ViewModel
 		private char GetSpinner()
 		{
 			char[] spinner = { '|', '/', '─', '\\' };
+			//Millisecond has a value between 0 and 999, that we divide by 100 for it to be 9ms et modulo 4 because of our 4 different caracters and then it repeat.
 			return spinner[(DateTime.Now.Millisecond / 100) % 4];
 		}
 
@@ -41,15 +43,19 @@ namespace EasySave.ViewModel
 
 			Console.Write(" [");
 
+			//Filled part of the bar
 			Console.ForegroundColor = barColor;
 			Console.Write(new string('█', filled));
 
+			//Empty part of the bar
 			Console.ForegroundColor = ConsoleColor.DarkGray;
-			Console.Write(new string('░', empty));
+			Console.Write(new string('▒', empty));
 
+			//Here just to reset the color in order to close the bar
 			Console.ResetColor();
 			Console.Write($"] {progress}%");
 
+			//If the copy is still running than we get the spinner, if it's done we get the check marked
 			if (progress > 0 && progress < 100)
 			{
 				Console.Write($" {GetSpinner()}");
@@ -62,6 +68,32 @@ namespace EasySave.ViewModel
 			}
 
 			Console.WriteLine();
+		}
+
+		private string BytesConvert(long bytes)
+			//Basically just find out which size is the files
+		{
+			string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+			double len = bytes;
+			int indice = 0;
+
+			while (len >= 1024 && indice < sizes.Length - 1)
+			{
+				indice++;
+				len /= 1024;
+			}
+			//0 make sure there's atleast 1 number before the coma and # just round number after the coma without useless 0
+			return $"{len:0.##} {sizes[indice]}";
+		}
+
+		private string TruncateString(string str, int maxLenght)
+			//If file names is too big it just puts dots instand of the whole thing
+		{
+			if (string.IsNullOrEmpty(str) || str.Length <= maxLenght)
+			{
+				return str;
+			}
+			return str.Substring(0, maxLenght-3) + "...";
 		}
 	}
 }
