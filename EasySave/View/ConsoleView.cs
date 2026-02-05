@@ -3,15 +3,17 @@ using EasySave.Service;
 using EasySave.ViewModel;
 namespace EasySave.View
 {
-    public class ConsoleView
+    internal class ConsoleView
     {
-        private readonly LanguageManager language = new LanguageManager();
         private readonly StateTracker stateTracker = new StateTracker();
-        private readonly BackupManager backupManager = new BackupManager();
+        private readonly LanguageManager language;
+        private readonly BackupManager backupManager;
 
-        public ConsoleView()
+        public ConsoleView(BackupManager manager)
         {
-            backupManager = new BackupManager(stateTracker);
+
+            backupManager = manager;
+            language = new LanguageManager();
             Console.WriteLine($"State file: {stateTracker.FilePath}");
         }
         public void DisplayMenu()

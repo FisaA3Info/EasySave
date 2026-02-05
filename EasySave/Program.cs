@@ -5,16 +5,25 @@ using EasySave.ViewModel;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         var stateTracker = new StateTracker();
         var manager = new BackupManager(stateTracker);
 
-        var consoleProgress = new ConsoleProgressDisplay(); 
-        //stateTracker.Attach(consoleProgress); 
-        
+        var consoleProgress = new ConsoleProgressDisplay();
+        stateTracker.AttachObserver(consoleProgress);
 
-        var view = new ConsoleView();
-        view.DisplayMenu();
+
+        if (args.Length > 0)
+        {
+            ExecuteFromArgs(args[0], manager);
+        }
+        else
+        {
+            // Injecter le manager dans la vue
+            var view = new ConsoleView(manager);
+            view.DisplayMenu();
+        }
+        ;
     }
 }
