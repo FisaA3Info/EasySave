@@ -31,7 +31,8 @@ class Program
         //check if there are jobs
         if (manager.BackupJobs.Count == 0)
         {
-            Console.WriteLine("pas de job");
+            Console.WriteLine("No backup jobs found.");
+            Console.WriteLine("Run EasySave without arguments to create jobs.");
             return;
         }
 
@@ -53,7 +54,7 @@ class Program
             }
             else
             {
-                Console.WriteLine($"invalide: {arg}");
+                Console.WriteLine("Invalid argument: " + arg);
                 DisplayUsage();
             }
         }
@@ -72,7 +73,7 @@ class Program
         }
         else
         {
-            Console.WriteLine($"mauvais range: {arg}");
+            Console.WriteLine("Invalid range format: " + arg);
             DisplayUsage();
         }
     }
@@ -87,15 +88,34 @@ class Program
 
         foreach (string part in parts)
         {
-            int index = int.Parse(part);
-            indices.Add(index);
+            if (int.TryParse(part.Trim(), out int index))
+            {
+                indices.Add(index);
+            }
+            else
+            {
+                Console.WriteLine($"Invalid index ignored: {part}");
+            }
         }
-        manager.ExecuteSelection(indices);
+
+        if (indices.Count > 0)
+        {
+            manager.ExecuteSelection(indices);
+        }
+        else
+        {
+            Console.WriteLine("No valid indices found.");
+            DisplayUsage();
+        }
     }
 
     static void DisplayUsage()
     {
         Console.WriteLine();
-        Console.WriteLine("EasySave.exe bonjour");
+        Console.WriteLine("Usage:");
+        Console.WriteLine("  EasySave.exe          Launch interactive mode");
+        Console.WriteLine("  EasySave.exe 1-3      Run jobs 1 to 3");
+        Console.WriteLine("  EasySave.exe 1;3      Run jobs 1 and 3");
+        Console.WriteLine("  EasySave.exe 2        Run job 2");
     }
 }
