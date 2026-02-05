@@ -11,7 +11,7 @@ class Program
         var manager = new BackupManager(stateTracker);
 
         var consoleProgress = new ConsoleProgressDisplay();
-        //stateTracker.Attach(consoleProgress);
+        stateTracker.AttachObserver(consoleProgress);
 
         // CLI mode or interactive mode
         if (args.Length > 0)
