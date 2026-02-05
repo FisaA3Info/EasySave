@@ -6,7 +6,14 @@ namespace EasySave.View
     public class ConsoleView
     {
         private readonly LanguageManager language = new LanguageManager();
+        private readonly StateTracker stateTracker = new StateTracker();
         private readonly BackupManager backupManager = new BackupManager();
+
+        public ConsoleView()
+        {
+            backupManager = new BackupManager(stateTracker);
+            Console.WriteLine($"State file: {stateTracker.FilePath}");
+        }
         public void DisplayMenu()
         {
             bool IsRunning = true;
