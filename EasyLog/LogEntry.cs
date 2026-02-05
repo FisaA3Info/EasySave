@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -7,6 +7,7 @@ namespace EasyLog
 {
     public class LogEntry
     {
+        //==============  attributes  =============
         public DateTime TimeStamp { get; set;  }
         public string BackupName { get; set; }
         public string SourcePath { get; set; }
@@ -14,6 +15,7 @@ namespace EasyLog
         public long FileSize { get; set; }
         public long TransferTimeMs { get; set; }
 
+        //==============  constructor  ===============
         public LogEntry (DateTime timeStamp, string backupName, string sourcePath, string targetPath, long fileSize, long transferTimeMs)
         {
             TimeStamp = timeStamp;

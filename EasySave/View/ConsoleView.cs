@@ -47,6 +47,22 @@ namespace EasySave.View
                 var j = jobs[i];
                 Console.WriteLine($"{i + 1}. {j?.Name} | {j?.Type} | {language.GetText("prompt_source")} {j?.SourceDir} | {language.GetText("prompt_target")} {j?.TargetDir}");
             }
+            Console.WriteLine();
+
+        }
+
+        public bool IsThereAJob()
+        {
+            var jobs = backupManager.BackupJobs;
+            if (jobs == null || jobs.Count == 0)
+            {
+                DisplayMessage("no_jobs");
+                return false;
+            } else
+            {
+                DisplayAllJobs();
+                return true;
+            }
         }
 
 
@@ -58,53 +74,66 @@ namespace EasySave.View
             {
                 case "1":
                     // Ask Job info and create
-                    Console.Write(language.GetText("prompt_name"));
+                    DisplayMessage("prompt_name");
                     string name = Console.ReadLine();
 
-                    Console.Write(language.GetText("prompt_source"));
+                    DisplayMessage("prompt_source");
                     string source = Console.ReadLine();
 
-                    Console.Write(language.GetText("prompt_target"));
+                    DisplayMessage("prompt_target");
                     string target = Console.ReadLine();
 
-                    Console.Write(language.GetText("prompt_type"));
+                    DisplayMessage("prompt_type");
                     string TypeChoice = Console.ReadLine();
 
+                    if (TypeChoice != "1" && TypeChoice != "2")
+                    {
+                        DisplayMessage("error_created");
+                        break;
+                    }
                     BackupType type = TypeChoice == "1" ? BackupType.Full : BackupType.Differential;
 
-                    bool success = backupManager.CreateJob(name, source, target, type);
-                    DisplayMessage(success ? "success_created" : "error_created");
+                    if ((name != null) && (source != null) && (target != null))
+                    {
+                        bool success = backupManager.CreateJob(name, source, target, type);
+                        DisplayMessage(success ? "success_created" : "error_created");
+                    }
+                    else
+                    {
+                        DisplayMessage("error_created");
+                    }
                     break;
 
                 case "2":
-                    // CHOIX EXECUTE BACKUP
-                    DisplayAllJobs();
-                    int index = int.Parse(Console.ReadLine());
-                    backupManager.ExecuteJob(index);
+                    // CHOICE EXECUTE BACKUP
+                    if (IsThereAJob() == true) {
+                        int index = int.Parse(Console.ReadLine());
+                        backupManager.ExecuteJob(index);
+                    }
                     break;
 
                 case "3":
-                    // CHOIX EXECUTE ALL 
+                    // CHOICE EXECUTE ALL 
                     backupManager.ExecuteAllJobs();
                     break;
 
                 case "4":
-                    // CHOIX CHANGE LANGUE
-                    DisplayAllJobs();
+                    // CHOICE DISPLAY JOBS
+                    IsThereAJob();
                     break;
 
                 case "5":
-                    // CHOIX CHANGE LANGUE
+                    // CHOICE CHANGE LANGUE
                     SelectLanguage();
                     break;
 
                 case "6":
-                    // CHOIX QUITTER
+                    // CHOICE QUIT
                     return false;
                 default:
                     DisplayMessage("invalid_choice");
                     break;
-            }
+                }
 
             DisplayMessage("press_key");
             Console.ReadKey();
