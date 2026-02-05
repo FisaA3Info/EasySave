@@ -6,6 +6,14 @@ using System.Text.Json;
 
 namespace EasyLog
 {
+    /// <summary>
+    /// 
+    /// DLL to Implement the Logs in a Daily Log File
+    /// 
+    /// Located in the System ApplicationData folder
+    /// based on the notation Year-Month-Day.json format
+    /// 
+    /// </summary>
     //based on a signleton pattern
     public static class Logger
     {
@@ -19,7 +27,7 @@ namespace EasyLog
             {
                 if (_logDir == null)
                 {
-                    _logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DailyLog");
+                    _logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasySave");
                 }
                 return _logDir;
             }
@@ -28,6 +36,13 @@ namespace EasyLog
 
 
         //============  methods  =================
+        /// <summary>
+        /// 
+        /// Combines the Log Directory With the Filename
+        /// to Have the Path Where to Save the Logs
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static string GetDailyLogPath()
         {
             string fileName = $"{DateTime.Now:yyyy-MM-dd}.json";
@@ -35,7 +50,13 @@ namespace EasyLog
             return fullPath;
         }
 
-        public void Log(LogEntry entry)
+        /// <summary>
+        /// 
+        /// Writes the Specified Log Entry Json File on the Daily File.
+        /// 
+        /// </summary>
+        /// <param name="entry"> LogEntry object to Gather the Data. Contains the details to be written to the log file.</param>
+        public static void Log(LogEntry entry)
         {
             //protects from concurrent conflicts (in case but will be utile for multithreading)
             lock (_lock)
@@ -54,7 +75,7 @@ namespace EasyLog
                         Directory.CreateDirectory(LogDirectory);
                     }
 
-                    File.AppendAllText(GetDailyLogPath(), jsonLine + Environment.NewLine);
+                    File.AppendAllText(GetDailyLogPath(), jsonLine + Environment.NewLine + Environment.NewLine); //for pagingation double backrow
                 }
                 catch (Exception e)
                 {
