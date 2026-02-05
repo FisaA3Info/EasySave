@@ -30,5 +30,10 @@
   "delete_job": "Which job do you want to delete ?",
   "error_delete": "The job could not be deleted.",
   "nb1_range": "first number : ",
-  "nb2_range": "Second number : "
+  "nb2_range": "Second number : ",
+  "selection_instructions": "Enter numbers one by one. Empty input to finish.",
+  "prompt_job_number": "Job number: ",
+  "job_not_found": "This job does not exist.",
+  "job_already_selected": "Already selected.",
+  "no_selection": "No job selected."
 }
