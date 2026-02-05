@@ -20,7 +20,7 @@
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Prérequis
 
@@ -45,7 +45,7 @@ dotnet run
 
 ---
 
-## 📖 Utilisation
+## Utilisation
 
 ### Menu principal
 ```
@@ -81,7 +81,7 @@ Choice: 1
 
 ---
 
-## 🎯 Fonctionnalités détaillées
+## Fonctionnalités détaillées
 
 ### 1. Types de sauvegarde
 
