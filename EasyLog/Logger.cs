@@ -21,13 +21,13 @@ namespace EasyLog
         private static readonly object _lock = new object();
         private static string _logDir;
 
-        public static string LogDirectory 
+        public static string LogDirectory
         {
             get
             {
                 if (_logDir == null)
                 {
-                    _logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasySave");
+                    _logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EasySave", "DailyLog");
                 }
                 return _logDir;
             }
@@ -50,12 +50,6 @@ namespace EasyLog
             return fullPath;
         }
 
-        /// <summary>
-        /// 
-        /// Writes the Specified Log Entry Json File on the Daily File.
-        /// 
-        /// </summary>
-        /// <param name="entry"> LogEntry object to Gather the Data. Contains the details to be written to the log file.</param>
         public static void Log(LogEntry entry)
         {
             //protects from concurrent conflicts (in case but will be utile for multithreading)
@@ -83,5 +77,5 @@ namespace EasyLog
                 }
             }
         }
-   }
+    }
 }
