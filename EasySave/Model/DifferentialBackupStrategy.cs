@@ -10,6 +10,27 @@ namespace EasySave.Model
     {
         public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
         {
+            //check if target in source
+            DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
+            DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
+
+            bool isParent = false;
+            while (tgtDir.Parent != null)
+            {
+                if (tgtDir.Parent.FullName == srcDir.FullName)  //check if the parent folder is the source and repeat until root
+                {
+                    isParent = true;
+                    break;
+                }
+                else tgtDir = tgtDir.Parent;
+            }
+
+            //if so prevent from recursion
+            if (isParent)
+            {
+                return ;
+            }
+
             string[] fileList = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
 
             // find files that need to be copied

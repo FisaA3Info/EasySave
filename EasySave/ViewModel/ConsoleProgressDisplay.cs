@@ -53,7 +53,7 @@ namespace EasySave.ViewModel
 		private void DrawProgressBar(StateEntry entry)
 		{
 			int barWidth = 50;
-			int progress = entry.Progress;
+			int progress = Math.Clamp(entry.Progress, 0, 100); // fix with a clamp to keep the progress between 0 and 100 (previous error caused by full backup update)
 
 			int filled = (progress * barWidth)/100;
 			int empty = barWidth - filled;

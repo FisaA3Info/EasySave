@@ -53,6 +53,27 @@ namespace EasySave.Model
                 // Create target directory
                 Directory.CreateDirectory(targetPath);
 
+                //check if target in source
+                DirectoryInfo srcDir = new DirectoryInfo(sourcePath);
+                DirectoryInfo tgtDir = new DirectoryInfo(targetPath);
+
+                bool isParent = false;
+                while (tgtDir.Parent != null)
+                {
+                    if (tgtDir.Parent.FullName == srcDir.FullName)  //check if the parent folder is the source and repeat until root
+                    {
+                        isParent = true;
+                        break;
+                    }
+                    else tgtDir = tgtDir.Parent;
+                }
+
+                //if so prevent from recursion
+                if (isParent)
+                {
+                    return;
+                }
+
                 // Copy files
                 foreach (var file in sourceDir.GetFiles())
                 {
@@ -93,6 +114,16 @@ namespace EasySave.Model
                 foreach (var subDir in sourceDir.GetDirectories())
                 {
                     string newTargetDir = Path.Combine(targetPath, subDir.Name);
+
+                    // skip if this subdirectory is the target directory itself
+                    DirectoryInfo subDirPath = new DirectoryInfo(subDir.FullName);
+                    DirectoryInfo targetRoot = new DirectoryInfo(targetPath);
+
+                    if (string.Equals(subDirPath.FullName, targetRoot.FullName, StringComparison.OrdinalIgnoreCase) || subDirPath.FullName.StartsWith(targetRoot.FullName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker);
                 }
             }
