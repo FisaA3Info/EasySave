@@ -173,6 +173,7 @@ namespace EasySave.ViewModel
             catch (Exception e)
             {
                 var errEntry = new StateEntry(job.Name ?? string.Empty, BackupState.OnError);
+                stateTracker?.UpdateState(errEntry);
                 return false;
             }
         }
