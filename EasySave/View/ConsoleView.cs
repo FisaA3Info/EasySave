@@ -1,4 +1,5 @@
-﻿using EasySave.Model;
+﻿using EasyLog;
+using EasySave.Model;
 using EasySave.Service;
 using EasySave.ViewModel;
 namespace EasySave.View
@@ -29,6 +30,7 @@ namespace EasySave.View
                 DisplayMessage("delete_jobs");
                 DisplayMessage("list_jobs");
                 DisplayMessage("change_language");
+                DisplayMessage("change_log");
                 DisplayMessage("quit");
                 Console.Write(language.GetText("your_choice") + " ");
 
@@ -246,10 +248,15 @@ namespace EasySave.View
                     // CHOICE CHANGE LANGUE
                     SelectLanguage();
                     break;
-
                 case "9":
+                    // CHANGE DAILY LOG FORMAT
+                    SelectFormatLog();
+                    break;
+
+                case "0":
                     // CHOICE QUIT
                     return false;
+
                 default:
                     DisplayMessage("invalid_choice");
                     break;
@@ -283,6 +290,30 @@ namespace EasySave.View
                     break;
             }
         }
+        public void SelectFormatLog()
+        {
+            Console.Clear();
+            DisplayMessage("select_json_format");
+            Console.WriteLine();
+            Console.WriteLine("1 : JSON");
+            Console.WriteLine("2 : XML");
+            Console.Write(language.GetText("your_choice") + " ");
+
+            string choice = Console.ReadLine();
+            switch (choice)
+            {
+                case "1":
+                    Logger.LogType = "json";
+                    break;
+                case "2":
+                    Logger.LogType = "xml";
+                    break;
+                default:
+                    DisplayMessage("invalid_choice");
+                    break;
+            }
+        }
+
 
     }
 }
