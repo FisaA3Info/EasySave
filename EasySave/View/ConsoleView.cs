@@ -127,7 +127,11 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             break;
                         }
-                        int index = int.Parse(response);
+                        if (!int.TryParse(response, out int index))
+                        {
+                            DisplayMessage("invalid_choice");
+                            break;
+                        }
                         backupManager.ExecuteJob(index);
                     }
                     break;
@@ -151,8 +155,11 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             break;
                         }
-                        int nb_start_range = int.Parse(nb_range1);
-                        int nb_end_range = int.Parse(nb_range2);
+                        if (!int.TryParse(nb_range1, out int nb_start_range) || !int.TryParse(nb_range2, out int nb_end_range))
+                        {
+                            DisplayMessage("invalid_choice");
+                            break;
+                        }
                         backupManager.ExecuteRange(nb_start_range, nb_end_range);
                     }
                     break;
