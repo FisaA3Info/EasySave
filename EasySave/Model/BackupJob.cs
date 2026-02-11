@@ -31,10 +31,32 @@ namespace EasySave.Model
 
         public void Execute(StateTracker stateTracker)
         {
-            State = BackupState.Active;
-            Strategy.Execute(Name,SourceDir, TargetDir, stateTracker);
-            State = BackupState.Inactive;
+            try
+            {
+                State = BackupState.Active;
+                Strategy.Execute(Name, SourceDir, TargetDir, stateTracker);
+                State = BackupState.Inactive;
+            }
+            catch (Exception)
+            {
+                State = BackupState.OnError;
 
+                // Update state tracker on error
+                if (stateTracker != null)
+                {
+                    var errorEntry = new StateEntry
+                    {
+                        JobName = Name ?? "",
+                        TimeStamp = DateTime.Now,
+                        State = BackupState.OnError,
+                        CurrentSourceFile = "",
+                        CurrentTargetFile = ""
+                    };
+                    stateTracker.UpdateState(errorEntry);
+                }
+                // send the exception in the try catch executeJob in backup manager
+                throw;
+            }
         }
 
     }
