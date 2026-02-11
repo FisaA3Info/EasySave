@@ -294,6 +294,8 @@ namespace EasySave.View
         {
             Console.Clear();
             DisplayMessage("select_json_format");
+            Console.Write(language.GetText("actual_log"));
+            Console.WriteLine($"{Logger.LogType}");
             Console.WriteLine();
             Console.WriteLine("1 : JSON");
             Console.WriteLine("2 : XML");

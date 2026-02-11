@@ -37,6 +37,6 @@
   "job_not_found": "This job does not exist.",
   "job_already_selected": "Already selected.",
   "no_selection": "No job selected.",
-  "select_json_format": "Select the daily log format you want."
-
+  "select_json_format": "Select the daily log format you want.",
+  "actual_log": "Current log type : "
 }
