@@ -35,7 +35,7 @@ namespace EasySave.ViewModel
         {
             this.stateTracker = stateTracker;
             BackupJobs = new List<BackupJob>();
-            LoadJobs();  // Charger les jobs existants
+            LoadJobs();  // Load existing jobs
         }
         private void LoadJobs()
         {
@@ -58,7 +58,7 @@ namespace EasySave.ViewModel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors du chargement des jobs: {ex.Message}");
+                Console.WriteLine($"Error while loading jobs: {ex.Message}");
             }
         }
 
@@ -94,7 +94,7 @@ namespace EasySave.ViewModel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de la sauvegarde des jobs: {ex.Message}");
+                Console.WriteLine($"Error while saving jobs: {ex.Message}");
             }
         }
 

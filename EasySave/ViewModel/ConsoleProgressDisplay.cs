@@ -46,7 +46,7 @@ namespace EasySave.ViewModel
 		private char GetSpinner()
 		{
 			char[] spinner = { '|', '/', '─', '\\' };
-			//Millisecond has a value between 0 and 999, that we divide by 100 for it to be 9ms et modulo 4 because of our 4 different caracters and then it repeat.
+			//Millisecond has a value between 0 and 999, that we divide by 100 for it to be 9ms and modulo 4 because of our 4 different caracters and then it repeat.
 			return spinner[(DateTime.Now.Millisecond / 100) % 4];
 		}
 
