@@ -53,6 +53,9 @@ namespace EasySave.Model
             int filesCopied = 0;
             long sizeCopied = 0;
 
+            // Update initial state
+            UpdateState(jobName, stateTracker, totalFiles, totalSize, 0, 0, "", "", BackupState.Active);
+
             // Copy files.
             foreach (string f in filesToCopy)
             {
@@ -118,6 +121,35 @@ namespace EasySave.Model
                     Console.WriteLine(dirNotFound.Message);
                 }
             }
+
+            // Update final state
+            UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, "", "", BackupState.Inactive);
+        }
+        private void UpdateState(string jobName, StateTracker stateTracker, int totalFiles, long totalSize, int filesCopied, long sizeCopied, string sourceFile, string targetFile, BackupState state)
+        {
+            if (stateTracker == null) return;
+
+            int progress = 0;
+            if (totalFiles > 0)
+            {
+                progress = (int)((filesCopied * 100) / totalFiles);
+            }
+
+            var entry = new StateEntry
+            {
+                JobName = jobName,
+                TimeStamp = DateTime.Now,
+                State = state,
+                TotalFiles = totalFiles,
+                TotalSize = totalSize,
+                Progress = progress,
+                FilesRemaining = totalFiles - filesCopied,
+                SizeRemaining = totalSize - sizeCopied,
+                CurrentSourceFile = sourceFile,
+                CurrentTargetFile = targetFile
+            };
+
+            stateTracker.UpdateState(entry);
         }
     }
 }
