@@ -10,6 +10,34 @@ namespace EasySave.Model
     {
         public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
         {
+            //check if target in source
+            DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
+            DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
+
+            bool isParent = false;
+            while (tgtDir.Parent != null)
+            {
+                if (tgtDir.Parent.FullName == srcDir.FullName)  //check if the parent folder is the source and repeat until root
+                {
+                    isParent = true;
+                    break;
+                }
+                else tgtDir = tgtDir.Parent;
+            }
+
+            //if so prevent from recursion
+            if (isParent)
+            {
+                return;
+            }
+
+            // Verify if source directory exists
+            if (!Directory.Exists(sourceDir))
+            {
+                Console.WriteLine($"[Error] Source not found: {sourceDir}");
+                return;
+            }
+
             string[] fileList = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
 
             // find files that need to be copied
@@ -32,12 +60,14 @@ namespace EasySave.Model
             int filesCopied = 0;
             long sizeCopied = 0;
 
+            // Update initial state
+            UpdateState(jobName, stateTracker, totalFiles, totalSize, 0, 0, "", "", BackupState.Active);
+
             // Copy files.
             foreach (string f in filesToCopy)
             {
-                string fName = f.Substring(sourceDir.Length + 1);
-                string sourcePath = Path.Combine(sourceDir, fName);
-                string targetPath = Path.Combine(targetDir, fName);
+                string relativePath = f.Substring(sourceDir.Length + 1);
+                string targetPath = Path.Combine(targetDir, relativePath);
                 string? targetFolder = Path.GetDirectoryName(targetPath);
 
                 try
@@ -47,7 +77,7 @@ namespace EasySave.Model
                     //creating directory for subdirectorys, starting timer after to measure copy time only
                     Directory.CreateDirectory(targetFolder);
                     timer.Start();
-                    File.Copy(sourcePath, targetPath, true);
+                    File.Copy(f, targetPath, true);
                     timer.Stop();
 
                     // update progress
@@ -71,7 +101,7 @@ namespace EasySave.Model
                         Progress = progress,
                         FilesRemaining = totalFiles - filesCopied,
                         SizeRemaining = totalSize - sizeCopied,
-                        CurrentSourceFile = fName,
+                        CurrentSourceFile = f,
                         CurrentTargetFile = targetPath
                     };
 
@@ -85,7 +115,7 @@ namespace EasySave.Model
                     (
                         DateTime.Now,
                         jobName,
-                        fName,
+                        f,
                         targetPath,
                         fileSize,
                         timer.ElapsedMilliseconds
@@ -93,11 +123,40 @@ namespace EasySave.Model
 
                     Logger.Log(logEntry);
                 }
-                catch (DirectoryNotFoundException dirNotFound)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(dirNotFound.Message);
+                    Console.WriteLine($"Error : {ex}");
                 }
             }
+
+            // Update final state
+            UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, "", "", BackupState.Inactive);
+        }
+        private void UpdateState(string jobName, StateTracker stateTracker, int totalFiles, long totalSize, int filesCopied, long sizeCopied, string sourceFile, string targetFile, BackupState state)
+        {
+            if (stateTracker == null) return;
+
+            int progress = 0;
+            if (totalFiles > 0)
+            {
+                progress = (int)((filesCopied * 100) / totalFiles);
+            }
+
+            var entry = new StateEntry
+            {
+                JobName = jobName,
+                TimeStamp = DateTime.Now,
+                State = state,
+                TotalFiles = totalFiles,
+                TotalSize = totalSize,
+                Progress = progress,
+                FilesRemaining = totalFiles - filesCopied,
+                SizeRemaining = totalSize - sizeCopied,
+                CurrentSourceFile = sourceFile,
+                CurrentTargetFile = targetFile
+            };
+
+            stateTracker.UpdateState(entry);
         }
     }
 }

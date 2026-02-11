@@ -8,7 +8,8 @@
   "delete_jobs": "6. Delete a job",
   "list_jobs": "7. List all jobs ",
   "change_language": "8. Change language",
-  "quit": "9. Quit",
+  "change_log": "9. Change daily log format.",
+  "quit": "0. Quit",
   "your_choice": "Your choice: ",
   "invalid_choice": "Invalid choice.",
   "press_key": "Press any key to continue...",
@@ -35,5 +36,7 @@
   "prompt_job_number": "Job number: ",
   "job_not_found": "This job does not exist.",
   "job_already_selected": "Already selected.",
-  "no_selection": "No job selected."
+  "no_selection": "No job selected.",
+  "select_json_format": "Select the daily log format you want.",
+  "actual_log": "Current log type : "
 }
