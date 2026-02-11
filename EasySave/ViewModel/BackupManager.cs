@@ -166,8 +166,6 @@ namespace EasySave.ViewModel
             try
             {
                 job.Execute(stateTracker);
-                var entry = new StateEntry(job.Name ?? string.Empty, job.State ?? BackupState.Inactive);
-                stateTracker?.UpdateState(entry);
                 return true;
             }
             catch (Exception e)
