@@ -2,12 +2,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
-using EasyLog;
+using System.IO;
+using System.Text.Json;
 
 namespace EasySave.ViewModel
 {
+    // smaller class for the json saves (instead of full log entry)
+    internal class JobData
+    {
+        public string Name { get; set; } = "";
+        public string SourceDir { get; set; } = "";
+        public string TargetDir { get; set; } = "";
+        public BackupType Type { get; set; }
+    }
+
     //manages the taks/jobs 
     internal class BackupManager
     {
@@ -16,12 +24,78 @@ namespace EasySave.ViewModel
         private const int MAX_JOBS = 5;
         public List<BackupJob> BackupJobs { get; set; }
 
+        // path to the json that contains the jobs
+        private static readonly string JobsFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EasySave", "jobs.json"
+        );
 
-        //================ Contsructor  ===================
+        //================ Constructor ===================
         public BackupManager(StateTracker stateTracker = null)
         {
             this.stateTracker = stateTracker;
             BackupJobs = new List<BackupJob>();
+            LoadJobs();  // Charger les jobs existants
+        }
+        private void LoadJobs()
+        {
+            try
+            {
+                if (File.Exists(JobsFilePath))
+                {
+                    string json = File.ReadAllText(JobsFilePath);
+                    var jobDataList = JsonSerializer.Deserialize<List<JobData>>(json);
+
+                    if (jobDataList != null)
+                    {
+                        foreach (var data in jobDataList)
+                        {
+                            var job = new BackupJob(data.Name, data.SourceDir, data.TargetDir, data.Type);
+                            BackupJobs.Add(job);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors du chargement des jobs: {ex.Message}");
+            }
+        }
+
+        private void SaveJobs()
+        {
+            try
+            {
+                // crete the path if doesn't exists
+                string? directory = Path.GetDirectoryName(JobsFilePath);
+
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                var jobDataList = new List<JobData>();
+                foreach (var job in BackupJobs)
+                {
+                    jobDataList.Add(new JobData
+                    {
+                        //create obj Jobdata that takes some backup jobs data
+                        Name = job.Name ?? "",
+                        SourceDir = job.SourceDir ?? "",
+                        TargetDir = job.TargetDir ?? "",
+                        Type = job.Type ?? BackupType.Full
+                    });
+                }
+
+                // searialize and write in json
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(jobDataList, options);
+                File.WriteAllText(JobsFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la sauvegarde des jobs: {ex.Message}");
+            }
         }
 
 
@@ -32,28 +106,26 @@ namespace EasySave.ViewModel
 
             if (string.IsNullOrWhiteSpace(jobName) || string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(destinationPath))
             {
-                //logger?.Log("CreateJob failed: invalid parameters.");
                 return false;
             }
 
             if (BackupJobs.Count >= MAX_JOBS)
             {
-                //logger?.Log($"CreateJob failed: max jobs ({MAX_JOBS}) reached.");
                 return false;
             }
+
             //uses the managejob constructor if less than 5 jobs
             try
             {
+                //+ add it to the json
                 var newJob = new BackupJob(jobName, sourcePath, destinationPath, type);
-
                 BackupJobs.Add(newJob);
-                //logger?.Log($"Job created: {jobName}");
                 stateTracker?.UpdateState(new StateEntry(newJob.Name ?? jobName, BackupState.Inactive));
+                SaveJobs();
                 return true;
             }
             catch (Exception e)
             {
-                //logger?.Log($"CreateJob error: {e.Message}");
                 return false;
             }
         }
@@ -63,22 +135,20 @@ namespace EasySave.ViewModel
         {
             if (index < 1 || index > BackupJobs.Count)
             {
-                //logger?.Log($"DeleteJob failed: invalid index {index}.");
                 return false;
             }
 
             try
             {
-                //deletes the job object and removes it from the list²
+                //deletes the job object and removes it from the list + update json
                 var removed = BackupJobs[index - 1];
                 BackupJobs.RemoveAt(index - 1);
-                //logger?.Log($"Job deleted: {removed?.Name ?? $"#{index}"}");
                 stateTracker?.RemoveState(removed?.Name ?? string.Empty);
+                SaveJobs();
                 return true;
             }
             catch (Exception e)
             {
-                //logger?.Log($"DeleteJob error: {e.Message}");
                 return false;
             }
         }
@@ -89,24 +159,19 @@ namespace EasySave.ViewModel
 
             if (index < 1 || index > BackupJobs.Count)
             {
-                //logger?.Log($"ExecuteJob failed: invalid index {index}.");
                 return false;
             }
 
             var job = BackupJobs[index - 1];
             try
             {
-                //logger?.Log($"Starting job #{index}: {job?.Name}");
                 job.Execute(stateTracker);
-                var entry = new StateEntry(job.Name ?? string.Empty, job.State ?? BackupState.Inactive);
-                stateTracker?.UpdateState(entry);
-                //logger?.Log($"Finished job #{index}: {job?.Name}");
                 return true;
             }
             catch (Exception e)
             {
-                //logger?.Log($"ExecuteJob error for #{index}: {e}");
                 var errEntry = new StateEntry(job.Name ?? string.Empty, BackupState.OnError);
+                stateTracker?.UpdateState(errEntry);
                 return false;
             }
         }
@@ -114,17 +179,14 @@ namespace EasySave.ViewModel
         //executes all the jobs in the list
         public void ExecuteAllJobs()
         {
-            //logger?.Log("ExecuteAllJobs: starting.");
             for (int i = 1; i <= BackupJobs.Count; i++)
             {
                 var ok = ExecuteJob(i);
                 if (!ok)
                 {
-                    //logger?.Log($"ExecuteAllJobs: stopped at #{i} due to error.");
                     break;
                 }
             }
-            //logger?.Log("ExecuteAllJobs: finished.");
         }
 
         //executes a range of jobs
@@ -132,7 +194,6 @@ namespace EasySave.ViewModel
         {
             if (BackupJobs.Count == 0)
             {
-                //logger?.Log("ExecuteRange: no jobs to execute.");
                 return;
             }
 
@@ -141,16 +202,13 @@ namespace EasySave.ViewModel
             start = Math.Max(1, start);
             end = Math.Min(BackupJobs.Count, end);
 
-            //logger?.Log($"ExecuteRange: executing jobs {start} to {end}.");
             for (int i = start; i <= end; i++)
             {
                 if (!ExecuteJob(i))
                 {
-                    //logger?.Log($"ExecuteRange: stopped at job #{i} due to error.");
                     break;
                 }
             }
-            //logger?.Log("ExecuteRange: finished.");
         }
 
         //executes specific jobs by its index
@@ -158,7 +216,6 @@ namespace EasySave.ViewModel
         {
             if (indexes == null || indexes.Count == 0)
             {
-                //logger?.Log("ExecuteSelection: empty selection.");
                 return;
             }
 
@@ -169,20 +226,16 @@ namespace EasySave.ViewModel
 
             if (!normalized.Any())
             {
-                //logger?.Log("ExecuteSelection: no valid indices.");
                 return;
             }
 
-            //logger?.Log($"ExecuteSelection: executing jobs {string.Join(",", normalized)}.");
             foreach (var idx in normalized)
             {
                 if (!ExecuteJob(idx))
                 {
-                    //logger?.Log($"ExecuteSelection: stopped at job #{idx} due to error.");
                     break;
                 }
             }
-            //logger?.Log("ExecuteSelection: finished.");
         }
     }
 }

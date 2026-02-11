@@ -3,16 +3,16 @@ using EasySave.Service;
 using EasySave.ViewModel;
 namespace EasySave.View
 {
-    public class ConsoleView
+    internal class ConsoleView
     {
-        private readonly LanguageManager language = new LanguageManager();
-        private readonly StateTracker stateTracker = new StateTracker();
-        private readonly BackupManager backupManager = new BackupManager();
+        private readonly LanguageManager language;
+        private readonly BackupManager backupManager;
 
-        public ConsoleView()
+        public ConsoleView(BackupManager manager)
         {
-            backupManager = new BackupManager(stateTracker);
-            Console.WriteLine($"State file: {stateTracker.FilePath}");
+
+            backupManager = manager;
+            language = new LanguageManager();
         }
         public void DisplayMenu()
         {
@@ -168,12 +168,12 @@ namespace EasySave.View
                     {
                         DisplayMessage("prompt_job_number");
                         string input = Console.ReadLine();
-                        // Si vide, on a fini
+                        // cancel if empty
                         if (string.IsNullOrEmpty(input))
                         {
                             break;
                         }
-                        // Verifier si c'est un nombre
+                        // verify if it's a number
                         int index;
                         bool isNumber = int.TryParse(input, out index);
 
@@ -182,13 +182,13 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             continue;
                         }
-                        // Verifier si le job existe
+                        // verifies if the job exists
                         if (index < 1 || index > backupManager.BackupJobs.Count)
                         {
                             DisplayMessage("job_not_found");
                             continue;
                         }
-                        // Verifier si deja selectionne
+                        // verifies if already selected
                         if (selectedJobs.Contains(index))
                         {
                             DisplayMessage("job_already_selected");
@@ -199,7 +199,7 @@ namespace EasySave.View
                         Console.WriteLine("  -> Job " + index + " added");
                     }
 
-                    // Executer si on a des selections
+                    // execute if jobs
                     if (selectedJobs.Count > 0)
                     {
                         backupManager.ExecuteSelection(selectedJobs);
