@@ -15,6 +15,7 @@ namespace EasySave.Model
         private long _totalSize;
         private int _filesCopied;
         private long _sizeCopied;
+        private bool _isError;
 
         public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {
@@ -24,6 +25,11 @@ namespace EasySave.Model
                 if (!sourceDir.Exists)
                 {
                     Console.WriteLine($"[Error] Source not found: {sourcePath}");
+                    return;
+                }
+                // prevent progress bar display
+                if (_isError)
+                {
                     return;
                 }
 
@@ -71,6 +77,8 @@ namespace EasySave.Model
                 //if so prevent from recursion
                 if (isParent)
                 {
+                    _isError = true;
+                    UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
                     return;
                 }
 
@@ -128,7 +136,9 @@ namespace EasySave.Model
                 }
             }
             catch (Exception ex) {
+                _isError = true;
                 Console.WriteLine($"Critical Error: {ex.Message}");
+                UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
             }
         }
 
