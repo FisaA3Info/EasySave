@@ -31,6 +31,13 @@ namespace EasySave.Model
                 return ;
             }
 
+            // Verify if source directory exists
+            if (!Directory.Exists(sourceDir))
+            {
+                Console.WriteLine($"[Error] Source not found: {sourceDir}");
+                return;
+            }
+
             string[] fileList = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
 
             // find files that need to be copied
