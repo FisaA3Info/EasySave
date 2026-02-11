@@ -87,18 +87,30 @@ namespace EasyLog
                     // check if json or xml logs
                     if (LogType != null && LogType == "json")
                     {
-                        //options for a better display
-                        var options = new JsonSerializerOptions
-                        {
-                            WriteIndented = true
-                        };
-                        string jsonLine = JsonSerializer.Serialize(entry, options);
+                        var options = new JsonSerializerOptions { WriteIndented = true };
 
                         if (!Directory.Exists(LogDirectory))
                         {
                             Directory.CreateDirectory(LogDirectory);
                         }
-                        logContent = jsonLine;
+
+                        string path = GetDailyLogPath();
+                        List<LogEntry> entries = new List<LogEntry>();
+
+                        // Read existing if file already exists
+                        if (File.Exists(path))
+                        {
+                            string existingJson = File.ReadAllText(path);
+                            if (!string.IsNullOrWhiteSpace(existingJson))
+                            {
+                                entries = JsonSerializer.Deserialize<List<LogEntry>>(existingJson) ?? new List<LogEntry>();
+                            }
+                        }
+
+                        // Add new entry and write the full array
+                        entries.Add(entry);
+                        File.WriteAllText(path, JsonSerializer.Serialize(entries, options));
+                        return;
                     }
 
                     if (LogType != null && LogType == "xml")
