@@ -56,9 +56,8 @@ namespace EasySave.Model
             // Copy files.
             foreach (string f in filesToCopy)
             {
-                string fName = f.Substring(sourceDir.Length + 1);
-                string sourcePath = Path.Combine(sourceDir, fName);
-                string targetPath = Path.Combine(targetDir, fName);
+                string relativePath = f.Substring(sourceDir.Length + 1);
+                string targetPath = Path.Combine(targetDir, relativePath);
                 string? targetFolder = Path.GetDirectoryName(targetPath);
 
                 try
@@ -68,7 +67,7 @@ namespace EasySave.Model
                     //creating directory for subdirectorys, starting timer after to measure copy time only
                     Directory.CreateDirectory(targetFolder);
                     timer.Start();
-                    File.Copy(sourcePath, targetPath, true);
+                    File.Copy(f, targetPath, true);
                     timer.Stop();
 
                     // update progress
@@ -92,7 +91,7 @@ namespace EasySave.Model
                         Progress = progress,
                         FilesRemaining = totalFiles - filesCopied,
                         SizeRemaining = totalSize - sizeCopied,
-                        CurrentSourceFile = fName,
+                        CurrentSourceFile = f,
                         CurrentTargetFile = targetPath
                     };
 
@@ -106,7 +105,7 @@ namespace EasySave.Model
                     (
                         DateTime.Now,
                         jobName,
-                        fName,
+                        f,
                         targetPath,
                         fileSize,
                         timer.ElapsedMilliseconds
