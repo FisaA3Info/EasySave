@@ -28,7 +28,7 @@ namespace EasySave.Model
             //if so prevent from recursion
             if (isParent)
             {
-                return ;
+                return;
             }
 
             // Verify if source directory exists
@@ -123,9 +123,9 @@ namespace EasySave.Model
 
                     Logger.Log(logEntry);
                 }
-                catch (DirectoryNotFoundException dirNotFound)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(dirNotFound.Message);
+                    Console.WriteLine($"Error : {ex}");
                 }
             }
 
