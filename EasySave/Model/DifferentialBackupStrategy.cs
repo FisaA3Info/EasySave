@@ -28,7 +28,7 @@ namespace EasySave.Model
             //if so prevent from recursion
             if (isParent)
             {
-                return ;
+                return;
             }
 
             string[] fileList = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
@@ -114,9 +114,9 @@ namespace EasySave.Model
 
                     Logger.Log(logEntry);
                 }
-                catch (DirectoryNotFoundException dirNotFound)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(dirNotFound.Message);
+                    Console.WriteLine($"Error : {ex}");
                 }
             }
         }
