@@ -82,7 +82,6 @@ namespace EasyLog
             {
                 try
                 {
-                    string logContent = "";
 
                     // check if json or xml logs
                     if (LogType != null && LogType == "json")
@@ -113,7 +112,7 @@ namespace EasyLog
                         return;
                     }
 
-                    if (LogType != null && LogType == "xml")
+                    else if (LogType != null && LogType == "xml")
                     {
                         string xmlLine;
                         XmlSerializer serializer = new XmlSerializer(typeof(LogEntry));
@@ -131,10 +130,8 @@ namespace EasyLog
                         {
                             Directory.CreateDirectory(LogDirectory);
                         }
-                        logContent = xmlLine;
+                        File.AppendAllText(GetDailyLogPath(), xmlLine + Environment.NewLine + Environment.NewLine); //for pagingation double backrow
                     }
-                    // single call to get the content by stocking it in local string
-                    File.AppendAllText(GetDailyLogPath(), logContent + Environment.NewLine + Environment.NewLine); //for pagingation double backrow
                 }
                 catch (Exception e)
                 {
