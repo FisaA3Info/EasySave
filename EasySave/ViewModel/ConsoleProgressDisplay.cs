@@ -10,15 +10,21 @@ namespace EasySave.ViewModel
 		private string lastJobname = "";
 		public void OnStateChanged(StateEntry entry)
 		{
+			// Only display progress bar for Active backups
+			if (entry.State != BackupState.Active)
+			{
+				return;
+			}
+
 			if (entry.JobName != lastJobname)
 			{
 				lastJobname = entry.JobName;
 				lastProgress = -1;
 			}
 			Console.WriteLine();//Empty line in start because you know, we never know uh
-			
+
 			DrawProgressBar(entry);
-			
+
 			Console.WriteLine($" Files: {entry.TotalFiles - entry.FilesRemaining}/{entry.TotalFiles} | " + 
 				$"Size: {BytesConvert(entry.TotalSize - entry.SizeRemaining)}/{BytesConvert(entry.TotalSize)}");
 
@@ -32,7 +38,7 @@ namespace EasySave.ViewModel
 			Console.WriteLine(); //Yeah empty line again to separate
 
 			lastProgress = entry.Progress;
-			
+
 		}
 
 		private ConsoleColor GetProgressColor(int progress)
