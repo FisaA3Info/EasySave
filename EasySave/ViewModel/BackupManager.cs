@@ -176,7 +176,7 @@ namespace EasySave.ViewModel
 
             try
             {
-                job.Execute(stateTracker);
+                job.Execute(stateTracker, _businessSoftwareService);
                 return true;
             }
             catch (Exception e)
