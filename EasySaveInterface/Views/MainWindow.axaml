@@ -56,14 +56,55 @@
               </Grid>
            </Border>
 
-        <Grid Grid.Row="1" Margin="20">
-        <StackPanel Background="Transparent">
-            <Button Content="Creer un travail de sauvegarde" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding CreateJobCommand}"/>
-            <Button Content="Lancer une sauvegarde" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteJobCommand}"/>
-            <Button Content="Lancer toutes les sauvegardes" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteAllJobsCommand}"/>
-            <Button Content="Lancer des travaux specifique" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteRangeCommand}"/>
-            <Button Content="Lancer des travaux dans une plage specifique" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteSelectedJobsCommand}"/>
-        </StackPanel>
+        <Grid Grid.Row="1" ColumnDefinitions="300,*" Margin="0">
+            <Border Grid.Column="0" Background="#252526" BorderBrush="#3F3F46" BorderThickness="0,0,1,0">
+				<ScrollViewer>
+					<StackPanel Margin="15">
+                        <TextBlock Text="MENU PRINCIPAL" 
+                                   FontSize="14" 
+                                   FontWeight="Bold" 
+                                   Foreground="#CCCCCC" 
+                                   Margin="5,10,5,15"/>
+                        
+                        <Button Command="{Binding CreateJobCommand}">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="1. Créer un travail de sauvegarde"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ExecuteJobCommand}">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="2. Exécuter un travail"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ExecuteAllJobsCommand}">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="3. Exécuter tous les travaux"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ExecuteRangeCommand}">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="4. Exécuter des jobs dans une plage spécifique"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding CreateJobCommand}">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="5. Exécuter des jobs spécifique"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding CreateJobCommand}">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="6. Supprimer un job"/>
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
         </Grid>
 
     
