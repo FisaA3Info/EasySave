@@ -21,7 +21,6 @@
   "prompt_source": "Source directory: ",
   "prompt_target": "Target directory: ",
   "prompt_type": "Type (1=Full, 2=Differential): ",
-  "error_max_jobs": "Maximum 5 jobs reached.",
   "success_created": "Job created successfully.",
   "success_executed": "Backup completed.",
   "error_created": "Job failed.",

@@ -21,7 +21,7 @@ namespace EasySave.ViewModel
     {
         //=================  attributes ====================
         private StateTracker stateTracker;
-        private const int MAX_JOBS = 5;
+        // private const int MAX_JOBS = 5;
         public List<BackupJob> BackupJobs { get; set; }
 
         // path to the json that contains the jobs
@@ -109,12 +109,6 @@ namespace EasySave.ViewModel
                 return false;
             }
 
-            if (BackupJobs.Count >= MAX_JOBS)
-            {
-                return false;
-            }
-
-            //uses the managejob constructor if less than 5 jobs
             try
             {
                 //+ add it to the json
