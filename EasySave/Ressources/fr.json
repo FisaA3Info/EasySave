@@ -21,7 +21,6 @@
   "prompt_source": "Répertoire source : ",
   "prompt_target": "Répertoire cible : ",
   "prompt_type": "Type (1=Complet, 2=Différentiel) : ",
-  "error_max_jobs": "Maximum 5 travaux atteint.",
   "success_created": "Travail créé avec succès.",
   "success_executed": "Sauvegarde terminée.",
   "error_created": "Travail échoué.",
