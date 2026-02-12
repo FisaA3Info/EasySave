@@ -14,7 +14,7 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
+    <!--
     <Window.Styles>
         <Style Selector="Button">
             <Setter Property="Width" Value="250"/>
@@ -24,21 +24,50 @@
     <Window.Title>
         <Binding Path="Title"/>
     </Window.Title>
+    <Window.WindowState>
+		
+    </Window.WindowState>
 
-    <StackPanel Background="Transparent">
+    -->
+    <Grid RowDefinitions="Auto,*" Margin="0">
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
-            <TextBlock Text="Bienvenue sur EasySave" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" FontWeight="Bold" FontSize="25"/>
+        <Border Grid.Row="0" Background="#252526" Padding="20,15">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0" 
+                          Text="=== EasySave ===" 
+                          FontSize="24" 
+                          FontWeight="Bold"
+                          Foreground="#FFFFFF"
+                          VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="0,0,20,0">
+                    <TextBlock Text="Langue:" Foreground="#CCCCCC" VerticalAlignment="Center"/>
+                    <ComboBox ItemsSource="{Binding Languages}" 
+                             SelectedItem="{Binding SelectedLanguage}"
+                             Width="120"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="Format logs:" Foreground="#CCCCCC" VerticalAlignment="Center"/>
+                    <ComboBox ItemsSource="{Binding LogFormats}" 
+                             SelectedItem="{Binding SelectedLogFormat}"
+                             Width="100"/>
+                </StackPanel>
+              </Grid>
+           </Border>
+
+        <Grid Grid.Row="1" Margin="20">
+        <StackPanel Background="Transparent">
+            <Button Content="Creer un travail de sauvegarde" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding CreateJobCommand}"/>
+            <Button Content="Lancer une sauvegarde" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteJobCommand}"/>
+            <Button Content="Lancer toutes les sauvegardes" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteAllJobsCommand}"/>
+            <Button Content="Lancer des travaux specifique" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteRangeCommand}"/>
+            <Button Content="Lancer des travaux dans une plage specifique" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ExecuteSelectedJobsCommand}"/>
         </StackPanel>
-        <Button Content="Creer un travail de sauvegarde" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding LaunchBackupCommand}"/>
-        <Button Content="Lancer une sauvegarde" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding LaunchBackupCommand}"/>
-        <Button Content="Lancer toutes les sauvegardes" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding LaunchBackupCommand}"/>
-        <Button Content="Lancer des travaux specifique" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding LaunchBackupCommand}"/>
-        <Button Content="Lancer des travaux dans une plage specifique" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding LaunchBackupCommand}"/>
-        <Button Content="Afficher les sauvegardes en cours" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ShowOngoingBackupsCommand}"/>
-        <Button Content="Afficher les sauvegardes terminées" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ShowFinishedBackupsCommand}"/>
-        <Button Content="Afficher les erreurs" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ShowErrorsCommand}"/>
-        <Button Content="Afficher les parametres" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" BorderThickness="2" FontWeight="Bold" Command="{Binding ShowSettingsCommand}"/>
-    </StackPanel>
+        </Grid>
+
+    
+   
+    </Grid>
 
 </Window>
