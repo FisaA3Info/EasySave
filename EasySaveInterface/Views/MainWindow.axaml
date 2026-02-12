@@ -66,37 +66,37 @@
                                    Foreground="#CCCCCC" 
                                    Margin="5,10,5,15"/>
                         
-                        <Button Command="{Binding CreateJobCommand}">
+                        <Button Classes="menu-button" Command="{Binding CreateJobCommand}">
 							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="1. Créer un travail de sauvegarde"/>
+                                <TextBlock Text="1. Creer un travail de sauvegarde"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ExecuteJobCommand}">
+                        <Button Classes="menu-button" Command="{Binding ExecuteJobCommand}">
 							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="2. Exécuter un travail"/>
+                                <TextBlock Text="2. Executer un travail"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ExecuteAllJobsCommand}">
+                        <Button Classes="menu-button" Command="{Binding ExecuteAllJobsCommand}">
 							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="3. Exécuter tous les travaux"/>
+                                <TextBlock Text="3. Executer tous les travaux"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ExecuteRangeCommand}">
+                        <Button Classes="menu-button" Command="{Binding ExecuteRangeCommand}">
 							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="4. Exécuter des jobs dans une plage spécifique"/>
+                                <TextBlock Text="4. Executer des jobs dans une plage spécifique"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding CreateJobCommand}">
+                        <Button Classes="menu-button" Command="{Binding CreateJobCommand}">
 							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="5. Exécuter des jobs spécifique"/>
+                                <TextBlock Text="5. Executer des jobs spécifique"/>
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding CreateJobCommand}">
+                        <Button Classes="menu-button" Command="{Binding CreateJobCommand}">
 							<StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBlock Text="6. Supprimer un job"/>
                             </StackPanel>

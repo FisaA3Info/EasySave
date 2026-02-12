@@ -11,5 +11,25 @@
   
     <Application.Styles>
         <FluentTheme />
+
+        <Style Selector="Button.menu-button">
+            <Setter Property="Background" Value="#2D2D30"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="Margin" Value="0,5"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style Selector="Button.menu-button:pointerover">
+            <Setter Property="Background" Value="#3E3E42"/>
+        </Style>
+        
+        <Style Selector="Button.menu-button:pressed">
+            <Setter Property="Background" Value="#007ACC"/>
+        </Style>
+
+
     </Application.Styles>
 </Application>
