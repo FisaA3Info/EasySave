@@ -2,12 +2,21 @@ using EasyLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Formats.Tar;
 using System.IO;
 
 namespace EasySave.Model
 {
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
+        private readonly AppSettings _settings;
+
+        //get the App settings to get the crypsoft path and the exclusion list
+        public DifferentialBackupStrategy(AppSettings settings)
+        {
+            _settings = settings;
+        }
+
         public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
         {
             //check if target in source
@@ -110,6 +119,21 @@ namespace EasySave.Model
                         stateTracker.UpdateState(activeState);
                     }
 
+                    long encryptionTime = 0;
+                    FileInfo tgtFile = new FileInfo(targetPath);
+
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+                    {
+                        Process encryptFile = new Process();
+                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
+                        encryptFile.StartInfo.ArgumentList.Add(targetPath);
+                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
+                        encryptFile.Start();
+
+                        encryptFile.WaitForExit();
+                        encryptionTime = encryptFile.ExitCode;
+                    }
+
                     //write logs
                     var logEntry = new LogEntry
                     (
@@ -118,7 +142,8 @@ namespace EasySave.Model
                         f,
                         targetPath,
                         fileSize,
-                        timer.ElapsedMilliseconds
+                        timer.ElapsedMilliseconds,
+                        encryptionTime
                     );
 
                     Logger.Log(logEntry);
