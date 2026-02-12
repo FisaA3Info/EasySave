@@ -89,8 +89,17 @@ namespace EasySave.Model
                 // Copy files
                 foreach (var file in sourceDir.GetFiles())
                 {
+                    // check if business software started during backup
+                    if (_businessService != null && _businessService.IsRunning())
+                    {
+                        var stopLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -1, 0);
+                        Logger.Log(stopLog);
+                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+                        return;
+                    }
+
                     string targetFilePath = Path.Combine(targetPath, file.Name);
-                    
+
                     // Update before copy
                     UpdateState(jobName, stateTracker, file.FullName, targetFilePath, BackupState.Active);
 

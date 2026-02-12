@@ -71,6 +71,14 @@ namespace EasySave.Model
             // Copy files.
             foreach (string f in filesToCopy)
             {
+                // check if business software started during backup
+                if (_businessService != null && _businessService.IsRunning())
+                {
+                    var stopLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -1, 0);
+                    Logger.Log(stopLog);
+                    break;
+                }
+
                 string relativePath = f.Substring(sourceDir.Length + 1);
                 string targetPath = Path.Combine(targetDir, relativePath);
                 string? targetFolder = Path.GetDirectoryName(targetPath);
