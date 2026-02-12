@@ -9,6 +9,14 @@ namespace EasySave.Model
 {
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
+        private readonly AppSettings _settings;
+
+        //get the App settings to get the crypsoft path and the exclusion list
+        public DifferentialBackupStrategy(AppSettings settings)
+        {
+            _settings = settings;
+        }
+
         public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
         {
             //check if target in source
@@ -111,23 +119,19 @@ namespace EasySave.Model
                         stateTracker.UpdateState(activeState);
                     }
 
-
                     long encryptionTime = 0;
-                    foreach (var file in srcDir.GetFiles())
+                    FileInfo tgtFile = new FileInfo(targetPath);
+
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
                     {
-                        FileInfo tgtFile = new FileInfo(targetPath);
+                        Process encryptFile = new Process();
+                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
+                        encryptFile.StartInfo.ArgumentList.Add(targetPath);
+                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
+                        encryptFile.Start();
 
-                        if (ExtensionsList.contains(tgtFile.Extension))
-                        {
-                            Process encryptFile = new Process();
-                            encryptFile.StartInfo.FileName = CRYPTOSOFT;
-                            encryptFile.StartInfo.ArgumentList.Add(file.Name);
-                            encryptFile.StartInfo.ArgumentList.Add(KEY);
-                            encryptFile.Start();
-
-                            encryptFile.WaitForExit();
-                            encryptionTime = encryptFile.ExitCode;
-                        }
+                        encryptFile.WaitForExit();
+                        encryptionTime = encryptFile.ExitCode;
                     }
 
                     //write logs

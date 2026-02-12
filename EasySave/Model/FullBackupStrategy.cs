@@ -1,21 +1,29 @@
+using EasyLog;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using EasyLog;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime;
+using System.Text;
 
 namespace EasySave.Model
 {
     internal class FullBackupStrategy : IBackupStrategy
     {
+        private readonly AppSettings _settings;
         private int _totalFiles;
         private long _totalSize;
         private int _filesCopied;
         private long _sizeCopied;
         private bool _isError;
+
+        //get the App settings to get the crypsoft path and the exclusion list
+        public FullBackupStrategy(AppSettings settings)
+        {
+            _settings = settings;
+        }
 
         public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {
@@ -106,12 +114,12 @@ namespace EasySave.Model
                     long encryptionTime = 0;
                     FileInfo tgtFile = new FileInfo(targetFilePath);
 
-                    if (ExtensionsList.contains(tgtFile.Extension))
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
                     {
                         Process encryptFile = new Process();
-                        encryptFile.StartInfo.FileName = CRYPTOSOFT;
-                        encryptFile.StartInfo.ArgumentList.Add(file.Name);
-                        encryptFile.StartInfo.ArgumentList.Add(KEY);
+                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
+                        encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
+                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
                         encryptFile.Start();
 
                         encryptFile.WaitForExit();
