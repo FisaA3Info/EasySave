@@ -13,18 +13,21 @@ namespace EasyLog
         public string TargetPath { get; set; }
         public long FileSize { get; set; }
         public long TransferTimeMs { get; set; }
+        public long EncryptionTimeMs { get; set; }
 
         //==============  constructor  ===============
         //required for xml (else no xml log)
         public LogEntry() { }
-        public LogEntry (DateTime timeStamp, string backupName, string sourcePath, string targetPath, long fileSize, long transferTimeMs)
+
+        public LogEntry (DateTime timeStamp, string backupName, string sourcePath, string targetPath, long fileSize, long transferTimeMs, long encryptionTimeMs)
         {
-            TimeStamp = timeStamp;
-            BackupName = backupName;
-            SourcePath = sourcePath;
-            TargetPath = targetPath;
-            FileSize = fileSize;
-            TransferTimeMs = transferTimeMs;
+            this.TimeStamp = timeStamp;
+            this.BackupName = backupName;
+            this.SourcePath = sourcePath;
+            this.TargetPath = targetPath;
+            this.FileSize = fileSize;
+            this.TransferTimeMs = transferTimeMs;
+            this.EncryptionTimeMs = encryptionTimeMs;
         }
     }
 }

@@ -103,6 +103,21 @@ namespace EasySave.Model
                     _filesCopied++;
                     _sizeCopied += file.Length;
 
+                    long encryptionTime = 0;
+                    FileInfo tgtFile = new FileInfo(targetFilePath);
+
+                    if (ExtensionsList.contains(tgtFile.Extension))
+                    {
+                        Process encryptFile = new Process();
+                        encryptFile.StartInfo.FileName = CRYPTOSOFT;
+                        encryptFile.StartInfo.ArgumentList.Add(file.Name);
+                        encryptFile.StartInfo.ArgumentList.Add(KEY);
+                        encryptFile.Start();
+
+                        encryptFile.WaitForExit();
+                        encryptionTime = encryptFile.ExitCode;
+                    }
+
                     // Log the copy operation
                     var logEntry = new LogEntry
                     (
@@ -111,7 +126,8 @@ namespace EasySave.Model
                         file.FullName,
                         targetFilePath,
                         file.Length,
-                        timer.ElapsedMilliseconds
+                        timer.ElapsedMilliseconds,
+                        encryptionTime
                     );
                     Logger.Log(logEntry);
 

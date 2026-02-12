@@ -2,6 +2,7 @@ using EasyLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Formats.Tar;
 using System.IO;
 
 namespace EasySave.Model
@@ -110,6 +111,25 @@ namespace EasySave.Model
                         stateTracker.UpdateState(activeState);
                     }
 
+
+                    long encryptionTime = 0;
+                    foreach (var file in srcDir.GetFiles())
+                    {
+                        FileInfo tgtFile = new FileInfo(targetPath);
+
+                        if (ExtensionsList.contains(tgtFile.Extension))
+                        {
+                            Process encryptFile = new Process();
+                            encryptFile.StartInfo.FileName = CRYPTOSOFT;
+                            encryptFile.StartInfo.ArgumentList.Add(file.Name);
+                            encryptFile.StartInfo.ArgumentList.Add(KEY);
+                            encryptFile.Start();
+
+                            encryptFile.WaitForExit();
+                            encryptionTime = encryptFile.ExitCode;
+                        }
+                    }
+
                     //write logs
                     var logEntry = new LogEntry
                     (
@@ -118,7 +138,8 @@ namespace EasySave.Model
                         f,
                         targetPath,
                         fileSize,
-                        timer.ElapsedMilliseconds
+                        timer.ElapsedMilliseconds,
+                        encryptionTime
                     );
 
                     Logger.Log(logEntry);
