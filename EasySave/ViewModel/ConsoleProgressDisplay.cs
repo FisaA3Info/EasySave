@@ -10,15 +10,21 @@ namespace EasySave.ViewModel
 		private string lastJobname = "";
 		public void OnStateChanged(StateEntry entry)
 		{
+			// Only display progress bar for Active backups
+			if (entry.State != BackupState.Active)
+			{
+				return;
+			}
+
 			if (entry.JobName != lastJobname)
 			{
 				lastJobname = entry.JobName;
 				lastProgress = -1;
 			}
 			Console.WriteLine();//Empty line in start because you know, we never know uh
-			
+
 			DrawProgressBar(entry);
-			
+
 			Console.WriteLine($" Files: {entry.TotalFiles - entry.FilesRemaining}/{entry.TotalFiles} | " + 
 				$"Size: {BytesConvert(entry.TotalSize - entry.SizeRemaining)}/{BytesConvert(entry.TotalSize)}");
 
@@ -32,7 +38,7 @@ namespace EasySave.ViewModel
 			Console.WriteLine(); //Yeah empty line again to separate
 
 			lastProgress = entry.Progress;
-			
+
 		}
 
 		private ConsoleColor GetProgressColor(int progress)
@@ -46,14 +52,14 @@ namespace EasySave.ViewModel
 		private char GetSpinner()
 		{
 			char[] spinner = { '|', '/', '─', '\\' };
-			//Millisecond has a value between 0 and 999, that we divide by 100 for it to be 9ms et modulo 4 because of our 4 different caracters and then it repeat.
+			//Millisecond has a value between 0 and 999, that we divide by 100 for it to be 9ms and modulo 4 because of our 4 different caracters and then it repeat.
 			return spinner[(DateTime.Now.Millisecond / 100) % 4];
 		}
 
 		private void DrawProgressBar(StateEntry entry)
 		{
 			int barWidth = 50;
-			int progress = entry.Progress;
+			int progress = Math.Clamp(entry.Progress, 0, 100); // fix with a clamp to keep the progress between 0 and 100 (previous error caused by full backup update)
 
 			int filled = (progress * barWidth)/100;
 			int empty = barWidth - filled;

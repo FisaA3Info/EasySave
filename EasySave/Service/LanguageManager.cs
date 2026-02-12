@@ -32,13 +32,13 @@ namespace EasySave.Service
                 }
                 else
                 {
-                    Console.WriteLine($"Fichier de langue '{filePath}' introuvable.");
+                    Console.WriteLine($"Can't find '{filePath}'.");
                     translations = new Dictionary<string, string>();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors du chargement de la langue : {ex.Message}");
+                Console.WriteLine($"Error while loading language : {ex.Message}");
                 translations = new Dictionary<string, string>();
             }
         }

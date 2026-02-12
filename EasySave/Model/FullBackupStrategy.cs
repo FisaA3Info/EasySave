@@ -15,6 +15,7 @@ namespace EasySave.Model
         private long _totalSize;
         private int _filesCopied;
         private long _sizeCopied;
+        private bool _isError;
 
         public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {
@@ -24,6 +25,11 @@ namespace EasySave.Model
                 if (!sourceDir.Exists)
                 {
                     Console.WriteLine($"[Error] Source not found: {sourcePath}");
+                    return;
+                }
+                // prevent progress bar display
+                if (_isError)
+                {
                     return;
                 }
 
@@ -52,6 +58,29 @@ namespace EasySave.Model
 
                 // Create target directory
                 Directory.CreateDirectory(targetPath);
+
+                //check if target in source
+                DirectoryInfo srcDir = new DirectoryInfo(sourcePath);
+                DirectoryInfo tgtDir = new DirectoryInfo(targetPath);
+
+                bool isParent = false;
+                while (tgtDir.Parent != null)
+                {
+                    if (tgtDir.Parent.FullName == srcDir.FullName)  //check if the parent folder is the source and repeat until root
+                    {
+                        isParent = true;
+                        break;
+                    }
+                    else tgtDir = tgtDir.Parent;
+                }
+
+                //if so prevent from recursion
+                if (isParent)
+                {
+                    _isError = true;
+                    UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
+                    return;
+                }
 
                 // Copy files
                 foreach (var file in sourceDir.GetFiles())
@@ -93,11 +122,23 @@ namespace EasySave.Model
                 foreach (var subDir in sourceDir.GetDirectories())
                 {
                     string newTargetDir = Path.Combine(targetPath, subDir.Name);
+
+                    // skip if this subdirectory is the target directory itself
+                    DirectoryInfo subDirPath = new DirectoryInfo(subDir.FullName);
+                    DirectoryInfo targetRoot = new DirectoryInfo(targetPath);
+
+                    if (string.Equals(subDirPath.FullName, targetRoot.FullName, StringComparison.OrdinalIgnoreCase) || subDirPath.FullName.StartsWith(targetRoot.FullName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker);
                 }
             }
             catch (Exception ex) {
+                _isError = true;
                 Console.WriteLine($"Critical Error: {ex.Message}");
+                UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
             }
         }
 

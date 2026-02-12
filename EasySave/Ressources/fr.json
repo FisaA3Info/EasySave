@@ -8,11 +8,12 @@
   "delete_jobs": "6. Supprimer un job",
   "list_jobs": "7. Afficher tous les jobs",
   "change_language": "8. Changer de langue",
-  "quit": "9. Quitter",
+  "change_log": "9. Changer le format des logs journaliers.",
+  "quit": "0. Quitter",
   "your_choice": "Votre choix : ",
   "invalid_choice": "Choix invalide.",
-  "press_key": "Appuyez sur une touche pour continuer...",
-  "select_language": "Sélectionnez une langue :",
+  "press_key": "Appuyer sur une touche pour continuer...",
+  "select_language": "Sélectionner une langue :",
   "lang_french": "1. Français",
   "lang_english": "2. Anglais",
   "language_changed": "Langue changée avec succès.",
@@ -31,9 +32,12 @@
   "error_delete": "Le job n'a pas réussi à être supprimé.",
   "nb1_range": "Donner le premier nombre : ",
   "nb2_range": "Donner le deuxieme nombre : ",
-  "selection_instructions": "Entrez les numéros un par un. Entrée vide pour terminer.",
+  "selection_instructions": "Entrer les numéros un par un. Entrée vide pour terminer.",
   "prompt_job_number": "Numéro du job : ",
   "job_not_found": "Ce job n'existe pas.",
   "job_already_selected": "Déjà sélectionné.",
-  "no_selection": "Aucun job sélectionné."
+  "no_selection": "Aucun job sélectionné.",
+  "select_json_format": "Sélectionner le type de log journalier voulu.",
+  "actual_log":  "Type de log actuel : "
+
 }

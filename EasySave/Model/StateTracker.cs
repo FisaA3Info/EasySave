@@ -30,7 +30,6 @@ namespace EasySave.Model
         }
 
         //Observer Management Section
-
         public void AttachObserver(IStateObserver observer)
         {
             if(observer == null) return;
@@ -56,7 +55,6 @@ namespace EasySave.Model
 
         // StateTracker base method 
         public void UpdateState(StateEntry entry)
-        
         {
             //Stock the result of FirstOrDefault on States which return the first value that statify the search or return null
             var existing = States.FirstOrDefault(search => search.JobName == entry.JobName);

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace EasyLog
 {
@@ -16,6 +15,8 @@ namespace EasyLog
         public long TransferTimeMs { get; set; }
 
         //==============  constructor  ===============
+        //required for xml (else no xml log)
+        public LogEntry() { }
         public LogEntry (DateTime timeStamp, string backupName, string sourcePath, string targetPath, long fileSize, long transferTimeMs)
         {
             TimeStamp = timeStamp;

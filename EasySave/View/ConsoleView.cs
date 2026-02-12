@@ -1,4 +1,5 @@
-﻿using EasySave.Model;
+﻿using EasyLog;
+using EasySave.Model;
 using EasySave.Service;
 using EasySave.ViewModel;
 namespace EasySave.View
@@ -29,6 +30,7 @@ namespace EasySave.View
                 DisplayMessage("delete_jobs");
                 DisplayMessage("list_jobs");
                 DisplayMessage("change_language");
+                DisplayMessage("change_log");
                 DisplayMessage("quit");
                 Console.Write(language.GetText("your_choice") + " ");
 
@@ -125,7 +127,11 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             break;
                         }
-                        int index = int.Parse(response);
+                        if (!int.TryParse(response, out int index))
+                        {
+                            DisplayMessage("invalid_choice");
+                            break;
+                        }
                         backupManager.ExecuteJob(index);
                     }
                     break;
@@ -149,8 +155,11 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             break;
                         }
-                        int nb_start_range = int.Parse(nb_range1);
-                        int nb_end_range = int.Parse(nb_range2);
+                        if (!int.TryParse(nb_range1, out int nb_start_range) || !int.TryParse(nb_range2, out int nb_end_range))
+                        {
+                            DisplayMessage("invalid_choice");
+                            break;
+                        }
                         backupManager.ExecuteRange(nb_start_range, nb_end_range);
                     }
                     break;
@@ -168,12 +177,12 @@ namespace EasySave.View
                     {
                         DisplayMessage("prompt_job_number");
                         string input = Console.ReadLine();
-                        // Si vide, on a fini
+                        // cancel if empty
                         if (string.IsNullOrEmpty(input))
                         {
                             break;
                         }
-                        // Verifier si c'est un nombre
+                        // verify if it's a number
                         int index;
                         bool isNumber = int.TryParse(input, out index);
 
@@ -182,13 +191,13 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             continue;
                         }
-                        // Verifier si le job existe
+                        // verifies if the job exists
                         if (index < 1 || index > backupManager.BackupJobs.Count)
                         {
                             DisplayMessage("job_not_found");
                             continue;
                         }
-                        // Verifier si deja selectionne
+                        // verifies if already selected
                         if (selectedJobs.Contains(index))
                         {
                             DisplayMessage("job_already_selected");
@@ -199,7 +208,7 @@ namespace EasySave.View
                         Console.WriteLine("  -> Job " + index + " added");
                     }
 
-                    // Executer si on a des selections
+                    // execute if jobs
                     if (selectedJobs.Count > 0)
                     {
                         backupManager.ExecuteSelection(selectedJobs);
@@ -246,10 +255,15 @@ namespace EasySave.View
                     // CHOICE CHANGE LANGUE
                     SelectLanguage();
                     break;
-
                 case "9":
+                    // CHANGE DAILY LOG FORMAT
+                    SelectFormatLog();
+                    break;
+
+                case "0":
                     // CHOICE QUIT
                     return false;
+
                 default:
                     DisplayMessage("invalid_choice");
                     break;
@@ -283,6 +297,32 @@ namespace EasySave.View
                     break;
             }
         }
+        public void SelectFormatLog()
+        {
+            Console.Clear();
+            DisplayMessage("select_json_format");
+            Console.Write(language.GetText("actual_log"));
+            Console.WriteLine($"{Logger.LogType}");
+            Console.WriteLine();
+            Console.WriteLine("1 : JSON");
+            Console.WriteLine("2 : XML");
+            Console.Write(language.GetText("your_choice") + " ");
+
+            string choice = Console.ReadLine();
+            switch (choice)
+            {
+                case "1":
+                    Logger.LogType = "json";
+                    break;
+                case "2":
+                    Logger.LogType = "xml";
+                    break;
+                default:
+                    DisplayMessage("invalid_choice");
+                    break;
+            }
+        }
+
 
     }
 }
