@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using EasyLog;
+using EasySave.Service;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using System.ComponentModel.DataAnnotations;
@@ -17,8 +18,11 @@ namespace EasySave.Model
         private long _sizeCopied;
         private bool _isError;
 
-        public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
+        private BusinessSoftwareService _businessService;
+
+        public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
+                _businessService = businessService;
                 var sourceDir = new DirectoryInfo(sourcePath);
 
                 // Verify if source directory exists

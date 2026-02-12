@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using EasyLog;
+using EasySave.Service;
 
 namespace EasySave.Model
 {
@@ -29,12 +30,12 @@ namespace EasySave.Model
                 Strategy = new DifferentialBackupStrategy();
         }
 
-        public void Execute(StateTracker stateTracker)
+        public void Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
             try
             {
                 State = BackupState.Active;
-                Strategy.Execute(Name, SourceDir, TargetDir, stateTracker);
+                Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService);
                 State = BackupState.Inactive;
             }
             catch (Exception)

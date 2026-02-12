@@ -1,4 +1,5 @@
 using EasyLog;
+using EasySave.Service;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,8 +10,11 @@ namespace EasySave.Model
 {
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
-        public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
+        private BusinessSoftwareService _businessService;
+
+        public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
+            _businessService = businessService;
             //check if target in source
             DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
             DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
