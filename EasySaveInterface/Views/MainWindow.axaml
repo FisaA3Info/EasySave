@@ -1,114 +1,209 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:EasySaveInterface.ViewModels"
+        xmlns:model="using:EasySave.Model"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="550"
         x:Class="EasySaveInterface.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="EasySaveInterface">
+        Title="EasySave">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-    <!--
-    <Window.Styles>
-        <Style Selector="Button">
-            <Setter Property="Width" Value="250"/>
-            <Setter Property="Height" Value="50"/>
-        </Style>
-    </Window.Styles>
-    <Window.Title>
-        <Binding Path="Title"/>
-    </Window.Title>
-    <Window.WindowState>
-		
-    </Window.WindowState>
+	<Design.DataContext>
+		<vm:MainWindowViewModel/>
+	</Design.DataContext>
 
-    -->
-    <Grid RowDefinitions="Auto,*" Margin="0">
+	<Grid RowDefinitions="Auto,*" Margin="0">
 
-        <Border Grid.Row="0" Background="#252526" Padding="20,15">
-            <Grid ColumnDefinitions="*,Auto,Auto">
-                <TextBlock Grid.Column="0" 
-                          Text="=== EasySave ===" 
-                          FontSize="24" 
+		<!-- Header -->
+		<Border Grid.Row="0" Background="#252526" Padding="20,15">
+			<Grid ColumnDefinitions="*,Auto,Auto">
+				<TextBlock Grid.Column="0"
+                          Text="=== EasySave ==="
+                          FontSize="24"
                           FontWeight="Bold"
                           Foreground="#FFFFFF"
                           VerticalAlignment="Center"/>
-                
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="0,0,20,0">
-                    <TextBlock Text="Langue:" Foreground="#CCCCCC" VerticalAlignment="Center"/>
-                    <ComboBox ItemsSource="{Binding Languages}" 
+
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="0,0,20,0">
+					<TextBlock Text="Langue:" Foreground="#CCCCCC" VerticalAlignment="Center"/>
+					<ComboBox ItemsSource="{Binding Languages}"
                              SelectedItem="{Binding SelectedLanguage}"
                              Width="120"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="Format logs:" Foreground="#CCCCCC" VerticalAlignment="Center"/>
-                    <ComboBox ItemsSource="{Binding LogFormats}" 
+				</StackPanel>
+
+				<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+					<TextBlock Text="Format logs:" Foreground="#CCCCCC" VerticalAlignment="Center"/>
+					<ComboBox ItemsSource="{Binding LogFormats}"
                              SelectedItem="{Binding SelectedLogFormat}"
                              Width="100"/>
-                </StackPanel>
-              </Grid>
-           </Border>
+				</StackPanel>
+			</Grid>
+		</Border>
 
-        <Grid Grid.Row="1" ColumnDefinitions="300,*" Margin="0">
-            <Border Grid.Column="0" Background="#252526" BorderBrush="#3F3F46" BorderThickness="0,0,1,0">
-				<ScrollViewer>
-					<StackPanel Margin="15">
-                        <TextBlock Text="MENU PRINCIPAL" 
-                                   FontSize="14" 
-                                   FontWeight="Bold" 
-                                   Foreground="#CCCCCC" 
-                                   Margin="5,10,5,15"/>
-                        
-                        <Button Classes="menu-button" Command="{Binding CreateJobCommand}">
+		<!-- Content -->
+		<Grid Grid.Row="1" ColumnDefinitions="250,*" Margin="0">
+
+			<!-- Left sidebar: menu -->
+			<Border Grid.Column="0" Background="#252526" BorderBrush="#3F3F46" BorderThickness="0,0,1,0">
+				<StackPanel Margin="15">
+					<TextBlock Text="MENU"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="#CCCCCC"
+                               Margin="5,10,5,15"/>
+
+					<Button Classes="menu-button" Command="{Binding GoToCreateCommand}">
+						<TextBlock Text="1. Créer un job"/>
+					</Button>
+
+					<Button Classes="menu-button" Command="{Binding GoToExecuteJobCommand}">
+						<TextBlock Text="2. Exécuter un job"/>
+					</Button>
+
+					<Button Classes="menu-button" Command="{Binding GoToExecuteAllCommand}">
+						<TextBlock Text="3. Exécuter tous les jobs"/>
+					</Button>
+
+					<Button Classes="menu-button" Command="{Binding GoToExecuteRangeCommand}">
+						<TextBlock Text="4. Exécuter une plage"/>
+					</Button>
+
+					<Button Classes="menu-button" Command="{Binding GoToExecuteSelectionCommand}">
+						<TextBlock Text="5. Exécuter jobs spécifiques"/>
+					</Button>
+
+					<Button Classes="menu-button" Command="{Binding GoToDeleteCommand}">
+						<TextBlock Text="6. Supprimer un job"/>
+					</Button>
+				</StackPanel>
+			</Border>
+
+			<!-- Right panel: pages -->
+			<Grid Grid.Column="1" RowDefinitions="*,Auto" Margin="20">
+
+				<ScrollViewer Grid.Row="0">
+					<StackPanel Spacing="15">
+
+						<!-- ========== PAGE: Create ========== -->
+						<StackPanel IsVisible="{Binding IsCreatePage}" Spacing="12">
+							<TextBlock Text="Créer un nouveau job" FontWeight="Bold" FontSize="18"/>
+							<TextBox Watermark="Nom du job" Text="{Binding NewJobName}"/>
+							<TextBox Watermark="Répertoire source" Text="{Binding NewJobSource}"/>
+							<TextBox Watermark="Répertoire cible" Text="{Binding NewJobTarget}"/>
 							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="1. Creer un travail de sauvegarde"/>
-                            </StackPanel>
-                        </Button>
+								<TextBlock Text="Type:" VerticalAlignment="Center"/>
+								<ComboBox ItemsSource="{Binding BackupTypes}"
+                                          SelectedItem="{Binding NewJobType}"
+                                          Width="180"/>
+							</StackPanel>
+							<Button Content="Créer" Command="{Binding CreateJobCommand}" HorizontalAlignment="Left"/>
+						</StackPanel>
 
-                        <Button Classes="menu-button" Command="{Binding ExecuteJobCommand}">
-							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="2. Executer un travail"/>
-                            </StackPanel>
-                        </Button>
+						<!-- ========== PAGE: Execute Job ========== -->
+						<StackPanel IsVisible="{Binding IsExecuteJobPage}" Spacing="12">
+							<TextBlock Text="Exécuter un job" FontWeight="Bold" FontSize="18"/>
+							<TextBlock Text="Sélectionnez le job à exécuter :" Foreground="#CCCCCC"/>
+							<ListBox ItemsSource="{Binding Jobs}"
+                                     SelectedIndex="{Binding SelectedJobIndex}">
+								<ListBox.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Orientation="Horizontal" Spacing="10">
+											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+											<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+											<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
+										</StackPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+							<Button Content="Exécuter" Command="{Binding ExecuteJobCommand}" HorizontalAlignment="Left"/>
+						</StackPanel>
 
-                        <Button Classes="menu-button" Command="{Binding ExecuteAllJobsCommand}">
-							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="3. Executer tous les travaux"/>
-                            </StackPanel>
-                        </Button>
+						<!-- ========== PAGE: Execute All ========== -->
+						<StackPanel IsVisible="{Binding IsExecuteAllPage}" Spacing="12">
+							<TextBlock Text="Exécuter tous les jobs" FontWeight="Bold" FontSize="18"/>
+							<TextBlock Text="Les jobs suivants seront exécutés :" Foreground="#CCCCCC"/>
+							<ItemsControl ItemsSource="{Binding Jobs}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
+											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+											<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<Button Content="Exécuter tout" Command="{Binding ExecuteAllJobsCommand}" HorizontalAlignment="Left"/>
+						</StackPanel>
 
-                        <Button Classes="menu-button" Command="{Binding ExecuteRangeCommand}">
-							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="4. Executer des jobs dans une plage sp�cifique"/>
-                            </StackPanel>
-                        </Button>
+						<!-- ========== PAGE: Execute Range ========== -->
+						<StackPanel IsVisible="{Binding IsExecuteRangePage}" Spacing="12">
+							<TextBlock Text="Exécuter une plage de jobs" FontWeight="Bold" FontSize="18"/>
+							<TextBlock Text="Jobs disponibles :" Foreground="#CCCCCC"/>
+							<ItemsControl ItemsSource="{Binding Jobs}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
+											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+											<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<TextBlock Text="Entrez les numéros séparés par des points-virgules :" Foreground="#CCCCCC" Margin="0,5,0,0"/>
+							<TextBox Watermark="ex: 1;3" Text="{Binding SelectedIndicesText}" Width="250" HorizontalAlignment="Left"/>
+							<Button Content="Exécuter la plage" Command="{Binding ExecuteRangeCommand}" HorizontalAlignment="Left"/>
+						</StackPanel>
 
-                        <Button Classes="menu-button" Command="{Binding CreateJobCommand}">
-							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="5. Executer des jobs sp�cifique"/>
-                            </StackPanel>
-                        </Button>
+						<!-- ========== PAGE: Execute Selection ========== -->
+						<StackPanel IsVisible="{Binding IsExecuteSelectionPage}" Spacing="12">
+							<TextBlock Text="Exécuter des jobs spécifiques" FontWeight="Bold" FontSize="18"/>
+							<TextBlock Text="Jobs disponibles :" Foreground="#CCCCCC"/>
+							<ItemsControl ItemsSource="{Binding Jobs}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
+											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+											<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<TextBlock Text="Entrez les numéros séparés par des points-virgules :" Foreground="#CCCCCC" Margin="0,5,0,0"/>
+							<TextBox Watermark="ex: 1;3;5" Text="{Binding SelectedIndicesText}" Width="250" HorizontalAlignment="Left"/>
+							<Button Content="Exécuter la sélection" Command="{Binding ExecuteSelectedJobsCommand}" HorizontalAlignment="Left"/>
+						</StackPanel>
 
-                        <Button Classes="menu-button" Command="{Binding CreateJobCommand}">
-							<StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="6. Supprimer un job"/>
-                            </StackPanel>
-                        </Button>
+						<!-- ========== PAGE: Delete ========== -->
+						<StackPanel IsVisible="{Binding IsDeletePage}" Spacing="12">
+							<TextBlock Text="Supprimer un job" FontWeight="Bold" FontSize="18"/>
+							<TextBlock Text="Sélectionnez le job à supprimer :" Foreground="#CCCCCC"/>
+							<ListBox ItemsSource="{Binding Jobs}"
+                                     SelectedIndex="{Binding SelectedJobIndex}">
+								<ListBox.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Orientation="Horizontal" Spacing="10">
+											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+											<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+											<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
+										</StackPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+							<Button Content="Supprimer" Command="{Binding DeleteJobCommand}" HorizontalAlignment="Left"/>
+						</StackPanel>
 
-                    </StackPanel>
-                </ScrollViewer>
-            </Border>
-        </Grid>
 
-    
-   
-    </Grid>
+					</StackPanel>
+				</ScrollViewer>
+
+				<!-- Status bar -->
+				<TextBlock Grid.Row="1" Text="{Binding StatusMessage}" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+
+			</Grid>
+
+		</Grid>
+	</Grid>
 
 </Window>
