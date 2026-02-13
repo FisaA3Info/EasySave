@@ -53,5 +53,7 @@
   "btn_delete": "Supprimer",
   "executing_job": "Exécution du job {0}...",
   "BackupSelectionFull": "Complète",
-  "BackupSelectionDifferential": "Différentiel"
+  "BackupSelectionDifferential": "Différentiel",
+  "headwarning_title": "⚠️ Attention",
+  "warning_msg": "La suppression d'un job est définitive et ne peut pas être annulée."
 }

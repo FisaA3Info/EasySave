@@ -53,5 +53,7 @@
   "btn_delete": "Delete",
   "executing_job": "Executing job {0}...",
   "BackupSelectionFull": "Full",
-  "BackupSelectionDifferential": "Differential"
+  "BackupSelectionDifferential": "Differential",
+  "headwarning_title": "⚠️ Warning",
+  "warning_msg": "The deletion of a job is permanent and cannot be undone."
 }
