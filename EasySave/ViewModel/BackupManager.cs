@@ -1,4 +1,4 @@
-﻿using EasySave.Model;
+using EasySave.Model;
 using EasySave.Service;
 using EasyLog;
 using System;
@@ -24,6 +24,7 @@ namespace EasySave.ViewModel
         //=================  attributes ====================
         private StateTracker stateTracker;
         private BusinessSoftwareService _businessSoftwareService;
+        private AppSettings settings;
         // private const int MAX_JOBS = 5;
         public List<BackupJob> BackupJobs { get; set; }
 
@@ -34,13 +35,16 @@ namespace EasySave.ViewModel
         );
 
         //================ Constructor ===================
-        public BackupManager(StateTracker stateTracker = null, BusinessSoftwareService businessSoftwareService = null)
+        public BackupManager(StateTracker stateTracker = null, AppSettings settings = null, BusinessSoftwareService businessSoftwareService = null)
         {
             this.stateTracker = stateTracker;
+            this.settings = settings ?? new AppSettings();
             this._businessSoftwareService = businessSoftwareService;
             BackupJobs = new List<BackupJob>();
             LoadJobs();  // Load existing jobs
         }
+
+        //================ Methods  =======================
         private void LoadJobs()
         {
             try
@@ -54,7 +58,7 @@ namespace EasySave.ViewModel
                     {
                         foreach (var data in jobDataList)
                         {
-                            var job = new BackupJob(data.Name, data.SourceDir, data.TargetDir, data.Type);
+                            var job = new BackupJob(data.Name, data.SourceDir, data.TargetDir, data.Type, settings);
                             BackupJobs.Add(job);
                         }
                     }
@@ -103,7 +107,6 @@ namespace EasySave.ViewModel
         }
 
 
-        //================ Methods  =======================
         //Use try catch for the error management (Maybe Error class ?)
         public bool CreateJob(string jobName, string sourcePath, string destinationPath, BackupType type)
         {
@@ -116,7 +119,7 @@ namespace EasySave.ViewModel
             try
             {
                 //+ add it to the json
-                var newJob = new BackupJob(jobName, sourcePath, destinationPath, type);
+                var newJob = new BackupJob(jobName, sourcePath, destinationPath, type, settings);
                 BackupJobs.Add(newJob);
                 stateTracker?.UpdateState(new StateEntry(newJob.Name ?? jobName, BackupState.Inactive));
                 SaveJobs();

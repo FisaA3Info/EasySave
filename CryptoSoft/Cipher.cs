@@ -10,9 +10,12 @@ namespace CryptoSoft
 {
     internal class Cipher
     {
+        //=================  attributes ====================
         private string FilePath {  get; set; }
         private string Key {  get; set; }
 
+
+        //================ Constructor  =======================
         //constructor taking the keys
         public Cipher (string FilePath, string Key)
         {
@@ -20,6 +23,7 @@ namespace CryptoSoft
             this.Key = Key;
         }
 
+        //================ Methods  =======================
         private bool CheckFiles()
         {
             if (!File.Exists(FilePath))
