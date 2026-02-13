@@ -32,12 +32,12 @@ namespace EasySave.Model
                 Strategy = new DifferentialBackupStrategy(_settings);
         }
 
-        public void Execute(StateTracker stateTracker)
+        public void Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
             try
             {
                 State = BackupState.Active;
-                Strategy.Execute(Name, SourceDir, TargetDir, stateTracker);
+                Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService);
                 State = BackupState.Inactive;
             }
             catch (Exception)

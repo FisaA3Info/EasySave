@@ -1,4 +1,6 @@
-﻿using EasySave.Model;
+using EasySave.Model;
+using EasySave.Service;
+using EasyLog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +23,7 @@ namespace EasySave.ViewModel
     {
         //=================  attributes ====================
         private StateTracker stateTracker;
+        private BusinessSoftwareService _businessSoftwareService;
         private AppSettings settings;
         // private const int MAX_JOBS = 5;
         public List<BackupJob> BackupJobs { get; set; }
@@ -32,10 +35,11 @@ namespace EasySave.ViewModel
         );
 
         //================ Constructor ===================
-        public BackupManager(StateTracker stateTracker = null, AppSettings settings = null)
+        public BackupManager(StateTracker stateTracker = null, AppSettings settings = null, BusinessSoftwareService businessSoftwareService = null)
         {
             this.stateTracker = stateTracker;
             this.settings = settings ?? new AppSettings();
+            this._businessSoftwareService = businessSoftwareService;
             BackupJobs = new List<BackupJob>();
             LoadJobs();  // Load existing jobs
         }
@@ -160,9 +164,22 @@ namespace EasySave.ViewModel
             }
 
             var job = BackupJobs[index - 1];
+
+            // Check if business software is running before launching
+            if (_businessSoftwareService != null && _businessSoftwareService.IsRunning())
+            {
+                // Log the blocked attempt
+                var logEntry = new LogEntry(
+                    DateTime.Now, job.Name ?? "", "", "",
+                    0, -1
+                );
+                Logger.Log(logEntry);
+                return false;
+            }
+
             try
             {
-                job.Execute(stateTracker);
+                job.Execute(stateTracker, _businessSoftwareService);
                 return true;
             }
             catch (Exception e)

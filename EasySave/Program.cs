@@ -1,5 +1,6 @@
 using EasyLog;
 using EasySave.Model;
+using EasySave.Service;
 using EasySave.View;
 using EasySave.ViewModel;
 
@@ -7,8 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        var settingsService = new SettingsService();
+        var businessService = new BusinessSoftwareService(settingsService.Settings.BusinessSoftwareName);
+
         var stateTracker = new StateTracker();
-        var manager = new BackupManager(stateTracker);
+        var manager = new BackupManager(stateTracker, businessService);
 
         var consoleProgress = new ConsoleProgressDisplay();
         stateTracker.AttachObserver(consoleProgress);
