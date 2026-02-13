@@ -185,6 +185,7 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextSelectJobDelete));
             OnPropertyChanged(nameof(TextBtnDelete));
             OnPropertyChanged(nameof(TextMenuTitle));
+
         }
 
         private string GetText(string key)
