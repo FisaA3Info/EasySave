@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using EasyLog;
 using EasySaveInterface.Converters;
+using EasySave.Service;
 
 namespace EasySaveInterface.ViewModels
 {
@@ -158,7 +159,9 @@ namespace EasySaveInterface.ViewModels
         public MainWindowViewModel()
         {
             _stateTracker = new StateTracker();
-            _backupManager = new BackupManager(_stateTracker);
+            var settingsService = new SettingsService();
+            var businessService = new BusinessSoftwareService(settingsService.Settings.BusinessSoftwareName);
+            _backupManager = new BackupManager(_stateTracker, settingsService.Settings, businessService);
             LoadLanguage("fr");
             RefreshJobList();
         }
