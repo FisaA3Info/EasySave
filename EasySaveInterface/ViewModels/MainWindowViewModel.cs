@@ -325,8 +325,17 @@ namespace EasySaveInterface.ViewModels
         [RelayCommand]
         private async Task ExecuteRangeAsync()
         {
+            var parts = SelectedIndicesText.Split(';', ',');
+            if (parts.Length < 2
+                || !int.TryParse(parts[0].Trim(), out int start)
+                || !int.TryParse(parts[1].Trim(), out int end))
+            {
+                StatusMessage = GetText("invalid_choice");
+                return;
+            }
+
             IsExecuting = true;
-            await Task.Run(() => _backupManager.ExecuteRange(RangeStart, RangeEnd));
+            await Task.Run(() => _backupManager.ExecuteRange(start, end));
             StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();
