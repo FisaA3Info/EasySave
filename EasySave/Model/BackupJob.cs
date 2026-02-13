@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +7,7 @@ using EasySave.Service;
 
 namespace EasySave.Model
 {
-    internal class BackupJob
+    public class BackupJob
     {
         public string? Name { get; set; }
         public string? SourceDir { get; set; }

@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="../CryptoSoft/CryptoSoft.csproj" Id="38a293d3-5596-4791-853c-79cc83be7b89" />
   <Project Path="../EasyLog/EasyLog.csproj" Id="765912fe-bb85-4958-b0af-1fb757036874" />
+  <Project Path="../EasySaveInterface/EasySaveInterface.csproj" Id="55873158-f580-4d8d-9c46-6615827a5ef8" />
   <Project Path="EasySave.csproj" />
 </Solution>

@@ -10,7 +10,7 @@ using System.Text.Json;
 namespace EasySave.ViewModel
 {
     // smaller class for the json saves (instead of full log entry)
-    internal class JobData
+    public class JobData
     {
         public string Name { get; set; } = "";
         public string SourceDir { get; set; } = "";
@@ -19,7 +19,7 @@ namespace EasySave.ViewModel
     }
 
     //manages the taks/jobs 
-    internal class BackupManager
+    public class BackupManager
     {
         //=================  attributes ====================
         private StateTracker stateTracker;
