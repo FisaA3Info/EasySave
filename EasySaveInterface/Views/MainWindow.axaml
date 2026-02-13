@@ -62,27 +62,27 @@
 							   Margin="5,10,5,15"/>
 
 						<Button Classes="menu-button" Command="{Binding GoToCreateCommand}">
-							<TextBlock Text="{Binding TextCreateBackup}"/>
+							<TextBlock Text="{Binding TextCreateBackup}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteJobCommand}">
-							<TextBlock Text="{Binding TextExecuteBackup}"/>
+							<TextBlock Text="{Binding TextExecuteBackup}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteAllCommand}">
-							<TextBlock Text="{Binding TextExecuteAll}"/>
+							<TextBlock Text="{Binding TextExecuteAll}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteRangeCommand}">
-							<TextBlock Text="{Binding TextExecuteRange}"/>
+							<TextBlock Text="{Binding TextExecuteRange}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteSelectionCommand}">
-							<TextBlock Text="{Binding TextExecuteSpecific}"/>
+							<TextBlock Text="{Binding TextExecuteSpecific}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToDeleteCommand}">
-							<TextBlock Text="{Binding TextDeleteJobs}"/>
+							<TextBlock Text="{Binding TextDeleteJobs}" TextWrapping="Wrap"/>
 						</Button>
 					</StackPanel>
 				</ScrollViewer>
