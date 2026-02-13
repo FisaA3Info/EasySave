@@ -14,7 +14,7 @@ namespace EasySave.Model
         public string? TargetDir { get; set; }
         public BackupType? Type { get; set; }
         public BackupState? State { get; set; }
-        public IBackupStrategy? Strategy { get; set; }
+        internal IBackupStrategy? Strategy { get; set; }
         private readonly AppSettings _settings;
 
         public BackupJob(string name, string sourceDir, string targetDir, BackupType type, AppSettings settings)
