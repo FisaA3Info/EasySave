@@ -16,6 +16,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using EasyLog;
 using EasySaveInterface.Converters;
 
 namespace EasySaveInterface.ViewModels
@@ -208,6 +209,11 @@ namespace EasySaveInterface.ViewModels
         {
             if (value == "Français") LoadLanguage("fr");
             else LoadLanguage("en");
+        }
+
+        partial void OnSelectedLogFormatChanged(string value)
+        {
+            Logger.LogType = value.ToLower();
         }
 
         // ===== Navigation commands =====
