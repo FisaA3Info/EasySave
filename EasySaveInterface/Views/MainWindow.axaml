@@ -196,6 +196,30 @@
 							<Button Content="{Binding TextBtnExecuteAll}" Command="{Binding ExecuteAllJobsCommand}" HorizontalAlignment="Left"/>
 						</StackPanel>
 
+                        <TextBlock Text="Les jobs suivants seront exécutés :" Foreground="#CCCCCC" FontSize="13"/>
+
+                        <Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
+                            <ItemsControl ItemsSource="{Binding Jobs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="model:BackupJob">
+                                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
+                                            <TextBlock Text="•" Foreground="#007ACC" FontSize="16" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                            <TextBlock Text="-" Foreground="#666666"/>
+                                            <TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
+                        <Button Content="Exécuter tous les jobs"
+                                Classes="primary"
+                                Command="{Binding ExecuteAllJobsCommand}"
+                                HorizontalAlignment="Left"
+                                IsEnabled="{Binding !IsExecuting}"/>
+                    </StackPanel>
+
 						<!-- ========== PAGE: Execute Range ========== -->
 						<StackPanel IsVisible="{Binding IsExecuteRangePage}" Spacing="12">
 							<TextBlock Text="{Binding TextExecuteRange}" FontWeight="Bold" FontSize="18"/>
