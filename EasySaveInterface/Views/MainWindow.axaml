@@ -306,6 +306,14 @@
 						<Button Content="{Binding TextBtnDelete}" Command="{Binding DeleteJobCommand}" HorizontalAlignment="Left"/>
 					</StackPanel>
 
+					<!-- Status message -->
+					<TextBlock Text="{Binding StatusMessage}"
+							   Foreground="#4EC9B0"
+							   FontSize="14"
+							   FontWeight="SemiBold"
+							   Margin="0,10,0,0"
+							   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
 				</StackPanel>
 
 			</ScrollViewer>
