@@ -84,22 +84,53 @@
 			<Grid Grid.Column="1" RowDefinitions="*,Auto" Margin="20">
 
 				<ScrollViewer Grid.Row="0">
-					<StackPanel Spacing="15">
 
 						<!-- ========== PAGE: Create ========== -->
-						<StackPanel IsVisible="{Binding IsCreatePage}" Spacing="12">
-							<TextBlock Text="Créer un nouveau job" FontWeight="Bold" FontSize="18"/>
-							<TextBox Watermark="Nom du job" Text="{Binding NewJobName}"/>
-							<TextBox Watermark="Répertoire source" Text="{Binding NewJobSource}"/>
-							<TextBox Watermark="Répertoire cible" Text="{Binding NewJobTarget}"/>
-							<StackPanel Orientation="Horizontal" Spacing="10">
-								<TextBlock Text="Type:" VerticalAlignment="Center"/>
-								<ComboBox ItemsSource="{Binding BackupTypes}"
-                                          SelectedItem="{Binding NewJobType}"
-                                          Width="180"/>
-							</StackPanel>
-							<Button Content="Créer" Command="{Binding CreateJobCommand}" HorizontalAlignment="Left"/>
-						</StackPanel>
+						<StackPanel IsVisible="{Binding IsCreatePage}" Spacing="15">
+                        <TextBlock Text=" == Créer un nouveau job =="
+                                   FontWeight="Bold"
+                                   FontSize="22"
+                                   Foreground="#FFFFFF"
+                                   Margin="0,0,0,10"/>
+
+                        <Border Background="#2D2D30" CornerRadius="6" Padding="20" BorderBrush="#3F3F46" BorderThickness="1">
+                            <StackPanel Spacing="15">
+                                <StackPanel>
+                                    <TextBlock Text="Nom du job *" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBox Watermark="Ex: Backup_Documents"
+                                             Text="{Binding NewJobName}"
+                                             Height="36"/>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock Text="Répertoire source *" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBox Watermark="Ex: C:\Users\Documents"
+                                             Text="{Binding NewJobSource}"
+                                             Height="36"/>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock Text="Répertoire cible *" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBox Watermark="Ex: D:\Backups\Documents"
+                                             Text="{Binding NewJobTarget}"
+                                             Height="36"/>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock Text="Type de sauvegarde *" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <ComboBox ItemsSource="{Binding BackupTypes}"
+                                              SelectedItem="{Binding NewJobType}"
+                                              Height="36"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <Button Content="Créer le job"
+                                        Classes="primary"
+                                        Command="{Binding CreateJobCommand}"
+                                        HorizontalAlignment="Left"
+                                        Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Border>
 
 						<!-- ========== PAGE: Execute Job ========== -->
 						<StackPanel IsVisible="{Binding IsExecuteJobPage}" Spacing="12">
