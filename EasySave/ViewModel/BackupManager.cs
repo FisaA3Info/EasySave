@@ -170,8 +170,13 @@ namespace EasySave.ViewModel
             {
                 // Log the blocked attempt
                 var logEntry = new LogEntry(
-                    DateTime.Now, job.Name ?? "", "", "",
-                    0, -1
+                    DateTime.Now, 
+                    job.Name ?? "", 
+                    "", 
+                    "",
+                    0, 
+                    -1,
+                    -1
                 );
                 Logger.Log(logEntry);
                 return false;
