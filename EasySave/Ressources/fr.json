@@ -52,6 +52,6 @@
   "select_job_delete": "Sélectionnez le job à supprimer :",
   "btn_delete": "Supprimer",
   "executing_job": "Exécution du job {0}...",
-  "BackupSelectionFull": "complète",
-  "BackupSelectionDifferential": "différentiel"
+  "BackupSelectionFull": "Complète",
+  "BackupSelectionDifferential": "Différentiel"
 }

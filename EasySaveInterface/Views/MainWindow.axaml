@@ -13,6 +13,7 @@
 
     <Window.Resources>
         <converters:ItemIndexConverter x:Key="ItemIndexConverter" />
+        <converters:BackupTypeConverter x:Key="BackupTypeConverter" />
     </Window.Resources>
 
 	<Design.DataContext>
@@ -124,8 +125,8 @@
 
 								<StackPanel>
 									<TextBlock Text="{Binding TextPromptType}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
-									<ComboBox ItemsSource="{Binding BackupTypes}"
-									  SelectedItem="{Binding NewJobType}"
+									<ComboBox ItemsSource="{Binding BackupTypeNames}"
+									  SelectedIndex="{Binding NewJobTypeIndex}"
 									  Height="36"
 									  HorizontalAlignment="Stretch"/>
 								</StackPanel>
@@ -161,7 +162,7 @@
 										<StackPanel Orientation="Horizontal" Spacing="10">
 											<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
 											<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
-												<TextBlock Text="{Binding Type}" FontSize="10" Foreground="White"/>
+												<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
 											</Border>
 										</StackPanel>
 										<StackPanel Orientation="Horizontal" Spacing="4">
@@ -199,10 +200,10 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="model:BackupJob">
                                         <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
-                                            <TextBlock Text="•" Foreground="#007ACC" FontSize="16" VerticalAlignment="Center"/>
+                                            <TextBlock Text="ï¿½" Foreground="#007ACC" FontSize="16" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                             <TextBlock Text="-" Foreground="#666666"/>
-                                            <TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+                                            <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -243,7 +244,7 @@
                                             </TextBlock>
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                             <TextBlock Text="-" Foreground="#666666"/>
-                                            <TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+                                            <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -277,7 +278,7 @@
 								<DataTemplate x:DataType="model:BackupJob">
 									<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
 										<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-										<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+										<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
 									</StackPanel>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
@@ -297,7 +298,7 @@
 								<DataTemplate x:DataType="model:BackupJob">
 									<StackPanel Orientation="Horizontal" Spacing="10">
 										<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-										<TextBlock Text="{Binding Type}" Foreground="#AAAAAA"/>
+										<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
 										<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
 									</StackPanel>
 								</DataTemplate>

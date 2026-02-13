@@ -52,6 +52,6 @@
   "select_job_delete": "Select the job to delete:",
   "btn_delete": "Delete",
   "executing_job": "Executing job {0}...",
-  "BackupSelectionFull": "full",
-  "BackupSelectionDifferential": "differential"
+  "BackupSelectionFull": "Full",
+  "BackupSelectionDifferential": "Differential"
 }

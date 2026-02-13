@@ -16,6 +16,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using EasySaveInterface.Converters;
 
 namespace EasySaveInterface.ViewModels
 {
@@ -53,7 +54,7 @@ namespace EasySaveInterface.ViewModels
         private string _newJobTarget = "";
 
         [ObservableProperty]
-        private BackupType _newJobType = BackupType.Full;
+        private int _newJobTypeIndex = 0;
 
         // Selection
         [ObservableProperty]
@@ -86,7 +87,7 @@ namespace EasySaveInterface.ViewModels
 
         public ObservableCollection<string> Languages { get; } = new() { "Français", "English" };
         public ObservableCollection<string> LogFormats { get; } = new() { "JSON", "XML" };
-        public ObservableCollection<BackupType> BackupTypes { get; } = new() { BackupType.Full, BackupType.Differential };
+        public ObservableCollection<string> BackupTypeNames { get; } = new();
 
         private Dictionary<string, string> _translations = new();
         public string TextCreateBackup => GetText("create_backup");
@@ -186,6 +187,14 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextBtnDelete));
             OnPropertyChanged(nameof(TextMenuTitle));
 
+            // Mettre à jour les noms de types traduits
+            BackupTypeConverter.FullText = GetText("BackupSelectionFull");
+            BackupTypeConverter.DifferentialText = GetText("BackupSelectionDifferential");
+            BackupTypeNames.Clear();
+            BackupTypeNames.Add(GetText("BackupSelectionFull"));
+            BackupTypeNames.Add(GetText("BackupSelectionDifferential"));
+
+            RefreshJobList();
         }
 
         private string GetText(string key)
@@ -255,7 +264,8 @@ namespace EasySaveInterface.ViewModels
                 return;
             }
 
-            bool success = _backupManager.CreateJob(NewJobName, NewJobSource, NewJobTarget, NewJobType);
+            BackupType type = NewJobTypeIndex == 0 ? BackupType.Full : BackupType.Differential;
+            bool success = _backupManager.CreateJob(NewJobName, NewJobSource, NewJobTarget, type);
             StatusMessage = success ? GetText("success_created") : GetText("error_max_jobs");
 
             if (success)
@@ -263,7 +273,7 @@ namespace EasySaveInterface.ViewModels
                 NewJobName = "";
                 NewJobSource = "";
                 NewJobTarget = "";
-                NewJobType = BackupType.Full;
+                NewJobTypeIndex = 0;
                 RefreshJobList();
             }
         }
