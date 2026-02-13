@@ -289,23 +289,49 @@
 					</StackPanel>
 
 					<!-- ========== PAGE: Delete ========== -->
-					<StackPanel IsVisible="{Binding IsDeletePage}" Spacing="12">
-						<TextBlock Text="{Binding TextDeleteJobs}" FontWeight="Bold" FontSize="18"/>
-						<TextBlock Text="{Binding TextSelectJobDelete}" Foreground="#CCCCCC"/>
-						<ListBox ItemsSource="{Binding Jobs}"
-							 SelectedIndex="{Binding SelectedJobIndex}">
-							<ListBox.ItemTemplate>
-								<DataTemplate x:DataType="model:BackupJob">
-									<StackPanel Orientation="Horizontal" Spacing="10">
-										<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-										<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-										<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
-									</StackPanel>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
-						<Button Content="{Binding TextBtnDelete}" Command="{Binding DeleteJobCommand}" HorizontalAlignment="Left"/>
-					</StackPanel>
+					<StackPanel IsVisible="{Binding IsDeletePage}" Spacing="15">
+                        <TextBlock Text="{Binding TextDeleteJobs}"
+                                   FontWeight="Bold"
+                                   FontSize="22"
+                                   Foreground="#FFFFFF"
+                                   Margin="0,0,0,10"/>
+
+                        <TextBlock Text="{Binding TextSelectJobDelete}" Foreground="#CCCCCC" FontSize="13"/>
+
+                        <ListBox ItemsSource="{Binding Jobs}"
+                                 SelectedIndex="{Binding SelectedJobIndex}"
+                                 MinHeight="200"
+                                 MaxHeight="350">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="model:BackupJob">
+                                    <StackPanel Spacing="5">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+                                            <Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+                                                <TextBlock Text="{Binding Type}" FontSize="10" Foreground="White"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Foreground="#888888" FontSize="11">
+                                            <Run Text="Source:"/>
+                                            <Run Text="{Binding SourceDir}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <Border Background="#3D1F1F" CornerRadius="6" Padding="15" BorderBrush="#D13438" BorderThickness="1">
+                            <StackPanel Spacing="5">
+                                <TextBlock Text="{Binding TextWarningTitle}" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                <TextBlock Text="{Binding TextWarningMsg}" TextWrapping="Wrap" Foreground="#CCCCCC" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Content="{Binding TextBtnDelete}"
+                                Classes="danger"
+                                Command="{Binding DeleteJobCommand}"
+                                HorizontalAlignment="Left"/>
+                    </StackPanel>
 
 					<!-- Status message -->
 					<TextBlock Text="{Binding StatusMessage}"

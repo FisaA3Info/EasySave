@@ -116,6 +116,8 @@ namespace EasySaveInterface.ViewModels
         public string TextSelectJobDelete => GetText("select_job_delete");
         public string TextBtnDelete => GetText("btn_delete");
         public string TextMenuTitle => GetText("menu_title");
+        public string TextWarningTitle => GetText("headwarning_title");
+        public string TextWarningMsg => GetText("warning_msg");
 
         public bool IsCreatePage => CurrentPage == PageType.Create;
         public bool IsExecuteJobPage => CurrentPage == PageType.ExecuteJob;
@@ -186,6 +188,8 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextSelectJobDelete));
             OnPropertyChanged(nameof(TextBtnDelete));
             OnPropertyChanged(nameof(TextMenuTitle));
+            OnPropertyChanged(nameof(TextWarningTitle));
+            OnPropertyChanged(nameof(TextWarningMsg));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
