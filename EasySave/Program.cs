@@ -12,7 +12,7 @@ class Program
         var businessService = new BusinessSoftwareService(settingsService.Settings.BusinessSoftwareName);
 
         var stateTracker = new StateTracker();
-        var manager = new BackupManager(stateTracker: stateTracker, settings: null, businessSoftwareService: businessService);
+        var manager = new BackupManager(stateTracker: stateTracker, settings: settingsService.Settings, businessSoftwareService: businessService);
 
         var consoleProgress = new ConsoleProgressDisplay();
         stateTracker.AttachObserver(consoleProgress);

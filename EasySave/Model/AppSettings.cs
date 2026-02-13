@@ -12,7 +12,7 @@ namespace EasySave.Model
         public List<string> EncryptedExtensions { get; set; } = new List<string>();
 
         // Business software
-        public string BusinessSoftwareName { get; set; } = "CalculatorApp.exe";
+        public string BusinessSoftwareName { get; set; } = "";
 
         // Log format
         public string LogFormat { get; set; } = "json";
