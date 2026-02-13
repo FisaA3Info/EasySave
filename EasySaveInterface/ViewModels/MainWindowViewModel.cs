@@ -350,7 +350,7 @@ namespace EasySaveInterface.ViewModels
             }
 
             bool success = _backupManager.DeleteJob(index);
-            StatusMessage = success ? GetText("success_created") : GetText("error_delete");
+            StatusMessage = success ? GetText("success_deleted") : GetText("error_delete");
             RefreshJobList();
         }
 

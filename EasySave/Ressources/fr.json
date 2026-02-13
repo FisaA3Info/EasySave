@@ -51,5 +51,6 @@
   "btn_execute_selection": "Exécuter la sélection",
   "select_job_delete": "Sélectionnez le job à supprimer :",
   "btn_delete": "Supprimer",
-  "executing_job": "Exécution du job {0}..."
+  "executing_job": "Exécution du job {0}...",
+  "success_deleted": "Job supprimé avec succès."
 }
