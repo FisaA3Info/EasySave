@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -61,6 +62,13 @@ namespace EasySaveInterface.ViewModels
         // Selection
         [ObservableProperty]
         private int _selectedJobIndex = -1;
+
+        public bool HasJobSelected => SelectedJobIndex >= 0;
+
+        partial void OnSelectedJobIndexChanged(int value)
+        {
+            OnPropertyChanged(nameof(HasJobSelected));
+        }
 
         // Range execution
         [ObservableProperty]
@@ -121,6 +129,8 @@ namespace EasySaveInterface.ViewModels
         public string TextListJobs => GetText("list_jobs");
         public string TextWarningTitle => GetText("headwarning_title");
         public string TextWarningMsg => GetText("warning_msg");
+
+        public bool HasJobs => Jobs.Count > 0;
 
         public bool IsCreatePage => CurrentPage == PageType.Create;
         public bool IsExecuteJobPage => CurrentPage == PageType.ExecuteJob;
@@ -286,6 +296,12 @@ namespace EasySaveInterface.ViewModels
                 return;
             }
 
+            if (!Directory.Exists(NewJobSource))
+            {
+                StatusMessage = GetText("error_source_not_found");
+                return;
+            }
+
             BackupType type = NewJobTypeIndex == 0 ? BackupType.Full : BackupType.Differential;
             bool success = _backupManager.CreateJob(NewJobName, NewJobSource, NewJobTarget, type);
             StatusMessage = success ? GetText("success_created") : GetText("error_max_jobs");
@@ -310,6 +326,9 @@ namespace EasySaveInterface.ViewModels
                 return;
             }
 
+            if (!CheckSourceDirs(new List<BackupJob> { _backupManager.BackupJobs[index - 1] }))
+                return;
+
             IsExecuting = true;
             StatusMessage = string.Format(GetText("executing_job"), index);
             bool success = await Task.Run(() => _backupManager.ExecuteJob(index));
@@ -326,6 +345,9 @@ namespace EasySaveInterface.ViewModels
                 StatusMessage = GetText("no_jobs");
                 return;
             }
+
+            if (!CheckSourceDirs(_backupManager.BackupJobs))
+                return;
 
             IsExecuting = true;
             await Task.Run(() => _backupManager.ExecuteAllJobs());
@@ -345,6 +367,16 @@ namespace EasySaveInterface.ViewModels
                 StatusMessage = GetText("invalid_choice");
                 return;
             }
+
+            int maxJob = _backupManager.BackupJobs.Count;
+            if (start < 1 || end < 1 || start > maxJob || end > maxJob)
+            {
+                StatusMessage = GetText("job_not_found");
+                return;
+            }
+
+            if (!CheckSourceDirs(_backupManager.BackupJobs))
+                return;
 
             IsExecuting = true;
             await Task.Run(() => _backupManager.ExecuteRange(start, end));
@@ -374,6 +406,16 @@ namespace EasySaveInterface.ViewModels
                 return;
             }
 
+            int maxJob = _backupManager.BackupJobs.Count;
+            if (indices.Any(i => i < 1 || i > maxJob))
+            {
+                StatusMessage = GetText("job_not_found");
+                return;
+            }
+
+            if (!CheckSourceDirs(_backupManager.BackupJobs))
+                return;
+
             IsExecuting = true;
             await Task.Run(() => _backupManager.ExecuteSelection(indices));
             StatusMessage = GetText("success_executed");
@@ -396,6 +438,19 @@ namespace EasySaveInterface.ViewModels
             RefreshJobList();
         }
 
+        private bool CheckSourceDirs(List<BackupJob> jobs)
+        {
+            foreach (var job in jobs)
+            {
+                if (!Directory.Exists(job.SourceDir))
+                {
+                    StatusMessage = $"{GetText("error_source_not_found")} ({job.Name})";
+                    return false;
+                }
+            }
+            return true;
+        }
+
         [RelayCommand]
         private void RefreshJobList()
         {
@@ -404,6 +459,7 @@ namespace EasySaveInterface.ViewModels
             {
                 Jobs.Add(job);
             }
+            OnPropertyChanged(nameof(HasJobs));
         }
     }
 }

@@ -57,5 +57,7 @@
   "headwarning_title": "⚠️ Warning",
   "warning_msg": "The deletion of a job is permanent and cannot be undone.",
   "select_json_format": "Select the daily log format you want.",
-  "actual_log": "Current log type : "
+  "actual_log": "Current log type : ",
+  "error_source_not_found": "Source directory does not exist.",
+  "success_deleted": "Job deleted successfully."
 }
