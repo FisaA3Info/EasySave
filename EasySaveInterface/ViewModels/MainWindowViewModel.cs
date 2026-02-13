@@ -8,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Collections.Generic;
+using Microsoft.VisualBasic;
 
 namespace EasySaveInterface.ViewModels
 {
@@ -156,43 +158,123 @@ namespace EasySaveInterface.ViewModels
         [RelayCommand]
         private void CreateJob()
         {
+            if (string.IsNullOrWhiteSpace(NewJobName) || string.IsNullOrWhiteSpace(NewJobSource) || string.IsNullOrWhiteSpace(NewJobTarget))
+            {
+                StatusMessage = "Veuillez remplir tous les champs.";
+                return;
+            }
 
+            bool success = _backupManager.CreateJob(NewJobName, NewJobSource, NewJobTarget, NewJobType);
+            StatusMessage = success ? "Job créé avec succès." : "Echec de la création.";
+
+            if (success)
+            {
+                NewJobName = "";
+                NewJobSource = "";
+                NewJobTarget = "";
+                NewJobType = BackupType.Full;
+                RefreshJobList();
+            }
         }
 
         [RelayCommand]
         private async Task ExecuteJobAsync()
         {
+            int index = SelectedJobIndex + 1;
+            if (index < 1)
+            {
+                StatusMessage = "Sélectionnez un job d'abord.";
+                return;
+            }
 
+            IsExecuting = true;
+            StatusMessage = $"Exécution du job {index}...";
+            bool success = await Task.Run(() => _backupManager.ExecuteJob(index));
+            StatusMessage = success ? "Job terminé." : "Echec du job.";
+            IsExecuting = false;
+            RefreshJobList();
         }
 
         [RelayCommand]
         private async Task ExecuteAllJobsAsync()
         {
+            if (_backupManager.BackupJobs.Count == 0)
+            {
+                StatusMessage = "Aucun job à exécuter.";
+                return;
+            }
 
+            IsExecuting = true;
+            StatusMessage = "Exécution de tous les jobs...";
+            await Task.Run(() => _backupManager.ExecuteAllJobs());
+            StatusMessage = "Tous les jobs ont été exécutés.";
+            IsExecuting = false;
+            RefreshJobList();
         }
 
         [RelayCommand]
         private async Task ExecuteRangeAsync()
         {
-
+            IsExecuting = true;
+            StatusMessage = $"Exécution des jobs {RangeStart} à {RangeEnd}...";
+            await Task.Run(() => _backupManager.ExecuteRange(RangeStart, RangeEnd));
+            StatusMessage = "Exécution de la plage terminée.";
+            IsExecuting = false;
+            RefreshJobList();
         }
 
         [RelayCommand]
         private async Task ExecuteSelectedJobsAsync()
         {
+            var indices = new List<int>();
+            if (!string.IsNullOrWhiteSpace(SelectedIndicesText))
+            {
+                foreach (var part in SelectedIndicesText.Split(';', ','))
+                {
+                    if (int.TryParse(part.Trim(), out int idx))
+                    {
+                        indices.Add(idx);
+                    }
+                }
+            }
 
+            if (indices.Count == 0)
+            {
+                StatusMessage = "Entrez des numéros séparés par des points-virgules.";
+                return;
+            }
+
+            IsExecuting = true;
+            StatusMessage = "Exécution des jobs sélectionnés...";
+            await Task.Run(() => _backupManager.ExecuteSelection(indices));
+            StatusMessage = "Job sélectionnés terminés.";
+            IsExecuting = false;
+            RefreshJobList();
         }
 
         [RelayCommand]
         private void DeleteJob()
         {
+            int index = SelectedJobIndex + 1;
+            if (index < 1)
+            {
+                StatusMessage = "Sélectionnez un job à supprimer.";
+                return;
+            }
 
+            bool success = _backupManager.DeleteJob(index);
+            StatusMessage = success ? "Job supprimé." : "Echec de la suppression.";
+            RefreshJobList();
         }
 
         [RelayCommand]
         private void RefreshJobList()
         {
-
+            Jobs.Clear();
+            foreach (var job in _backupManager.BackupJobs)
+            {
+                Jobs.Add(job);
+            }
         }
     }
 }
