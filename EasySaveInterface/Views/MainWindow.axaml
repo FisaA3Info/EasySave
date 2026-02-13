@@ -186,7 +186,7 @@
                                 Classes="primary"
                                 Command="{Binding ExecuteJobCommand}"
                                 HorizontalAlignment="Left"
-                                IsEnabled="{Binding !IsExecuting}"/>
+                                IsEnabled="{Binding HasJobSelected}"/>
 					</StackPanel>
 
 					<!-- ========== PAGE: Execute All ========== -->
@@ -218,7 +218,7 @@
                                 Classes="primary"
                                 Command="{Binding ExecuteAllJobsCommand}"
                                 HorizontalAlignment="Left"
-                                IsEnabled="{Binding !IsExecuting}"/>
+                                IsEnabled="{Binding HasJobs}"/>
                     </StackPanel>
 
 					<!-- ========== PAGE: Execute Range ========== -->
@@ -334,7 +334,8 @@
                         <Button Content="{Binding TextBtnDelete}"
                                 Classes="danger"
                                 Command="{Binding DeleteJobCommand}"
-                                HorizontalAlignment="Left"/>
+                                HorizontalAlignment="Left"
+                                IsEnabled="{Binding HasJobSelected}"/>
                     </StackPanel>
 
 					<!-- ========== PAGE: List Jobs ========== -->

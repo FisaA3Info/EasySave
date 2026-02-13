@@ -31,7 +31,11 @@ namespace EasySave.Service
                 }
             }
             catch { }
-            return new AppSettings();
+
+            // file doesn't exist or failed to load, create it with defaults
+            Settings = new AppSettings();
+            Save();
+            return Settings;
         }
 
         public void Save()

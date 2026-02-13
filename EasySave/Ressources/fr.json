@@ -57,5 +57,7 @@
   "BackupSelectionFull": "Complète",
   "BackupSelectionDifferential": "Différentiel",
   "headwarning_title": "⚠️ Attention",
-  "warning_msg": "La suppression d'un job est définitive et ne peut pas être annulée."
+  "warning_msg": "La suppression d'un job est définitive et ne peut pas être annulée.",
+  "error_source_not_found": "Le répertoire source n'existe pas.",
+  "success_deleted": "Job supprimé avec succès."
 }
