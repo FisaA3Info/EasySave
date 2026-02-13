@@ -3,13 +3,19 @@ using CommunityToolkit.Mvvm.Input;
 using EasySave.Model;
 using EasySave.ViewModel;
 using HarfBuzzSharp;
+using Microsoft.VisualBasic;
 using ReactiveUI;
+using System;
+using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Reactive.Subjects;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Collections.Generic;
-using Microsoft.VisualBasic;
 
 namespace EasySaveInterface.ViewModels
 {
@@ -82,6 +88,34 @@ namespace EasySaveInterface.ViewModels
         public ObservableCollection<string> LogFormats { get; } = new() { "JSON", "XML" };
         public ObservableCollection<BackupType> BackupTypes { get; } = new() { BackupType.Full, BackupType.Differential };
 
+        private Dictionary<string, string> _translations = new();
+        public string TextCreateBackup => GetText("create_backup");
+        public string TextExecuteBackup => GetText("execute_backup");
+        public string TextExecuteAll => GetText("execute_all");
+        public string TextExecuteRange => GetText("execute_range");
+        public string TextExecuteSpecific => GetText("execute_specific");
+        public string TextDeleteJobs => GetText("delete_jobs");
+        public string TextPromptName => GetText("prompt_name");
+        public string TextPromptSource => GetText("prompt_source");
+        public string TextPromptTarget => GetText("prompt_target");
+        public string TextPromptType => GetText("prompt_type");
+        public string TextLabelLanguage => GetText("label_language");
+        public string TextLabelLogFormat => GetText("label_log_format");
+        public string TextMenuLabel => GetText("menu_label");
+        public string TextSelectJobExecute => GetText("select_job_execute");
+        public string TextLabelSource => GetText("label_source");
+        public string TextLabelTarget => GetText("label_target");
+        public string TextBtnExecute => GetText("btn_execute");
+        public string TextJobsWillExecute => GetText("jobs_will_execute");
+        public string TextBtnExecuteAll => GetText("btn_execute_all");
+        public string TextJobsAvailable => GetText("jobs_available");
+        public string TextEnterNumbersSemicolon => GetText("enter_numbers_semicolon");
+        public string TextBtnExecuteRange => GetText("btn_execute_range");
+        public string TextBtnExecuteSelection => GetText("btn_execute_selection");
+        public string TextSelectJobDelete => GetText("select_job_delete");
+        public string TextBtnDelete => GetText("btn_delete");
+        public string TextMenuTitle => GetText("menu_title");
+
         public bool IsCreatePage => CurrentPage == PageType.Create;
         public bool IsExecuteJobPage => CurrentPage == PageType.ExecuteJob;
         public bool IsExecuteAllPage => CurrentPage == PageType.ExecuteAll;
@@ -107,7 +141,63 @@ namespace EasySaveInterface.ViewModels
         {
             _stateTracker = new StateTracker();
             _backupManager = new BackupManager(_stateTracker);
+            LoadLanguage("fr");
             RefreshJobList();
+        }
+
+        private void LoadLanguage(string lang)
+        {
+            string path = Path.Combine(AppContext.BaseDirectory, "Ressources", $"{lang}.json");
+            try
+            {
+                if (File.Exists(path))
+                {
+                    string json = File.ReadAllText(path);
+                    _translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
+                                    ?? new Dictionary<string, string>();
+                }
+            }
+            catch { }
+
+            OnPropertyChanged(nameof(TextCreateBackup));
+            OnPropertyChanged(nameof(TextExecuteBackup));
+            OnPropertyChanged(nameof(TextExecuteAll));
+            OnPropertyChanged(nameof(TextExecuteRange));
+            OnPropertyChanged(nameof(TextExecuteSpecific));
+            OnPropertyChanged(nameof(TextDeleteJobs));
+            OnPropertyChanged(nameof(TextPromptName));
+            OnPropertyChanged(nameof(TextPromptSource));
+            OnPropertyChanged(nameof(TextPromptTarget));
+            OnPropertyChanged(nameof(TextPromptType));
+            OnPropertyChanged(nameof(TextLabelLanguage));
+            OnPropertyChanged(nameof(TextLabelLogFormat));
+            OnPropertyChanged(nameof(TextMenuLabel));
+            OnPropertyChanged(nameof(TextSelectJobExecute));
+            OnPropertyChanged(nameof(TextLabelSource));
+            OnPropertyChanged(nameof(TextLabelTarget));
+            OnPropertyChanged(nameof(TextBtnExecute));
+            OnPropertyChanged(nameof(TextJobsWillExecute));
+            OnPropertyChanged(nameof(TextBtnExecuteAll));
+            OnPropertyChanged(nameof(TextJobsAvailable));
+            OnPropertyChanged(nameof(TextEnterNumbersSemicolon));
+            OnPropertyChanged(nameof(TextBtnExecuteRange));
+            OnPropertyChanged(nameof(TextBtnExecuteSelection));
+            OnPropertyChanged(nameof(TextSelectJobDelete));
+            OnPropertyChanged(nameof(TextBtnDelete));
+            OnPropertyChanged(nameof(TextMenuTitle));
+        }
+
+        private string GetText(string key)
+        {
+            if (_translations.ContainsKey(key))
+                return _translations[key];
+            return $"[{key}]";
+        }
+
+        partial void OnSelectedLanguageChanged(string value)
+        {
+            if (value == "Français") LoadLanguage("fr");
+            else LoadLanguage("en");
         }
 
         // ===== Navigation commands =====
@@ -160,12 +250,12 @@ namespace EasySaveInterface.ViewModels
         {
             if (string.IsNullOrWhiteSpace(NewJobName) || string.IsNullOrWhiteSpace(NewJobSource) || string.IsNullOrWhiteSpace(NewJobTarget))
             {
-                StatusMessage = "Veuillez remplir tous les champs.";
+                StatusMessage = GetText("invalid_choice");
                 return;
             }
 
             bool success = _backupManager.CreateJob(NewJobName, NewJobSource, NewJobTarget, NewJobType);
-            StatusMessage = success ? "Job créé avec succès." : "Echec de la création.";
+            StatusMessage = success ? GetText("success_created") : GetText("error_max_jobs");
 
             if (success)
             {
@@ -183,14 +273,14 @@ namespace EasySaveInterface.ViewModels
             int index = SelectedJobIndex + 1;
             if (index < 1)
             {
-                StatusMessage = "Sélectionnez un job d'abord.";
+                StatusMessage = GetText("invalid_choice");
                 return;
             }
 
             IsExecuting = true;
-            StatusMessage = $"Exécution du job {index}...";
+            StatusMessage = string.Format(GetText("executing_job"), index);
             bool success = await Task.Run(() => _backupManager.ExecuteJob(index));
-            StatusMessage = success ? "Job terminé." : "Echec du job.";
+            StatusMessage = success ? GetText("success_executed") : GetText("error_executed");
             IsExecuting = false;
             RefreshJobList();
         }
@@ -200,14 +290,13 @@ namespace EasySaveInterface.ViewModels
         {
             if (_backupManager.BackupJobs.Count == 0)
             {
-                StatusMessage = "Aucun job à exécuter.";
+                StatusMessage = GetText("no_jobs");
                 return;
             }
 
             IsExecuting = true;
-            StatusMessage = "Exécution de tous les jobs...";
             await Task.Run(() => _backupManager.ExecuteAllJobs());
-            StatusMessage = "Tous les jobs ont été exécutés.";
+            StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();
         }
@@ -216,9 +305,8 @@ namespace EasySaveInterface.ViewModels
         private async Task ExecuteRangeAsync()
         {
             IsExecuting = true;
-            StatusMessage = $"Exécution des jobs {RangeStart} à {RangeEnd}...";
             await Task.Run(() => _backupManager.ExecuteRange(RangeStart, RangeEnd));
-            StatusMessage = "Exécution de la plage terminée.";
+            StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();
         }
@@ -240,14 +328,13 @@ namespace EasySaveInterface.ViewModels
 
             if (indices.Count == 0)
             {
-                StatusMessage = "Entrez des numéros séparés par des points-virgules.";
+                StatusMessage = GetText("no_selection");
                 return;
             }
 
             IsExecuting = true;
-            StatusMessage = "Exécution des jobs sélectionnés...";
             await Task.Run(() => _backupManager.ExecuteSelection(indices));
-            StatusMessage = "Job sélectionnés terminés.";
+            StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();
         }
@@ -258,12 +345,12 @@ namespace EasySaveInterface.ViewModels
             int index = SelectedJobIndex + 1;
             if (index < 1)
             {
-                StatusMessage = "Sélectionnez un job à supprimer.";
+                StatusMessage = GetText("invalid_choice");
                 return;
             }
 
             bool success = _backupManager.DeleteJob(index);
-            StatusMessage = success ? "Job supprimé." : "Echec de la suppression.";
+            StatusMessage = success ? GetText("success_created") : GetText("error_delete");
             RefreshJobList();
         }
 

@@ -35,5 +35,21 @@
   "prompt_job_number": "Job number: ",
   "job_not_found": "This job does not exist.",
   "job_already_selected": "Already selected.",
-  "no_selection": "No job selected."
+  "no_selection": "No job selected.",
+  "label_language": "Language:",
+  "label_log_format": "Log format:",
+  "menu_label": "MENU",
+  "select_job_execute": "Select the job to execute:",
+  "label_source": "Source:",
+  "label_target": "Target:",
+  "btn_execute": "Execute",
+  "jobs_will_execute": "The following jobs will be executed:",
+  "btn_execute_all": "Execute all",
+  "jobs_available": "Available jobs:",
+  "enter_numbers_semicolon": "Enter numbers separated by semicolons:",
+  "btn_execute_range": "Execute range",
+  "btn_execute_selection": "Execute selection",
+  "select_job_delete": "Select the job to delete:",
+  "btn_delete": "Delete",
+  "executing_job": "Executing job {0}..."
 }
