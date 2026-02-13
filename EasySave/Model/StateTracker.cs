@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EasySave.Model
 {
-    internal class StateTracker
+    public class StateTracker
     {
         public string FilePath { get; set; }
         public List<StateEntry> States { get; private set; }
