@@ -29,7 +29,8 @@ namespace EasySaveInterface.ViewModels
         ExecuteAll,
         ExecuteRange,
         ExecuteSelection,
-        Delete
+        Delete,
+        ListJobs
     }
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -117,6 +118,7 @@ namespace EasySaveInterface.ViewModels
         public string TextSelectJobDelete => GetText("select_job_delete");
         public string TextBtnDelete => GetText("btn_delete");
         public string TextMenuTitle => GetText("menu_title");
+        public string TextListJobs => GetText("list_jobs");
         public string TextWarningTitle => GetText("headwarning_title");
         public string TextWarningMsg => GetText("warning_msg");
 
@@ -126,6 +128,7 @@ namespace EasySaveInterface.ViewModels
         public bool IsExecuteRangePage => CurrentPage == PageType.ExecuteRange;
         public bool IsExecuteSelectionPage => CurrentPage == PageType.ExecuteSelection;
         public bool IsDeletePage => CurrentPage == PageType.Delete;
+        public bool IsListJobsPage => CurrentPage == PageType.ListJobs;
         public bool ShowJobList => CurrentPage != PageType.Create && CurrentPage != PageType.None;
 
         partial void OnCurrentPageChanged(PageType value)
@@ -136,6 +139,7 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(IsExecuteRangePage));
             OnPropertyChanged(nameof(IsExecuteSelectionPage));
             OnPropertyChanged(nameof(IsDeletePage));
+            OnPropertyChanged(nameof(IsListJobsPage));
             OnPropertyChanged(nameof(ShowJobList));
             StatusMessage = "";
             SelectedJobIndex = -1;
@@ -191,6 +195,7 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextMenuTitle));
             OnPropertyChanged(nameof(TextWarningTitle));
             OnPropertyChanged(nameof(TextWarningMsg));
+            OnPropertyChanged(nameof(TextListJobs));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
@@ -261,6 +266,13 @@ namespace EasySaveInterface.ViewModels
         private void GoToDelete()
         {
             CurrentPage = PageType.Delete;
+            RefreshJobList();
+        }
+
+        [RelayCommand]
+        private void GoToListJobs()
+        {
+            CurrentPage = PageType.ListJobs;
             RefreshJobList();
         }
 

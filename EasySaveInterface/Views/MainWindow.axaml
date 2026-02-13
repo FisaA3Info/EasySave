@@ -62,27 +62,31 @@
 							   Margin="5,10,5,15"/>
 
 						<Button Classes="menu-button" Command="{Binding GoToCreateCommand}">
-							<TextBlock Text="{Binding TextCreateBackup}"/>
+							<TextBlock Text="{Binding TextCreateBackup}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteJobCommand}">
-							<TextBlock Text="{Binding TextExecuteBackup}"/>
+							<TextBlock Text="{Binding TextExecuteBackup}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteAllCommand}">
-							<TextBlock Text="{Binding TextExecuteAll}"/>
+							<TextBlock Text="{Binding TextExecuteAll}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteRangeCommand}">
-							<TextBlock Text="{Binding TextExecuteRange}"/>
+							<TextBlock Text="{Binding TextExecuteRange}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToExecuteSelectionCommand}">
-							<TextBlock Text="{Binding TextExecuteSpecific}"/>
+							<TextBlock Text="{Binding TextExecuteSpecific}" TextWrapping="Wrap"/>
 						</Button>
 
 						<Button Classes="menu-button" Command="{Binding GoToDeleteCommand}">
-							<TextBlock Text="{Binding TextDeleteJobs}"/>
+							<TextBlock Text="{Binding TextDeleteJobs}" TextWrapping="Wrap"/>
+						</Button>
+
+						<Button Classes="menu-button" Command="{Binding GoToListJobsCommand}">
+							<TextBlock Text="{Binding TextListJobs}" TextWrapping="Wrap"/>
 						</Button>
 					</StackPanel>
 				</ScrollViewer>
@@ -332,6 +336,40 @@
                                 Command="{Binding DeleteJobCommand}"
                                 HorizontalAlignment="Left"/>
                     </StackPanel>
+
+					<!-- ========== PAGE: List Jobs ========== -->
+					<StackPanel IsVisible="{Binding IsListJobsPage}" Spacing="15">
+						<TextBlock Text="{Binding TextListJobs}"
+								   FontWeight="Bold"
+								   FontSize="22"
+								   Foreground="#FFFFFF"
+								   Margin="0,0,0,10"/>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
+							<ItemsControl ItemsSource="{Binding Jobs}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Spacing="5" Margin="0,8">
+											<StackPanel Orientation="Horizontal" Spacing="10">
+												<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+												<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+													<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+												</Border>
+											</StackPanel>
+											<StackPanel Orientation="Horizontal" Spacing="4">
+												<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelSource}" Foreground="#888888" FontSize="11"/>
+												<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
+											</StackPanel>
+											<StackPanel Orientation="Horizontal" Spacing="4">
+												<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelTarget}" Foreground="#888888" FontSize="11"/>
+												<TextBlock Text="{Binding TargetDir}" Foreground="#888888" FontSize="11"/>
+											</StackPanel>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</Border>
+					</StackPanel>
 
 					<!-- Status message -->
 					<TextBlock Text="{Binding StatusMessage}"
