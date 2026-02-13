@@ -200,7 +200,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="model:BackupJob">
                                         <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
-                                            <TextBlock Text="�" Foreground="#007ACC" FontSize="16" VerticalAlignment="Center"/>
+                                            <TextBlock Text="-" Foreground="#007ACC" FontSize="16" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                             <TextBlock Text="-" Foreground="#666666"/>
                                             <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
