@@ -15,7 +15,7 @@ public static class Program
             Cipher Encryption = new Cipher(args[0], args[1]);
             Console.WriteLine("CryptoSoft executing ...");
             //xor encryption
-            int EncrypTime = Encryption.SymmetriclEncryption();
+            int EncrypTime = Encryption.SymmetricalEncryption();
             Environment.Exit(EncrypTime);
         }
         catch (Exception e)

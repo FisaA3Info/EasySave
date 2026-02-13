@@ -25,7 +25,6 @@ namespace EasySave.ViewModel
         private StateTracker stateTracker;
         private BusinessSoftwareService _businessSoftwareService;
         private AppSettings settings;
-        // private const int MAX_JOBS = 5;
         public List<BackupJob> BackupJobs { get; set; }
 
         // path to the json that contains the jobs
