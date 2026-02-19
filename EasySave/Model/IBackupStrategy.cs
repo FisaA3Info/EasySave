@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text;
 using EasyLog;
@@ -8,6 +9,6 @@ namespace EasySave.Model
 {
     internal interface IBackupStrategy
     {
-        void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null);
+        Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null);
     }
 }

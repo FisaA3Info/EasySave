@@ -2,6 +2,7 @@ using EasySave.Model;
 using EasySave.Service;
 using EasyLog;
 using System;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -154,7 +155,7 @@ namespace EasySave.ViewModel
         }
 
         //uses the managejob method to execute itself
-        public bool ExecuteJob(int index)
+        public async Task<bool> ExecuteJob(int index)
         {
 
             if (index < 1 || index > BackupJobs.Count)
@@ -178,12 +179,11 @@ namespace EasySave.ViewModel
                     -1
                 );
                 Logger.Log(logEntry);
-                return false;
             }
 
             try
             {
-                job.Execute(stateTracker, _businessSoftwareService);
+                await job.Execute(stateTracker, _businessSoftwareService);
                 return true;
             }
             catch (Exception e)
@@ -195,20 +195,18 @@ namespace EasySave.ViewModel
         }
 
         //executes all the jobs in the list
-        public void ExecuteAllJobs()
+        public async Task ExecuteAllJobs()
         {
+            var tasks = new List<Task>();
             for (int i = 1; i <= BackupJobs.Count; i++)
             {
-                var ok = ExecuteJob(i);
-                if (!ok)
-                {
-                    break;
-                }
+                tasks.Add(ExecuteJob(i));
             }
+            await Task.WhenAll(tasks);
         }
 
         //executes a range of jobs
-        public void ExecuteRange(int start, int end)
+        public async Task ExecuteRange(int start, int end)
         {
             if (BackupJobs.Count == 0)
             {
@@ -220,17 +218,16 @@ namespace EasySave.ViewModel
             start = Math.Max(1, start);
             end = Math.Min(BackupJobs.Count, end);
 
-            for (int i = start; i <= end; i++)
+            var tasks = new List<Task>();
+            for (int i = 1; i <= BackupJobs.Count; i++)
             {
-                if (!ExecuteJob(i))
-                {
-                    break;
-                }
+                tasks.Add(ExecuteJob(i));
             }
+            await Task.WhenAll(tasks);
         }
 
         //executes specific jobs by its index
-        public void ExecuteSelection(List<int> indexes)
+        public async Task ExecuteSelection(List<int> indexes)
         {
             if (indexes == null || indexes.Count == 0)
             {
@@ -247,13 +244,13 @@ namespace EasySave.ViewModel
                 return;
             }
 
+            var tasks = new List<Task>();
             foreach (var idx in normalized)
             {
-                if (!ExecuteJob(idx))
-                {
-                    break;
-                }
+                int index = idx;
+                tasks.Add(ExecuteJob(index));
             }
+            await Task.WhenAll(tasks);
         }
     }
 }
