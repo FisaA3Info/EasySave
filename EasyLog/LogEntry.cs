@@ -14,6 +14,8 @@ namespace EasyLog
         public long FileSize { get; set; }
         public long TransferTimeMs { get; set; }
         public long EncryptionTimeMs { get; set; }
+        public string MachineName { get; set; } = "";
+        public string UserName { get; set; } = "";
 
         //==============  constructor  ===============
         //required for xml (else no xml log)
