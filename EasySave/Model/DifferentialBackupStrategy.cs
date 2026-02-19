@@ -1,15 +1,28 @@
 using EasyLog;
+using EasySave.Service;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Formats.Tar;
 using System.IO;
 
 namespace EasySave.Model
 {
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
-        public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker)
+        private readonly AppSettings _settings;
+
+        //get the App settings to get the crypsoft path and the exclusion list
+        public DifferentialBackupStrategy(AppSettings settings)
         {
+            _settings = settings;
+        }
+
+        private BusinessSoftwareService _businessService;
+
+        public void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        {
+            _businessService = businessService;
             //check if target in source
             DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
             DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
@@ -66,6 +79,14 @@ namespace EasySave.Model
             // Copy files.
             foreach (string f in filesToCopy)
             {
+                // check if business software started during backup
+                if (_businessService != null && _businessService.IsRunning())
+                {
+                    var stopLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -1, 0);
+                    Logger.Log(stopLog);
+                    break;
+                }
+
                 string relativePath = f.Substring(sourceDir.Length + 1);
                 string targetPath = Path.Combine(targetDir, relativePath);
                 string? targetFolder = Path.GetDirectoryName(targetPath);
@@ -110,6 +131,21 @@ namespace EasySave.Model
                         stateTracker.UpdateState(activeState);
                     }
 
+                    long encryptionTime = 0;
+                    FileInfo tgtFile = new FileInfo(targetPath);
+
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+                    {
+                        Process encryptFile = new Process();
+                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
+                        encryptFile.StartInfo.ArgumentList.Add(targetPath);
+                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
+                        encryptFile.Start();
+
+                        encryptFile.WaitForExit();
+                        encryptionTime = encryptFile.ExitCode;
+                    }
+
                     //write logs
                     var logEntry = new LogEntry
                     (
@@ -118,7 +154,8 @@ namespace EasySave.Model
                         f,
                         targetPath,
                         fileSize,
-                        timer.ElapsedMilliseconds
+                        timer.ElapsedMilliseconds,
+                        encryptionTime
                     );
 
                     Logger.Log(logEntry);
