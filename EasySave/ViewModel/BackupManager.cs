@@ -164,23 +164,6 @@ namespace EasySave.ViewModel
             }
 
             var job = BackupJobs[index - 1];
-
-            // Check if business software is running before launching
-            if (_businessSoftwareService != null && _businessSoftwareService.IsRunning())
-            {
-                // Log the blocked attempt
-                var logEntry = new LogEntry(
-                    DateTime.Now, 
-                    job.Name ?? "", 
-                    "", 
-                    "",
-                    0, 
-                    -1,
-                    -1
-                );
-                Logger.Log(logEntry);
-            }
-
             try
             {
                 await job.Execute(stateTracker, _businessSoftwareService);

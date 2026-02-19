@@ -80,12 +80,21 @@ namespace EasySave.Model
             // Copy files.
             foreach (string f in filesToCopy)
             {
-                // check if business software started during backup
+                // check if business software started during backup and wait until it stops
                 if (_businessService != null && _businessService.IsRunning())
                 {
-                    var stopLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -1, 0);
-                    Logger.Log(stopLog);
-                    break;
+                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, f, "", BackupState.Paused);
+                    var pauseLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -2, 0);
+                    Logger.Log(pauseLog);
+
+                    //wait until business software stops
+                    while (_businessService.IsRunning())
+                    {
+                        await Task.Delay(1000);
+                    }
+
+                    //resume backup
+                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, f, "", BackupState.Active);
                 }
 
                 string relativePath = f.Substring(sourceDir.Length + 1);

@@ -95,17 +95,25 @@ namespace EasySave.Model
                     return;
                 }
 
-                // Copy files
                 foreach (var file in sourceDir.GetFiles())
                 {
-                    // check if business software started during backup
+                    // check if business software started during backup and wait until it stops
                     if (_businessService != null && _businessService.IsRunning())
                     {
-                        var stopLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -1, 0);
-                        Logger.Log(stopLog);
-                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
-                        return;
+                        UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Paused);
+                        var pauseLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -2, 0);
+                        Logger.Log(pauseLog);
+
+                        //wait until business software stops (checks every second)
+                        while (_businessService.IsRunning())
+                        {
+                            await Task.Delay(1000); 
+                        }
+
+                        //resume backup
+                        UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Active);
                     }
+
 
                     string targetFilePath = Path.Combine(targetPath, file.Name);
 
