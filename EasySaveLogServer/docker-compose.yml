@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  log-server:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - log-data:/app/logs
+    restart: unless-stopped
+volumes:
+  log-data:
