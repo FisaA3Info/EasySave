@@ -137,6 +137,7 @@ namespace EasySave.Model
                     if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
                     {
                         Process encryptFile = new Process();
+                        encryptFile.StartInfo.CreateNoWindow = true;
                         encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
                         encryptFile.StartInfo.ArgumentList.Add(targetPath);
                         encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);

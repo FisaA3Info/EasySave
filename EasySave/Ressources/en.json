@@ -25,6 +25,7 @@
   "success_executed": "Backup completed.",
   "error_created": "Job failed.",
   "error_executed": "Save failed.",
+  "error_max_jobs": "Maximum number of jobs reached.",
   "no_jobs": "None jobs define.",
   "jobs_header": "List of all jobs",
   "delete_job": "Which job do you want to delete ?",
@@ -59,5 +60,13 @@
   "select_json_format": "Select the daily log format you want.",
   "actual_log": "Current log type : ",
   "error_source_not_found": "Source directory does not exist.",
-  "success_deleted": "Job deleted successfully."
+  "success_deleted": "Job deleted successfully.",
+  "settings": "Settings",
+  "settings_title": "Application Settings",
+  "crypto_soft_path": "CryptoSoft Path:",
+  "encryption_key": "Encryption Key:",
+  "encrypted_extensions": "File Extensions to Encrypt (separated by semicolons):",
+  "business_software_name": "Business Software Name:",
+  "btn_save_settings": "Save Settings",
+  "settings_saved": "Settings saved successfully."
 }

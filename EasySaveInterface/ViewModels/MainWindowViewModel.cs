@@ -32,7 +32,8 @@ namespace EasySaveInterface.ViewModels
         ExecuteRange,
         ExecuteSelection,
         Delete,
-        ListJobs
+        ListJobs,
+        Settings
     }
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -96,6 +97,21 @@ namespace EasySaveInterface.ViewModels
         [ObservableProperty]
         private string _selectedLogFormat = "JSON";
 
+        // Settings properties
+        [ObservableProperty]
+        private string _cryptoSoftPath = "";
+
+        [ObservableProperty]
+        private string _encryptionKey = "";
+
+        [ObservableProperty]
+        private string _encryptedExtensions = "";
+
+        [ObservableProperty]
+        private string _businessSoftwareName = "";
+
+        private SettingsService _settingsService;
+
         public ObservableCollection<string> Languages { get; } = new() { "Français", "English" };
         public ObservableCollection<string> LogFormats { get; } = new() { "JSON", "XML" };
         public ObservableCollection<string> BackupTypeNames { get; } = new();
@@ -130,6 +146,14 @@ namespace EasySaveInterface.ViewModels
         public string TextListJobs => GetText("list_jobs");
         public string TextWarningTitle => GetText("headwarning_title");
         public string TextWarningMsg => GetText("warning_msg");
+        public string TextSettings => GetText("settings");
+        public string TextSettingsTitle => GetText("settings_title");
+        public string TextCryptoSoftPath => GetText("crypto_soft_path");
+        public string TextEncryptionKey => GetText("encryption_key");
+        public string TextEncryptedExtensions => GetText("encrypted_extensions");
+        public string TextBusinessSoftware => GetText("business_software_name");
+        public string TextBtnSaveSettings => GetText("btn_save_settings");
+        public string TextSettingsSaved => GetText("settings_saved");
 
         public bool HasJobs => Jobs.Count > 0;
 
@@ -140,6 +164,7 @@ namespace EasySaveInterface.ViewModels
         public bool IsExecuteSelectionPage => CurrentPage == PageType.ExecuteSelection;
         public bool IsDeletePage => CurrentPage == PageType.Delete;
         public bool IsListJobsPage => CurrentPage == PageType.ListJobs;
+        public bool IsSettingsPage => CurrentPage == PageType.Settings;
         public bool ShowJobList => CurrentPage != PageType.Create && CurrentPage != PageType.None;
 
         partial void OnCurrentPageChanged(PageType value)
@@ -151,6 +176,7 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(IsExecuteSelectionPage));
             OnPropertyChanged(nameof(IsDeletePage));
             OnPropertyChanged(nameof(IsListJobsPage));
+            OnPropertyChanged(nameof(IsSettingsPage));
             OnPropertyChanged(nameof(ShowJobList));
             StatusMessage = "";
             SelectedJobIndex = -1;
@@ -159,9 +185,10 @@ namespace EasySaveInterface.ViewModels
         public MainWindowViewModel()
         {
             _stateTracker = new StateTracker();
-            var settingsService = new SettingsService();
-            var businessService = new BusinessSoftwareService(settingsService.Settings.BusinessSoftwareName);
-            _backupManager = new BackupManager(_stateTracker, settingsService.Settings, businessService);
+            _settingsService = new SettingsService();
+            var businessService = new BusinessSoftwareService(_settingsService.Settings.BusinessSoftwareName);
+            _backupManager = new BackupManager(_stateTracker, _settingsService.Settings, businessService);
+            LoadSettings();
             LoadLanguage("fr");
             RefreshJobList();
         }
@@ -209,6 +236,14 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextWarningTitle));
             OnPropertyChanged(nameof(TextWarningMsg));
             OnPropertyChanged(nameof(TextListJobs));
+            OnPropertyChanged(nameof(TextSettings));
+            OnPropertyChanged(nameof(TextSettingsTitle));
+            OnPropertyChanged(nameof(TextCryptoSoftPath));
+            OnPropertyChanged(nameof(TextEncryptionKey));
+            OnPropertyChanged(nameof(TextEncryptedExtensions));
+            OnPropertyChanged(nameof(TextBusinessSoftware));
+            OnPropertyChanged(nameof(TextBtnSaveSettings));
+            OnPropertyChanged(nameof(TextSettingsSaved));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
@@ -286,6 +321,13 @@ namespace EasySaveInterface.ViewModels
         private void GoToListJobs()
         {
             CurrentPage = PageType.ListJobs;
+            RefreshJobList();
+        }
+
+        [RelayCommand]
+        private void GoToSettings()
+        {
+            CurrentPage = PageType.Settings;
             RefreshJobList();
         }
 
@@ -463,6 +505,38 @@ namespace EasySaveInterface.ViewModels
                 Jobs.Add(job);
             }
             OnPropertyChanged(nameof(HasJobs));
+        }
+
+        private void LoadSettings()
+        {
+            CryptoSoftPath = _settingsService.Settings.CryptoSoftPath;
+            EncryptionKey = _settingsService.Settings.EncryptionKey;
+            EncryptedExtensions = string.Join(";", _settingsService.Settings.EncryptedExtensions);
+            BusinessSoftwareName = _settingsService.Settings.BusinessSoftwareName;
+            SelectedLogFormat = _settingsService.Settings.LogFormat.ToUpper();
+        }
+
+        [RelayCommand]
+        private void SaveSettings()
+        {
+            _settingsService.Settings.CryptoSoftPath = CryptoSoftPath;
+            _settingsService.Settings.EncryptionKey = EncryptionKey;
+            // get the extensions
+            var extensionList = new List<string>();
+            var parts = EncryptedExtensions.Split(new[] { ';', ',' });
+            foreach (var part in parts)
+            {
+                var trimmedPart = part.Trim();
+                if (!string.IsNullOrEmpty(trimmedPart))
+                {
+                    extensionList.Add(trimmedPart);
+                }
+            }
+            _settingsService.Settings.EncryptedExtensions = extensionList;
+            _settingsService.Settings.BusinessSoftwareName = BusinessSoftwareName;
+            _settingsService.Settings.LogFormat = SelectedLogFormat.ToLower();
+            _settingsService.Save();
+            StatusMessage = GetText("settings_saved");
         }
     }
 }

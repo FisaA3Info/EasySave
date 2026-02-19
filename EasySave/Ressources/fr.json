@@ -25,6 +25,7 @@
   "success_executed": "Sauvegarde terminée.",
   "error_created": "Travail échoué.",
   "error_executed": "Sauvegarde échoué.",
+  "error_max_jobs": "Nombre maximum de jobs atteint.",
   "no_jobs": "Aucun jobs.",
   "jobs_header": "Liste des jobs.",
   "delete_job": "Quel job voulez vous supprimer ?",
@@ -59,5 +60,13 @@
   "headwarning_title": "⚠️ Attention",
   "warning_msg": "La suppression d'un job est définitive et ne peut pas être annulée.",
   "error_source_not_found": "Le répertoire source n'existe pas.",
-  "success_deleted": "Job supprimé avec succès."
+  "success_deleted": "Job supprimé avec succès.",
+  "settings": "Paramètres",
+  "settings_title": "Paramètres de l'application",
+  "crypto_soft_path": "Chemin de CryptoSoft :",
+  "encryption_key": "Clé de chiffrement :",
+  "encrypted_extensions": "Extensions de fichiers à chiffrer (séparées par des points-virgules) :",
+  "business_software_name": "Nom du logiciel métier :",
+  "btn_save_settings": "Enregistrer les paramètres",
+  "settings_saved": "Paramètres enregistrés avec succès."
 }
