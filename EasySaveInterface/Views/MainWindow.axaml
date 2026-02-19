@@ -88,6 +88,11 @@
 						<Button Classes="menu-button" Command="{Binding GoToListJobsCommand}">
 							<TextBlock Text="{Binding TextListJobs}" TextWrapping="Wrap"/>
 						</Button>
+
+						<Button Classes="menu-button" Command="{Binding GoToSettingsCommand}">
+							<TextBlock Text="{Binding TextSettings}" TextWrapping="Wrap"/>
+						</Button>
+						
 					</StackPanel>
 				</ScrollViewer>
 			</Border>
@@ -369,6 +374,72 @@
 									</DataTemplate>
 								</ItemsControl.ItemTemplate>
 							</ItemsControl>
+						</Border>
+					</StackPanel>
+
+					<!-- ========== PAGE: Settings ========== -->
+					<StackPanel IsVisible="{Binding IsSettingsPage}" Spacing="15">
+						<TextBlock Text="{Binding TextSettingsTitle}"
+								   FontWeight="Bold"
+								   FontSize="22"
+								   Foreground="#FFFFFF"
+								   Margin="0,0,0,10"/>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="20" BorderBrush="#3F3F46" BorderThickness="1">
+							<StackPanel Spacing="20">
+
+								<!-- CryptoSoft Path -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextCryptoSoftPath}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: C:\CryptoSoft\CryptoSoft.exe"
+											 Text="{Binding CryptoSoftPath}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Encryption Key -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextEncryptionKey}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: HonkHonk"
+											 Text="{Binding EncryptionKey}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Encrypted Extensions -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextEncryptedExtensions}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"
+											   TextWrapping="Wrap"/>
+									<TextBox Watermark="Ex: .txt;.doc;.pdf"
+											 Text="{Binding EncryptedExtensions}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Business Software Name -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextBusinessSoftware}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: MyBusinessApp"
+											 Text="{Binding BusinessSoftwareName}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Save Button -->
+								<Button Content="{Binding TextBtnSaveSettings}"
+										Classes="primary"
+										Command="{Binding SaveSettingsCommand}"
+										HorizontalAlignment="Left"
+										Margin="0,10,0,0"/>
+							</StackPanel>
 						</Border>
 					</StackPanel>
 
