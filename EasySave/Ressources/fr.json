@@ -74,5 +74,5 @@
   "txt_user_name": "Nom de l'utilisateur :",
   "txt_url_log_server": "URL du serveur de logs :",
   "txt_log_mode_indication": "• local : Logs uniquement en local \n• centralized : Logs uniquement sur le serveur\n• both : Logs en local ET sur le serveur",
-  "priority_extensions": "Extensions prioritaires (séparées par des points-virgules)",
+  "priority_extensions": "Extensions prioritaires (séparées par des points-virgules)"
 }
