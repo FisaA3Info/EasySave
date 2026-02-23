@@ -382,6 +382,33 @@ namespace EasySaveInterface.ViewModels
         }
 
         [RelayCommand]
+        private async Task PlayJobAsync(BackupJob job)
+        {
+            if (job == null) return;
+
+            if (!CheckSourceDirs(new List<BackupJob> { job }))
+                return;
+
+            int index = _backupManager.BackupJobs.IndexOf(job) + 1;
+            StatusMessage = string.Format(GetText("executing_job"), index);
+
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    _backupManager.ExecuteJob(index);
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        StatusMessage = GetText("success_executed"));
+                }
+                catch
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        StatusMessage = GetText("error_executed"));
+                }
+            });
+        }
+
+        [RelayCommand]
         private async Task ExecuteAllJobsAsync()
         {
             if (_backupManager.BackupJobs.Count == 0)
