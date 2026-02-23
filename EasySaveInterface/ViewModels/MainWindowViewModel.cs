@@ -245,7 +245,6 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextBtnSaveSettings));
             OnPropertyChanged(nameof(TextSettingsSaved));
 
-            // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
             BackupTypeConverter.DifferentialText = GetText("BackupSelectionDifferential");
             BackupTypeNames.Clear();
