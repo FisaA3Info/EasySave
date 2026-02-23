@@ -148,6 +148,7 @@ namespace EasySave.Model
                 _isError = true;
                 Console.WriteLine($"Critical Error: {ex.Message}");
                 UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
+                _priorityManager?.SignalPriorityDone();
             }
         }
 
