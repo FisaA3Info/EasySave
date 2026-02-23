@@ -234,7 +234,7 @@ namespace EasySave.ViewModel
                 return;
             }
 
-            _priorityFileManager = new PriorityFileManager PriorityFileManager(normalized.Count);
+            _priorityFileManager = new PriorityFileManager(normalized.Count);
             var tasks = new List<Task>();
             foreach (var idx in normalized)
             {
