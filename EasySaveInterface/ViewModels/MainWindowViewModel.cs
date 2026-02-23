@@ -111,6 +111,9 @@ namespace EasySaveInterface.ViewModels
         private string _businessSoftwareName = "";
 
         [ObservableProperty]
+        private string _priorityExtensions = "";
+
+        [ObservableProperty]
         private string _logMode = "local"; // "local", "centralized", "both"
 
         [ObservableProperty]
@@ -166,6 +169,8 @@ namespace EasySaveInterface.ViewModels
         public string TextEncryptedExtensions => GetText("encrypted_extensions");
         public string TextBusinessSoftware => GetText("business_software_name");
         public string TextBtnSaveSettings => GetText("btn_save_settings");
+
+        public string TextPriorityExtensions => GetText("btn_save_settings");
         public string TextSettingsSaved => GetText("settings_saved");
         public string TextLogMode => GetText("txt_log_mode");
         public string TextMachineName => GetText("txt_machine_name");
@@ -267,6 +272,7 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextUserName));
             OnPropertyChanged(nameof(TextUrlLogServer));
             OnPropertyChanged(nameof(TextLogModeIndication));
+            OnPropertyChanged(nameof(TextPriorityExtensions));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
@@ -537,6 +543,7 @@ namespace EasySaveInterface.ViewModels
             EncryptedExtensions = string.Join(";", _settingsService.Settings.EncryptedExtensions);
             BusinessSoftwareName = _settingsService.Settings.BusinessSoftwareName;
             SelectedLogFormat = _settingsService.Settings.LogFormat.ToUpper();
+            PriorityExtensions = string.Join(";", _settingsService.Settings.PriorityExtensions);
         }
 
         [RelayCommand]
@@ -558,6 +565,20 @@ namespace EasySaveInterface.ViewModels
             _settingsService.Settings.EncryptedExtensions = extensionList;
             _settingsService.Settings.BusinessSoftwareName = BusinessSoftwareName;
             _settingsService.Settings.LogFormat = SelectedLogFormat.ToLower();
+
+            // get priority extensions
+            var priorityList = new List<string>();
+            var priorityParts = PriorityExtensions.Split(new[] { ';', ',' });
+            foreach (var part in priorityParts)
+            {
+                var trimmed = part.Trim();
+                if (!string.IsNullOrEmpty(trimmed))
+                {
+                    priorityList.Add(trimmed);
+                }
+            }
+            _settingsService.Settings.PriorityExtensions = priorityList;
+
             _settingsService.Save();
             StatusMessage = GetText("settings_saved");
         }
