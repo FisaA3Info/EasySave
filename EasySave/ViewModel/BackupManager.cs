@@ -202,7 +202,7 @@ namespace EasySave.ViewModel
             end = Math.Min(BackupJobs.Count, end);
 
             var tasks = new List<Task>();
-            for (int i = 1; i <= BackupJobs.Count; i++)
+            for (int i = start; i <= end; i++)
             {
                 tasks.Add(ExecuteJob(i));
             }
