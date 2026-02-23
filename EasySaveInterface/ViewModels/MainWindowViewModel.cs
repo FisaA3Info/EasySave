@@ -271,7 +271,6 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextUrlLogServer));
             OnPropertyChanged(nameof(TextLogModeIndication));
 
-            // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
             BackupTypeConverter.DifferentialText = GetText("BackupSelectionDifferential");
             BackupTypeNames.Clear();
@@ -406,6 +405,33 @@ namespace EasySaveInterface.ViewModels
             StatusMessage = success ? GetText("success_executed") : GetText("error_executed");
             IsExecuting = false;
             RefreshJobList();
+        }
+
+        [RelayCommand]
+        private async Task PlayJobAsync(BackupJob job)
+        {
+            if (job == null) return;
+
+            if (!CheckSourceDirs(new List<BackupJob> { job }))
+                return;
+
+            int index = _backupManager.BackupJobs.IndexOf(job) + 1;
+            StatusMessage = string.Format(GetText("executing_job"), index);
+
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    _backupManager.ExecuteJob(index);
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        StatusMessage = GetText("success_executed"));
+                }
+                catch
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        StatusMessage = GetText("error_executed"));
+                }
+            });
         }
 
         [RelayCommand]

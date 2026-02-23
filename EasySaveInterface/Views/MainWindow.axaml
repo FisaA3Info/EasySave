@@ -161,37 +161,45 @@
 
 						<TextBlock Text="{Binding TextSelectJobExecute}" Foreground="#CCCCCC" FontSize="13"/>
 
-						<ListBox ItemsSource="{Binding Jobs}"
-                                 SelectedIndex="{Binding SelectedJobIndex}"
-                                 MinHeight="200"
-                                 MaxHeight="350">
-							<ListBox.ItemTemplate>
-								<DataTemplate x:DataType="model:BackupJob">
-									<StackPanel Spacing="5">
-										<StackPanel Orientation="Horizontal" Spacing="10">
-											<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
-											<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
-												<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
-											</Border>
-										</StackPanel>
-										<StackPanel Orientation="Horizontal" Spacing="4">
-											<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelSource}" Foreground="#888888" FontSize="11"/>
-											<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
-										</StackPanel>
-										<StackPanel Orientation="Horizontal" Spacing="4">
-											<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelTarget}" Foreground="#888888" FontSize="11"/>
-											<TextBlock Text="{Binding TargetDir}" Foreground="#888888" FontSize="11"/>
-										</StackPanel>
-									</StackPanel>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
-
-						<Button Content="{Binding TextBtnExecute}"
-                                Classes="primary"
-                                Command="{Binding ExecuteJobCommand}"
-                                HorizontalAlignment="Left"
-                                IsEnabled="{Binding HasJobSelected}"/>
+						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="350">
+							<ScrollViewer>
+								<ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="model:BackupJob">
+											<Grid ColumnDefinitions="*,Auto" Margin="0,5">
+												<StackPanel Grid.Column="0" Spacing="5">
+													<StackPanel Orientation="Horizontal" Spacing="10">
+														<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+														<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+															<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+														</Border>
+													</StackPanel>
+													<StackPanel Orientation="Horizontal" Spacing="4">
+														<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelSource}" Foreground="#888888" FontSize="11"/>
+														<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
+													</StackPanel>
+													<StackPanel Orientation="Horizontal" Spacing="4">
+														<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelTarget}" Foreground="#888888" FontSize="11"/>
+														<TextBlock Text="{Binding TargetDir}" Foreground="#888888" FontSize="11"/>
+													</StackPanel>
+													<Grid ColumnDefinitions="*,Auto" Margin="0,2,10,0">
+														<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+														<TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+													</Grid>
+												</StackPanel>
+												<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+													<Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+															Command="{Binding $parent[Window].DataContext.PlayJobCommand}"
+															CommandParameter="{Binding}"/>
+													<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"/>
+													<Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"/>
+												</StackPanel>
+											</Grid>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</ScrollViewer>
+						</Border>
 					</StackPanel>
 
 					<!-- ========== PAGE: Execute All ========== -->
@@ -246,7 +254,7 @@
                                                        Width="30">
                                                 <TextBlock.Text>
                                                     <MultiBinding Converter="{StaticResource ItemIndexConverter}">
-                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                        <Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
                                                         <Binding />
                                                     </MultiBinding>
                                                 </TextBlock.Text>
@@ -264,7 +272,7 @@
                             <TextBlock Text="{Binding TextEnterNumbersSemicolon}"
                                        Foreground="#CCCCCC"
                                        FontSize="12"/>
-                            <TextBox Watermark="Ex: 1;3;4"
+                            <TextBox Watermark="Ex: 1-3"
                                      Text="{Binding SelectedIndicesText}"
                                      Width="250"
                                      Height="36"
@@ -279,22 +287,55 @@
                     </StackPanel>
 
 					<!-- ========== PAGE: Execute Selection ========== -->
-					<StackPanel IsVisible="{Binding IsExecuteSelectionPage}" Spacing="12">
-						<TextBlock Text="{Binding TextExecuteSpecific}" FontWeight="Bold" FontSize="18"/>
-						<TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC"/>
-						<ItemsControl ItemsSource="{Binding Jobs}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate x:DataType="model:BackupJob">
-									<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
-										<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-										<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-									</StackPanel>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-						<TextBlock Text="{Binding TextEnterNumbersSemicolon}" Foreground="#CCCCCC" Margin="0,5,0,0"/>
-						<TextBox Watermark="ex: 1;3;5" Text="{Binding SelectedIndicesText}" Width="250" HorizontalAlignment="Left"/>
-						<Button Content="{Binding TextBtnExecuteSelection}" Command="{Binding ExecuteSelectedJobsCommand}" HorizontalAlignment="Left"/>
+					<StackPanel IsVisible="{Binding IsExecuteSelectionPage}" Spacing="15">
+						<TextBlock Text="{Binding TextExecuteSpecific}"
+								   FontWeight="Bold"
+								   FontSize="22"
+								   Foreground="#FFFFFF"
+								   Margin="0,0,0,10"/>
+
+						<TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC" FontSize="13"/>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
+							<ItemsControl ItemsSource="{Binding Jobs}">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
+											<TextBlock Foreground="#007ACC"
+													   FontWeight="Bold"
+													   Width="30">
+												<TextBlock.Text>
+													<MultiBinding Converter="{StaticResource ItemIndexConverter}">
+														<Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+														<Binding />
+													</MultiBinding>
+												</TextBlock.Text>
+											</TextBlock>
+											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+											<TextBlock Text="-" Foreground="#666666"/>
+											<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</Border>
+
+						<StackPanel Spacing="8">
+							<TextBlock Text="{Binding TextEnterNumbersSemicolon}"
+									   Foreground="#CCCCCC"
+									   FontSize="12"/>
+							<TextBox Watermark="Ex: 1;3;5"
+									 Text="{Binding SelectedIndicesText}"
+									 Width="250"
+									 Height="36"
+									 HorizontalAlignment="Left"/>
+						</StackPanel>
+
+						<Button Content="{Binding TextBtnExecuteSelection}"
+								Classes="primary"
+								Command="{Binding ExecuteSelectedJobsCommand}"
+								HorizontalAlignment="Left"
+								IsEnabled="{Binding !IsExecuting}"/>
 					</StackPanel>
 
 					<!-- ========== PAGE: Delete ========== -->
