@@ -170,7 +170,7 @@ namespace EasySaveInterface.ViewModels
         public string TextBusinessSoftware => GetText("business_software_name");
         public string TextBtnSaveSettings => GetText("btn_save_settings");
 
-        public string TextPriorityExtensions => GetText("btn_save_settings");
+        public string TextPriorityExtensions => GetText("priority_extensions");
         public string TextSettingsSaved => GetText("settings_saved");
         public string TextLogMode => GetText("txt_log_mode");
         public string TextMachineName => GetText("txt_machine_name");
