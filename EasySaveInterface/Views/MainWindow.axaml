@@ -433,6 +433,43 @@
 											 Height="36"/>
 								</StackPanel>
 
+                            <StackPanel Spacing="15">
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding TextLogMode}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <ComboBox ItemsSource="{Binding LogModes}"
+                                              SelectedItem="{Binding LogMode}"
+                                              Height="36"
+                                              HorizontalAlignment="Stretch"/>
+                                    <TextBlock Text="{Binding TextLogModeIndication}" Foreground="#808080" FontSize="10" Margin="0,5,0,0" />
+                                </StackPanel>
+
+                                <StackPanel IsVisible="{Binding LogMode, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="{Binding TextUrlLogServer}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBox Watermark="Ex: http://192.168.1.100:5000/"
+                                             Text="{Binding LogServerUrl}"
+                                             Height="36"
+                                             IsEnabled="{Binding LogMode, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                </StackPanel>
+
+                                <Grid ColumnDefinitions="*,*">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding TextMachineName}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding MachineName}"
+                                                 Height="36"
+                                                 IsReadOnly="True"
+                                                 Background="#1E1E1E"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding TextUserName}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding UserName}"
+                                                 Height="36"
+                                                 IsReadOnly="True"
+                                                 Background="#1E1E1E"/>
+                                    </StackPanel>
+                                </Grid>
+
 								<!-- Save Button -->
 								<Button Content="{Binding TextBtnSaveSettings}"
 										Classes="primary"
@@ -440,6 +477,7 @@
 										HorizontalAlignment="Left"
 										Margin="0,10,0,0"/>
 							</StackPanel>
+								</StackPanel>
 						</Border>
 					</StackPanel>
 
