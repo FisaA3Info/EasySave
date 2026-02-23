@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using EasySaveInterface.ViewModels;
@@ -18,14 +19,17 @@ namespace EasySaveInterface.Views
             if (topLevel == null)
                 return;
 
+            if (DataContext is not MainWindowViewModel vm)
+                return;
+
             var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(
                 new FolderPickerOpenOptions
                 {
-                    Title = "Choisir un dossier",
+                    Title = vm.TextBrowserTitle,
                     AllowMultiple = false
                 });
 
-            if (folders.Count > 0 && DataContext is MainWindowViewModel vm)
+            if (folders.Count > 0)
             {
                 string selectedPath = folders[0].Path.LocalPath;
                 string? tag = (sender as Button)?.Tag?.ToString();
@@ -34,6 +38,8 @@ namespace EasySaveInterface.Views
                     vm.NewJobSource = selectedPath;
                 else if (tag == "target")
                     vm.NewJobTarget = selectedPath;
+                else if (tag == "crypto")
+                    vm.CryptoSoftPath = selectedPath;
             }
         }
     }

@@ -172,6 +172,8 @@ namespace EasySaveInterface.ViewModels
         public string TextUserName => GetText("txt_user_name");
         public string TextUrlLogServer => GetText("txt_url_log_server");
         public string TextLogModeIndication => GetText("txt_log_mode_indication");
+        public string TextBrowse => GetText("browse");
+        public string TextBrowserTitle => GetText("browser_title");
 
         public bool HasJobs => Jobs.Count > 0;
 
@@ -267,6 +269,8 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextUserName));
             OnPropertyChanged(nameof(TextUrlLogServer));
             OnPropertyChanged(nameof(TextLogModeIndication));
+            OnPropertyChanged(nameof(TextBrowse));
+            OnPropertyChanged(nameof(TextBrowserTitle));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
