@@ -22,6 +22,7 @@ namespace EasySave.Model
         private bool _isError;
 
         private BusinessSoftwareService _businessService;
+        private JobController _controller;
 
         //get the App settings to get the crypsoft path and the exclusion list
         public FullBackupStrategy(AppSettings settings)
@@ -29,9 +30,10 @@ namespace EasySave.Model
             _settings = settings;
         }
 
-        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null)
         {
                 _businessService = businessService;
+                _controller = controller;
                 var sourceDir = new DirectoryInfo(sourcePath);
 
                 // Verify if source directory exists
@@ -97,6 +99,9 @@ namespace EasySave.Model
 
                 foreach (var file in sourceDir.GetFiles())
                 {
+                    // Wait if paused by user
+                    _controller?.WaitIfPaused();
+
                     // check if business software started during backup and wait until it stops
                     if (_businessService != null && _businessService.IsRunning())
                     {

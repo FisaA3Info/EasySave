@@ -191,7 +191,9 @@
 													<Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
 															Command="{Binding $parent[Window].DataContext.PlayJobCommand}"
 															CommandParameter="{Binding}"/>
-													<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"/>
+													<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+															Command="{Binding $parent[Window].DataContext.PauseJobCommand}"
+															CommandParameter="{Binding}"/>
 													<Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"/>
 												</StackPanel>
 											</Grid>

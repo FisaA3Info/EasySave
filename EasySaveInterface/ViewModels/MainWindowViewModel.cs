@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EasySave.Model;
 using EasySave.ViewModel;
@@ -381,31 +381,76 @@ namespace EasySaveInterface.ViewModels
             RefreshJobList();
         }
 
+        private int _runningJobCount = 0;
+
+        private void AppendStatus(string msg)
+        {
+            if (string.IsNullOrEmpty(StatusMessage))
+                StatusMessage = msg;
+            else
+                StatusMessage = StatusMessage + "\n" + msg;
+        }
+
         [RelayCommand]
         private async Task PlayJobAsync(BackupJob job)
         {
             if (job == null) return;
 
+            string jobName = job.Name ?? "";
+
+            // If paused, resume
+            if (job.State == BackupState.Active && job.Controller.IsPaused)
+            {
+                job.Controller.Resume();
+                AppendStatus(string.Format(GetText("job_resumed"), jobName));
+                return;
+            }
+
+            // If already running, do nothing
+            if (job.State == BackupState.Active)
+                return;
+
             if (!CheckSourceDirs(new List<BackupJob> { job }))
                 return;
 
             int index = _backupManager.BackupJobs.IndexOf(job) + 1;
-            StatusMessage = string.Format(GetText("executing_job"), index);
 
-            _ = Task.Run(() =>
+            if (_runningJobCount == 0)
+                StatusMessage = "";
+
+            _runningJobCount++;
+            AppendStatus(string.Format(GetText("executing_job"), jobName));
+
+            _ = Task.Run(async () =>
             {
                 try
                 {
-                    _backupManager.ExecuteJob(index);
+                    await _backupManager.ExecuteJob(index);
                     Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                        StatusMessage = GetText("success_executed"));
+                    {
+                        _runningJobCount--;
+                        AppendStatus(string.Format(GetText("job_completed"), jobName));
+                    });
                 }
                 catch
                 {
                     Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                        StatusMessage = GetText("error_executed"));
+                    {
+                        _runningJobCount--;
+                        AppendStatus(string.Format(GetText("job_failed"), jobName));
+                    });
                 }
             });
+        }
+
+        [RelayCommand]
+        private void PauseJob(BackupJob job)
+        {
+            if (job == null) return;
+            if (job.State != BackupState.Active) return;
+
+            job.Controller.Pause();
+            AppendStatus(string.Format(GetText("job_paused"), job.Name ?? ""));
         }
 
         [RelayCommand]
