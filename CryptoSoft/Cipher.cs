@@ -35,7 +35,7 @@ namespace CryptoSoft
             return true;
         }
 
-        public int SymetricalEncryption()
+        public int SymmetricalEncryption()
         {
             //if error negative time
             try

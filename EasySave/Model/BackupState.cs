@@ -1,6 +1,6 @@
-﻿namespace EasySave.Model 
+namespace EasySave.Model 
 {
-    enum BackupState
+    public enum BackupState
     {
         Active,
         Inactive,

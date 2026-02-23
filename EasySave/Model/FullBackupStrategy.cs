@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
+using EasySave.Service;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime;
 using System.Text;
@@ -19,14 +20,17 @@ namespace EasySave.Model
         private long _sizeCopied;
         private bool _isError;
 
+        private BusinessSoftwareService _businessService;
+
         //get the App settings to get the crypsoft path and the exclusion list
         public FullBackupStrategy(AppSettings settings)
         {
             _settings = settings;
         }
 
-        public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
+        public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
+                _businessService = businessService;
                 var sourceDir = new DirectoryInfo(sourcePath);
 
                 // Verify if source directory exists
@@ -93,8 +97,17 @@ namespace EasySave.Model
                 // Copy files
                 foreach (var file in sourceDir.GetFiles())
                 {
+                    // check if business software started during backup
+                    if (_businessService != null && _businessService.IsRunning())
+                    {
+                        var stopLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -1, 0);
+                        Logger.Log(stopLog);
+                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+                        return;
+                    }
+
                     string targetFilePath = Path.Combine(targetPath, file.Name);
-                    
+
                     // Update before copy
                     UpdateState(jobName, stateTracker, file.FullName, targetFilePath, BackupState.Active);
 
@@ -117,6 +130,7 @@ namespace EasySave.Model
                     if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
                     {
                         Process encryptFile = new Process();
+                        encryptFile.StartInfo.CreateNoWindow = true;
                         encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
                         encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
                         encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
