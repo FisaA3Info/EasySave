@@ -424,12 +424,23 @@
 
 								<!-- Business Software Name -->
 								<StackPanel>
-									<TextBlock Text="{Binding TextBusinessSoftware}" 
-											   Foreground="#CCCCCC" 
-											   FontSize="12" 
+									<TextBlock Text="{Binding TextBusinessSoftware}"
+											   Foreground="#CCCCCC"
+											   FontSize="12"
 											   Margin="0,0,0,5"/>
 									<TextBox Watermark="Ex: MyBusinessApp"
 											 Text="{Binding BusinessSoftwareName}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Large File Threshold -->
+								<StackPanel>
+									<TextBlock Text="Taille max fichier volumineux (Ko) :"
+											   Foreground="#CCCCCC"
+											   FontSize="12"
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: 1024 (0 = pas de limite)"
+											 Text="{Binding MaxLargeFileSizeText}"
 											 Height="36"/>
 								</StackPanel>
 

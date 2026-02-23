@@ -111,6 +111,9 @@ namespace EasySaveInterface.ViewModels
         private string _businessSoftwareName = "";
 
         [ObservableProperty]
+        private string _maxLargeFileSizeText = "0";
+
+        [ObservableProperty]
         private string _logMode = "local"; // "local", "centralized", "both"
 
         [ObservableProperty]
@@ -537,6 +540,7 @@ namespace EasySaveInterface.ViewModels
             EncryptedExtensions = string.Join(";", _settingsService.Settings.EncryptedExtensions);
             BusinessSoftwareName = _settingsService.Settings.BusinessSoftwareName;
             SelectedLogFormat = _settingsService.Settings.LogFormat.ToUpper();
+            MaxLargeFileSizeText = _settingsService.Settings.MaxLargeFileTransferSizeKb.ToString();
         }
 
         [RelayCommand]
@@ -558,6 +562,8 @@ namespace EasySaveInterface.ViewModels
             _settingsService.Settings.EncryptedExtensions = extensionList;
             _settingsService.Settings.BusinessSoftwareName = BusinessSoftwareName;
             _settingsService.Settings.LogFormat = SelectedLogFormat.ToLower();
+            if (long.TryParse(MaxLargeFileSizeText, out long sizeKb))
+                _settingsService.Settings.MaxLargeFileTransferSizeKb = sizeKb;
             _settingsService.Save();
             StatusMessage = GetText("settings_saved");
         }

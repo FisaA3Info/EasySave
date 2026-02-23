@@ -33,8 +33,8 @@ namespace EasySave.Model
         public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, LargeFileTransferManager largeFileManager = null)
         {
                 _businessService = businessService;
-            _largeFileManager = largeFileManager;
-            var sourceDir = new DirectoryInfo(sourcePath);
+                _largeFileManager = largeFileManager;
+                var sourceDir = new DirectoryInfo(sourcePath);
 
                 // Verify if source directory exists
                 if (!sourceDir.Exists)
