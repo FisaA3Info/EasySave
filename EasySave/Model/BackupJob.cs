@@ -33,12 +33,12 @@ namespace EasySave.Model
                 Strategy = new DifferentialBackupStrategy(_settings);
         }
 
-        public async Task Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null, LargeFileTransferManager largeFileManager = null)
         {
             try
             {
                 State = BackupState.Active;
-                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService);
+                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService, largeFileManager);
                 State = BackupState.Inactive;
             }
             catch (Exception)
