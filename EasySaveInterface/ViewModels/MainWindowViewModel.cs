@@ -1,25 +1,25 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EasyLog;
 using EasySave.Model;
+using EasySave.Service;
 using EasySave.ViewModel;
+using EasySaveInterface.Converters;
 using HarfBuzzSharp;
 using Microsoft.VisualBasic;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using EasyLog;
-using EasySaveInterface.Converters;
-using EasySave.Service;
 
 namespace EasySaveInterface.ViewModels
 {
@@ -172,6 +172,8 @@ namespace EasySaveInterface.ViewModels
         public string TextUserName => GetText("txt_user_name");
         public string TextUrlLogServer => GetText("txt_url_log_server");
         public string TextLogModeIndication => GetText("txt_log_mode_indication");
+        public string TextBrowse => GetText("browse");
+        public string TextBrowserTitle => GetText("browser_title");
 
         public bool HasJobs => Jobs.Count > 0;
 
@@ -267,6 +269,8 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextUserName));
             OnPropertyChanged(nameof(TextUrlLogServer));
             OnPropertyChanged(nameof(TextLogModeIndication));
+            OnPropertyChanged(nameof(TextBrowse));
+            OnPropertyChanged(nameof(TextBrowserTitle));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
@@ -561,5 +565,6 @@ namespace EasySaveInterface.ViewModels
             _settingsService.Save();
             StatusMessage = GetText("settings_saved");
         }
+        
     }
 }
