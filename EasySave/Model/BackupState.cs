@@ -4,6 +4,7 @@ namespace EasySave.Model
     {
         Active,
         Inactive,
-        OnError
+        OnError,
+        Paused
     }
 }

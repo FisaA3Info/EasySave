@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -32,12 +33,12 @@ namespace EasySave.Model
                 Strategy = new DifferentialBackupStrategy(_settings);
         }
 
-        public void Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
             try
             {
                 State = BackupState.Active;
-                Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService);
+                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService);
                 State = BackupState.Inactive;
             }
             catch (Exception)

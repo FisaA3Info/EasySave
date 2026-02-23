@@ -376,7 +376,7 @@ namespace EasySaveInterface.ViewModels
 
             IsExecuting = true;
             StatusMessage = string.Format(GetText("executing_job"), index);
-            bool success = await Task.Run(() => _backupManager.ExecuteJob(index));
+            bool success = await _backupManager.ExecuteJob(index);
             StatusMessage = success ? GetText("success_executed") : GetText("error_executed");
             IsExecuting = false;
             RefreshJobList();
@@ -395,7 +395,7 @@ namespace EasySaveInterface.ViewModels
                 return;
 
             IsExecuting = true;
-            await Task.Run(() => _backupManager.ExecuteAllJobs());
+            await _backupManager.ExecuteAllJobs();
             StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();
@@ -424,7 +424,7 @@ namespace EasySaveInterface.ViewModels
                 return;
 
             IsExecuting = true;
-            await Task.Run(() => _backupManager.ExecuteRange(start, end));
+            await _backupManager.ExecuteRange(start, end);
             StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();
@@ -462,7 +462,7 @@ namespace EasySaveInterface.ViewModels
                 return;
 
             IsExecuting = true;
-            await Task.Run(() => _backupManager.ExecuteSelection(indices));
+            await _backupManager.ExecuteSelection(indices);
             StatusMessage = GetText("success_executed");
             IsExecuting = false;
             RefreshJobList();

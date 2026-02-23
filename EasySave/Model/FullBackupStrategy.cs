@@ -1,5 +1,6 @@
 using EasyLog;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -28,7 +29,7 @@ namespace EasySave.Model
             _settings = settings;
         }
 
-        public void Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
                 _businessService = businessService;
                 var sourceDir = new DirectoryInfo(sourcePath);
@@ -56,13 +57,13 @@ namespace EasySave.Model
                 UpdateState(jobName, stateTracker, "", "", BackupState.Active);
 
                 // Recursive execution
-                ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker);
+                await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker);
 
                 // Update final state
                 UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
             }
 
-        private void ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
+        private async Task ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {
             try
             {
@@ -94,17 +95,25 @@ namespace EasySave.Model
                     return;
                 }
 
-                // Copy files
                 foreach (var file in sourceDir.GetFiles())
                 {
-                    // check if business software started during backup
+                    // check if business software started during backup and wait until it stops
                     if (_businessService != null && _businessService.IsRunning())
                     {
-                        var stopLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -1, 0);
-                        Logger.Log(stopLog);
-                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
-                        return;
+                        UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Paused);
+                        var pauseLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -2, 0);
+                        Logger.Log(pauseLog);
+
+                        //wait until business software stops (checks every second)
+                        while (_businessService.IsRunning())
+                        {
+                            await Task.Delay(1000); 
+                        }
+
+                        //resume backup
+                        UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Active);
                     }
+
 
                     string targetFilePath = Path.Combine(targetPath, file.Name);
 
@@ -136,7 +145,7 @@ namespace EasySave.Model
                         encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
                         encryptFile.Start();
 
-                        encryptFile.WaitForExit();
+                        await encryptFile.WaitForExitAsync();
                         encryptionTime = encryptFile.ExitCode;
                     }
 
@@ -170,7 +179,7 @@ namespace EasySave.Model
                         continue;
                     }
 
-                    ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker);
+                    await ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker);
                 }
             }
             catch (Exception ex) {
