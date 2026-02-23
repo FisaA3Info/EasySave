@@ -1,11 +1,29 @@
-﻿namespace CryptoSoft;
+﻿using System.Threading;
+
+namespace CryptoSoft;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    private static Mutex _mutex;
+    public static int Main(string[] args)
     {
+        // 'global\\' to check on the entire machine (local is default so we add to prevent the launch on other sessions)
+        _mutex = new Mutex(true, "Global\\CryptoSoftMutex" , out bool isFree);
+
+        if (!isFree)
+        {
+            Console.WriteLine($"CryptoSoft isn't available right now ! Please wait...");
+            _mutex.WaitOne();
+        }
+
         try
         {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("[Error]: Invalid arguments.");
+                return -1;
+            }
+
             foreach (var arg in args)
             {
                 Console.WriteLine(arg);
@@ -16,12 +34,17 @@ public static class Program
             Console.WriteLine("CryptoSoft executing ...");
             //xor encryption
             int EncrypTime = Encryption.SymmetricalEncryption();
-            Environment.Exit(EncrypTime);
+            return EncrypTime;
         }
         catch (Exception e)
         {
             Console.WriteLine($"CryptoSoft [Error]: {e}");
-            Environment.Exit(-1);
+            return -1;
+        }
+        finally
+        {
+            _mutex.ReleaseMutex();
+            _mutex.Dispose();
         }
     }
 }

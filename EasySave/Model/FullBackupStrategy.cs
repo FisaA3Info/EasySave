@@ -56,13 +56,13 @@ namespace EasySave.Model
                 UpdateState(jobName, stateTracker, "", "", BackupState.Active);
 
                 // Recursive execution
-                ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker);
+                ExecuteRecursiveAsync(jobName, sourcePath, targetPath, stateTracker).Wait();
 
                 // Update final state
                 UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
             }
 
-        private void ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
+        private async Task ExecuteRecursiveAsync(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {
             try
             {
@@ -127,17 +127,9 @@ namespace EasySave.Model
                     long encryptionTime = 0;
                     FileInfo tgtFile = new FileInfo(targetFilePath);
 
-                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) && !string.IsNullOrEmpty(_settings.EncryptionKey))
                     {
-                        Process encryptFile = new Process();
-                        encryptFile.StartInfo.CreateNoWindow = true;
-                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
-                        encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
-                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
-                        encryptFile.Start();
-
-                        encryptFile.WaitForExit();
-                        encryptionTime = encryptFile.ExitCode;
+                        encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, tgtFile.FullName, _settings.EncryptionKey);
                     }
 
                     // Log the copy operation
@@ -170,7 +162,7 @@ namespace EasySave.Model
                         continue;
                     }
 
-                    ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker);
+                    await ExecuteRecursiveAsync(jobName, subDir.FullName, newTargetDir, stateTracker);
                 }
             }
             catch (Exception ex) {
