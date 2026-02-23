@@ -110,11 +110,24 @@ namespace EasySaveInterface.ViewModels
         [ObservableProperty]
         private string _businessSoftwareName = "";
 
+        [ObservableProperty]
+        private string _logMode = "local"; // "local", "centralized", "both"
+
+        [ObservableProperty]
+        private string _logServerUrl = "";
+
+        [ObservableProperty]
+        private string _machineName = Environment.MachineName;
+
+        [ObservableProperty]
+        private string _userName = Environment.UserName;
+
         private SettingsService _settingsService;
 
         public ObservableCollection<string> Languages { get; } = new() { "Français", "English" };
         public ObservableCollection<string> LogFormats { get; } = new() { "JSON", "XML" };
         public ObservableCollection<string> BackupTypeNames { get; } = new();
+        public ObservableCollection<string> LogModes { get; } = new() { "local", "centralized", "both" };
 
         private Dictionary<string, string> _translations = new();
         public string TextCreateBackup => GetText("create_backup");
@@ -154,6 +167,11 @@ namespace EasySaveInterface.ViewModels
         public string TextBusinessSoftware => GetText("business_software_name");
         public string TextBtnSaveSettings => GetText("btn_save_settings");
         public string TextSettingsSaved => GetText("settings_saved");
+        public string TextLogMode => GetText("txt_log_mode");
+        public string TextMachineName => GetText("txt_machine_name");
+        public string TextUserName => GetText("txt_user_name");
+        public string TextUrlLogServer => GetText("txt_url_log_server");
+        public string TextLogModeIndication => GetText("txt_log_mode_indication");
 
         public bool HasJobs => Jobs.Count > 0;
 
@@ -244,6 +262,11 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextBusinessSoftware));
             OnPropertyChanged(nameof(TextBtnSaveSettings));
             OnPropertyChanged(nameof(TextSettingsSaved));
+            OnPropertyChanged(nameof(TextLogMode));
+            OnPropertyChanged(nameof(TextMachineName));
+            OnPropertyChanged(nameof(TextUserName));
+            OnPropertyChanged(nameof(TextUrlLogServer));
+            OnPropertyChanged(nameof(TextLogModeIndication));
 
             // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
