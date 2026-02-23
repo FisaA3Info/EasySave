@@ -1,25 +1,25 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EasyLog;
 using EasySave.Model;
+using EasySave.Service;
 using EasySave.ViewModel;
+using EasySaveInterface.Converters;
 using HarfBuzzSharp;
 using Microsoft.VisualBasic;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using EasyLog;
-using EasySaveInterface.Converters;
-using EasySave.Service;
 
 namespace EasySaveInterface.ViewModels
 {
@@ -561,5 +561,6 @@ namespace EasySaveInterface.ViewModels
             _settingsService.Save();
             StatusMessage = GetText("settings_saved");
         }
+        
     }
 }

@@ -120,16 +120,42 @@
 
 								<StackPanel>
 									<TextBlock Text="{Binding TextPromptSource}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
-									<TextBox Watermark="Ex: C:\Users\Documents"
-										 Text="{Binding NewJobSource}"
-										 Height="36"/>
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBox Grid.Column="0"
+											Watermark="Ex: C:\Users\Documents"
+											 Text="{Binding NewJobSource}"
+											 Height="36"/>
+										<Button Grid.Column="1"
+												Content="Parcourir"
+												Click="SelectFolder"
+												Tag= "source"
+												Classes="browse"
+												Height="36"
+												Padding="15,0"
+												Margin="8,0,0,0"
+												VerticalContentAlignment="Center"
+												HorizontalContentAlignment="Center"/>
+									</Grid>
 								</StackPanel>
 
 								<StackPanel>
 									<TextBlock Text="{Binding TextPromptTarget}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
-									<TextBox Watermark="Ex: D:\Backups\Documents"
-										 Text="{Binding NewJobTarget}"
-										 Height="36"/>
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBox  Grid.Column="0"
+											Watermark="Ex: D:\Backups\Documents"
+											 Text="{Binding NewJobTarget}"
+											 Height="36"/>
+										<Button Grid.Column="1"
+												Content="Parcourir"
+												Click="SelectFolder"
+												Tag="target"
+												Classes="browse"
+												Height="36"
+												Padding="15,0"
+												Margin="8,0,0,0"
+												VerticalContentAlignment="Center"
+												HorizontalContentAlignment="Center"/>
+									</Grid>
 								</StackPanel>
 
 								<StackPanel>
