@@ -59,6 +59,7 @@
   "job_failed": "Job {0} échoué.",
   "job_paused": "Job {0} mis en pause.",
   "job_resumed": "Job {0} repris.",
+  "job_stopped": "Job {0} arrêté.",
   "BackupSelectionFull": "Complète",
   "BackupSelectionDifferential": "Différentiel",
   "headwarning_title": "⚠️ Attention",

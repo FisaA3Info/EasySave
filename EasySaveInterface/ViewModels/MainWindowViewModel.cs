@@ -33,7 +33,7 @@ namespace EasySaveInterface.ViewModels
         ExecuteSelection,
         Delete,
         ListJobs,
-        Settings
+        Settings,
     }
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -429,7 +429,14 @@ namespace EasySaveInterface.ViewModels
                     Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                     {
                         _runningJobCount--;
-                        AppendStatus(string.Format(GetText("job_completed"), jobName));
+                        if (job.Controller.IsStopped)
+                        {
+                            job.Progress = 0;
+                        }
+                        else
+                        {
+                            AppendStatus(string.Format(GetText("job_completed"), jobName));
+                        }
                     });
                 }
                 catch
@@ -451,6 +458,16 @@ namespace EasySaveInterface.ViewModels
 
             job.Controller.Pause();
             AppendStatus(string.Format(GetText("job_paused"), job.Name ?? ""));
+        }
+
+        [RelayCommand]
+        private void StopJob(BackupJob job)
+        {
+            if (job == null) return;
+            if (job.State != BackupState.Active) return;
+
+            job.Controller.Stop();
+            AppendStatus(string.Format(GetText("job_stopped"), job.Name ?? ""));
         }
 
         [RelayCommand]

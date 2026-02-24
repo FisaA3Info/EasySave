@@ -5,8 +5,10 @@ namespace EasySave.Model
     public class JobController
     {
         private readonly ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
+        private bool _isStopped = false;
 
         public bool IsPaused => !_pauseEvent.IsSet;
+        public bool IsStopped => _isStopped;
 
         public void Pause()
         {
@@ -18,6 +20,12 @@ namespace EasySave.Model
             _pauseEvent.Set();
         }
 
+        public void Stop()
+        {
+            _isStopped = true;
+            _pauseEvent.Set();
+        }
+
         public void WaitIfPaused()
         {
             _pauseEvent.Wait();
@@ -25,6 +33,7 @@ namespace EasySave.Model
 
         public void Reset()
         {
+            _isStopped = false;
             _pauseEvent.Set();
         }
     }
