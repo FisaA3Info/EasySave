@@ -2,14 +2,10 @@ using EasyLog;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
-using EasySave.Service;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime;
-using System.Text;
 using System.Linq;
+using EasySave.Service;
 
 namespace EasySave.Model
 {
@@ -23,6 +19,8 @@ namespace EasySave.Model
         private bool _isError;
 
         private BusinessSoftwareService _businessService;
+        private JobController _controller;
+        private LargeFileTransferManager _largeFileManager;
         private PriorityFileManager _priorityManager;
 
         //get the App settings to get the crypsoft path and the exclusion list
@@ -31,40 +29,39 @@ namespace EasySave.Model
             _settings = settings;
         }
 
-        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, PriorityFileManager priorityManager = null)
+        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null, PriorityFileManager priorityManager = null)
         {
-                _businessService = businessService;
-                _priorityManager = priorityManager;
-                var sourceDir = new DirectoryInfo(sourcePath);
+            _isError = false;
+            _businessService = businessService;
+            _controller = controller;
+            _largeFileManager = largeFileManager;
+            _priorityManager = priorityManager;
 
-                // Verify if source directory exists
-                if (!sourceDir.Exists)
-                {
-                    Console.WriteLine($"[Error] Source not found: {sourcePath}");
-                    return;
-                }
-                // prevent progress bar display
-                if (_isError)
-                {
-                    return;
-                }
+            var sourceDir = new DirectoryInfo(sourcePath);
 
-                // Caculate stats
-                var (fileCount, totalSize) = BackupFileInfo.CalculateDirectoryStats(sourcePath);
-                _totalFiles = fileCount;
-                _totalSize = totalSize;
-                _filesCopied = 0;
-                _sizeCopied = 0;
-
-                // Update initial state
-                UpdateState(jobName, stateTracker, "", "", BackupState.Active);
-
-                // Recursive execution
-                await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker, true);
-
-                // Update final state
-                UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+            // Verify if source directory exists
+            if (!sourceDir.Exists)
+            {
+                Console.WriteLine($"[Error] Source not found: {sourcePath}");
+                return;
             }
+
+            // Caculate stats
+            var (fileCount, totalSize) = BackupFileInfo.CalculateDirectoryStats(sourcePath);
+            _totalFiles = fileCount;
+            _totalSize = totalSize;
+            _filesCopied = 0;
+            _sizeCopied = 0;
+
+            // Update initial state
+            UpdateState(jobName, stateTracker, "", "", BackupState.Active);
+
+            // Recursive execution
+            await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker, true);
+
+            // Update final state
+            UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+        }
 
         private async Task ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, bool isRoot = false)
         {
@@ -87,7 +84,7 @@ namespace EasySave.Model
                         isParent = true;
                         break;
                     }
-                    else tgtDir = tgtDir.Parent;
+                    tgtDir = tgtDir.Parent;
                 }
 
                 //if so prevent from recursion
@@ -106,15 +103,22 @@ namespace EasySave.Model
                 var normalFiles = allFiles.Where(f => !priorityExts.Contains(f.Extension, StringComparer.OrdinalIgnoreCase)).ToList();
 
                 //copy priority files first
-                foreach(var file in priorityFiles)
+                foreach (var file in priorityFiles)
                 {
+                    if (_isError) return;
+                    _controller?.WaitIfPaused();
+                    if (_controller != null && _controller.IsStopped)
+                    {
+                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+                        return;
+                    }
                     await CopyFile(jobName, file, targetPath, stateTracker);
                 }
 
                 //signal priority done only when at root
-                if(isRoot && _priorityManager != null)
+                if (isRoot)
                 {
-                    _priorityManager.SignalPriorityDone();
+                    _priorityManager?.SignalPriorityDone();
                 }
 
                 //wait for all jobs to finish priority files before copying normal files
@@ -123,20 +127,37 @@ namespace EasySave.Model
                     await _priorityManager.WaitForAllPriorityAsync();
                 }
 
+                // Copy normal files
                 foreach (var file in normalFiles)
                 {
+                    if (_isError) return;
+                    _controller?.WaitIfPaused();
+                    if (_controller != null && _controller.IsStopped)
+                    {
+                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+                        return;
+                    }
                     await CopyFile(jobName, file, targetPath, stateTracker);
                 }
 
+                // Recurse into subdirectories
                 foreach (var subDir in sourceDir.GetDirectories())
                 {
+                    if (_isError) return;
+                    if (_controller != null && _controller.IsStopped)
+                    {
+                        UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+                        return;
+                    }
+
                     string newTargetDir = Path.Combine(targetPath, subDir.Name);
 
                     // skip if this subdirectory is the target directory itself
                     DirectoryInfo subDirPath = new DirectoryInfo(subDir.FullName);
                     DirectoryInfo targetRoot = new DirectoryInfo(targetPath);
 
-                    if (string.Equals(subDirPath.FullName, targetRoot.FullName, StringComparison.OrdinalIgnoreCase) || subDirPath.FullName.StartsWith(targetRoot.FullName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(subDirPath.FullName, targetRoot.FullName, StringComparison.OrdinalIgnoreCase) ||
+                        subDirPath.FullName.StartsWith(targetRoot.FullName + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -144,11 +165,12 @@ namespace EasySave.Model
                     await ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker, false);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 _isError = true;
                 Console.WriteLine($"Critical Error: {ex.Message}");
                 UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
-                _priorityManager?.SignalPriorityDone();
+                _priorityManager?.SignalPriorityDone(); // unblock other jobs waiting on priority barrier
             }
         }
 
@@ -165,7 +187,6 @@ namespace EasySave.Model
                 {
                     await Task.Delay(1000);
                 }
-
                 UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Active);
             }
 
@@ -178,29 +199,31 @@ namespace EasySave.Model
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
-            //copy file
-            file.CopyTo(targetFilePath, true);
+            if (_largeFileManager != null)
+                await _largeFileManager.AcquireIfLargeAsync(file.Length);
+            try
+            {
+                file.CopyTo(targetFilePath, true);
+            }
+            finally
+            {
+                if (_largeFileManager != null)
+                    _largeFileManager.ReleaseIfLarge(file.Length);
+            }
 
             timer.Stop();
 
-            //update stats
             _filesCopied++;
             _sizeCopied += file.Length;
 
             long encryptionTime = 0;
             FileInfo tgtFile = new FileInfo(targetFilePath);
 
-            if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+            if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) &&
+                !string.IsNullOrEmpty(_settings.EncryptionKey) &&
+                !string.IsNullOrEmpty(_settings.CryptoSoftPath))
             {
-                Process encryptFile = new Process();
-                encryptFile.StartInfo.CreateNoWindow = true;
-                encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
-                encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
-                encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
-                encryptFile.Start();
-
-                await encryptFile.WaitForExitAsync();
-                encryptionTime = encryptFile.ExitCode;
+                encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, tgtFile.FullName, _settings.EncryptionKey);
             }
 
             //log the copy operation
