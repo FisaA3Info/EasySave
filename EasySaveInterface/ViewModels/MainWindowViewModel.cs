@@ -118,7 +118,7 @@ namespace EasySaveInterface.ViewModels
         private string _priorityExtensions = "";
 
         [ObservableProperty]
-        private string _logMode = "local"; // "local", "centralized", "both"
+        private string _selectedLogMode = "local"; // "local", "centralized", "both"
 
         [ObservableProperty]
         private string _logServerUrl = "";
@@ -222,9 +222,18 @@ namespace EasySaveInterface.ViewModels
             Logger.LogMode = _settingsService.Settings.LogMode;
             Logger.LogServerUrl = _settingsService.Settings.LogServerUrl;
             LoadSettings();
-            
 
-           
+            _selectedLogMode = _settingsService.Settings.LogMode switch
+            {
+                "local" => "Local",
+                "centralized" => "Centralized",
+                "both" => "Both",
+                _ => "Local"
+            };
+            _logServerUrl = _settingsService.Settings.LogServerUrl;
+            _machineName = _settingsService.Settings.MachineName;
+            _userName = _settingsService.Settings.UserName;
+
 
             LoadLanguage("fr");
             RefreshJobList();
@@ -318,18 +327,18 @@ namespace EasySaveInterface.ViewModels
         {
             Logger.LogType = value.ToLower();
         }
-        //partial void OnSelectedLogModeChanged(string value)
-        //{
-        //    string mode = value switch
-        //    {
-        //        "Centralized" => "centralized",
-        //        "Both" => "both",
-        //        _ => "local"
-        //    };
-        //    Logger.LogMode = mode;
-        //    _settingsService.Settings.LogMode = mode;
-        //    _settingsService.Save();
-        //}
+        partial void OnSelectedLogModeChanged(string value)
+        {
+            string mode = value switch
+            {
+                "Centralized" => "centralized",
+                "Both" => "both",
+                _ => "local"
+            };
+            Logger.LogMode = mode;
+            _settingsService.Settings.LogMode = mode;
+            _settingsService.Save();
+        }
 
         // ===== Navigation commands =====
 
@@ -791,6 +800,7 @@ private void LoadSettings()
             SelectedLogFormat = _settingsService.Settings.LogFormat.ToUpper();
             MaxLargeFileSizeText = _settingsService.Settings.MaxLargeFileTransferSizeKb.ToString();
             PriorityExtensions = string.Join(";", _settingsService.Settings.PriorityExtensions);
+            SelectedLogMode = _settingsService.Settings.LogMode;
         }
 
         [RelayCommand]
@@ -827,6 +837,13 @@ private void LoadSettings()
                 }
             }
             _settingsService.Settings.PriorityExtensions = priorityList;
+
+            // LogMode settings
+            _settingsService.Settings.LogServerUrl = LogServerUrl;
+            _settingsService.Settings.MachineName = MachineName;
+            _settingsService.Settings.UserName = UserName;
+
+            Logger.LogServerUrl = LogServerUrl;
 
             _settingsService.Save();
             StatusMessage = GetText("settings_saved");

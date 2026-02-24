@@ -560,18 +560,18 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding TextLogMode}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
                                     <ComboBox ItemsSource="{Binding LogModes}"
-                                              SelectedItem="{Binding LogMode}"
+                                              SelectedItem="{Binding SelectedLogMode}"
                                               Height="36"
                                               HorizontalAlignment="Stretch"/>
                                     <TextBlock Text="{Binding TextLogModeIndication}" Foreground="#808080" FontSize="10" Margin="0,5,0,0" />
                                 </StackPanel>
 
-                                <StackPanel IsVisible="{Binding LogMode, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <StackPanel IsVisible="{Binding SelectedLogMode, Converter={x:Static ObjectConverters.IsNotNull}}">
                                     <TextBlock Text="{Binding TextUrlLogServer}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
                                     <TextBox Watermark="Ex: http://192.168.1.100:5000/"
                                              Text="{Binding LogServerUrl}"
                                              Height="36"
-                                             IsEnabled="{Binding LogMode, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                             IsEnabled="{Binding SelectedLogMode, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                                 </StackPanel>
 
                                 <Grid ColumnDefinitions="*,*">
