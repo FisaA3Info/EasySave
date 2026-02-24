@@ -68,5 +68,17 @@
   "encrypted_extensions": "File Extensions to Encrypt (separated by semicolons):",
   "business_software_name": "Business Software Name:",
   "btn_save_settings": "Save Settings",
-  "settings_saved": "Settings saved successfully."
+  "settings_saved": "Settings saved successfully.",
+  "txt_log_mode": "Log mode : ",
+  "txt_machine_name": "Machine name : ",
+  "txt_user_name": "User name : ",
+  "txt_url_log_server": "Log server URL : ",
+  "txt_log_mode_indication": "• local : Logs are only saved on your computer \n• centralized : Logs are only saved on the server \n• both : Logs are both on local AND on server",
+  "settings_saved": "Settings saved successfully.",
+  "btn_play": "Play",
+  "btn_pause": "Pause",
+  "btn_stop": "Stop",
+  "btn_play_all": "Play All",
+  "btn_pause_all": "Pause All",
+  "btn_stop_all": "Stop All"
 }

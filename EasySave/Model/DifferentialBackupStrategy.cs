@@ -12,6 +12,7 @@ namespace EasySave.Model
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
         private readonly AppSettings _settings;
+        private LargeFileTransferManager _largeFileManager;
 
         //get the App settings to get the crypsoft path and the exclusion list
         public DifferentialBackupStrategy(AppSettings settings)
@@ -21,9 +22,10 @@ namespace EasySave.Model
 
         private BusinessSoftwareService _businessService;
 
-        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, LargeFileTransferManager largeFileManager = null)
         {
             _businessService = businessService;
+            _largeFileManager = largeFileManager;
             //check if target in source
             DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
             DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
@@ -108,7 +110,22 @@ namespace EasySave.Model
                     //creating directory for subdirectorys, starting timer after to measure copy time only
                     Directory.CreateDirectory(targetFolder);
                     timer.Start();
-                    File.Copy(f, targetPath, true);
+
+                    // Lock large files
+                    long currentFileSize = new FileInfo(f).Length;
+                    if (_largeFileManager != null)
+                        await _largeFileManager.AcquireIfLargeAsync(currentFileSize);
+                    try
+                    {
+                        //Copy files
+                        File.Copy(f, targetPath, true);
+                    }
+                    finally
+                    {
+                        if (_largeFileManager != null)
+                            _largeFileManager.ReleaseIfLarge(currentFileSize);
+                    }
+
                     timer.Stop();
 
                     // update progress
