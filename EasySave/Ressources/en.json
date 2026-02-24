@@ -91,5 +91,7 @@
   "btn_stop": "Stop",
   "btn_play_all": "Play All",
   "btn_pause_all": "Pause All",
-  "btn_stop_all": "Stop All"
+  "btn_stop_all": "Stop All",
+  "txt_max_large_file": "Max large file size (KB):",
+  "placeholder_max_large_file": "Ex: 1024 (0 = no limit)"
 }

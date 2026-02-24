@@ -507,7 +507,7 @@
 
 								<!-- Large File Threshold -->
 								<StackPanel>
-									<TextBlock Text="Taille max fichier volumineux (Ko) :"
+									<TextBlock Text="{Binding TextMaxLargeFile}"
 											   Foreground="#CCCCCC"
 											   FontSize="12"
 											   Margin="0,0,0,5"/>

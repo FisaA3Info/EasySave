@@ -172,6 +172,8 @@ namespace EasySaveInterface.ViewModels
         public string TextUserName => GetText("txt_user_name");
         public string TextUrlLogServer => GetText("txt_url_log_server");
         public string TextLogModeIndication => GetText("txt_log_mode_indication");
+        public string TextMaxLargeFile => GetText("txt_max_large_file");
+        public string TextPlaceholderMaxLargeFile => GetText("placeholder_max_large_file");
 
         public bool HasJobs => Jobs.Count > 0;
 
@@ -267,6 +269,8 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextUserName));
             OnPropertyChanged(nameof(TextUrlLogServer));
             OnPropertyChanged(nameof(TextLogModeIndication));
+            OnPropertyChanged(nameof(TextMaxLargeFile));
+            OnPropertyChanged(nameof(TextPlaceholderMaxLargeFile));
 
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
             BackupTypeConverter.DifferentialText = GetText("BackupSelectionDifferential");
@@ -274,7 +278,7 @@ namespace EasySaveInterface.ViewModels
             BackupTypeNames.Add(GetText("BackupSelectionFull"));
             BackupTypeNames.Add(GetText("BackupSelectionDifferential"));
 
-            RefreshJobList();
+            ForceRefreshJobList();
         }
 
         private string GetText(string key)
@@ -731,7 +735,22 @@ namespace EasySaveInterface.ViewModels
             UpdateGlobalProgress();
         }
 
-        private void LoadSettings()
+        private void ForceRefreshJobList()
+        {
+            foreach (var job in Jobs)
+                job.PropertyChanged -= OnJobProgressChanged;
+
+            Jobs.Clear();
+            foreach (var job in _backupManager.BackupJobs)
+            {
+                job.PropertyChanged += OnJobProgressChanged;
+                Jobs.Add(job);
+            }
+            OnPropertyChanged(nameof(HasJobs));
+            UpdateGlobalProgress();
+        }
+
+private void LoadSettings()
         {
             CryptoSoftPath = _settingsService.Settings.CryptoSoftPath;
             EncryptionKey = _settingsService.Settings.EncryptionKey;

@@ -91,5 +91,7 @@
   "btn_stop": "Arrêter",
   "btn_play_all": "Lancer tout",
   "btn_pause_all": "Tout mettre en pause",
-  "btn_stop_all": "Tout arrêter"
+  "btn_stop_all": "Tout arrêter",
+  "txt_max_large_file": "Taille max fichier volumineux (Ko) :",
+  "placeholder_max_large_file": "Ex: 1024 (0 = pas de limite)"
 }
