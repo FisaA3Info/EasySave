@@ -126,8 +126,6 @@ namespace EasySaveInterface.ViewModels
         [ObservableProperty]
         private string _userName = Environment.UserName;
 
-        private SettingsService _settingsService;
-
         public ObservableCollection<string> Languages { get; } = new() { "Français", "English" };
         public ObservableCollection<string> LogFormats { get; } = new() { "JSON", "XML" };
         public ObservableCollection<string> BackupTypeNames { get; } = new();
