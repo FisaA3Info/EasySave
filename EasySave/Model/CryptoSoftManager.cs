@@ -23,18 +23,28 @@ namespace EasySave.Model
                 process.StartInfo.ArgumentList.Add(key);
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.CreateNoWindow = true;
 
                 process.Start();
 
                 var outputTask = process.StandardOutput.ReadToEndAsync();
+                //error not used, to implement in view soon pls
+                var errorTask = process.StandardError.ReadToEndAsync();
 
                 await process.WaitForExitAsync();
 
                 var output = await outputTask;
 
-                //retrieve error and encryption time
-                return output;
+                try
+                {
+                    //retrieve encryption time
+                    return long.Parse(output.Trim());
+                }
+                catch 
+                {
+                    return -1;
+                }
             }
             finally
             {

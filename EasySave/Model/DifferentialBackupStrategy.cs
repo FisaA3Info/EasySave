@@ -21,7 +21,7 @@ namespace EasySave.Model
 
         private BusinessSoftwareService _businessService;
 
-        public async void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
             _businessService = businessService;
             //check if target in source
