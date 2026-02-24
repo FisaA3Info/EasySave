@@ -1,11 +1,26 @@
 version: '3.8'
 services:
   log-server:
-    build: .
+    build: 
+     context: ./EasySaveLogServer
+     dockerfile: Dockerfile
+    container_name: easy-log-server
     ports:
       - "5000:5000"
     volumes:
       - log-data:/app/logs
+    restart: unless-stopped
+
+  easysave:
+    build: 
+     context: ./EasySave
+     dockerfile: Dockerfile
+    container_name: easysave
+    depends_on:
+      log-server:
+       condition: service_healthy
+       restart: true
+
     restart: unless-stopped
 volumes:
   log-data:
