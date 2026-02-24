@@ -9,7 +9,7 @@ namespace EasySave.Model
     {
         private int _totalJobs;
         private int _jobsDone;
-        private readonly ManualResetEventSlim _allPriorityDone = new ManualResetEventSlim(false);
+        private readonly TaskCompletionSource _allPriorityDone = new TaskCompletionSource();
 
         public PriorityFileManager(int totalJobs)
         {
@@ -19,7 +19,7 @@ namespace EasySave.Model
             //if no jobs, signal
             if (totalJobs <= 0)
             {
-                _allPriorityDone.Set();
+                _allPriorityDone.TrySetResult();
             }
         }
 
@@ -28,13 +28,13 @@ namespace EasySave.Model
             int done = Interlocked.Increment(ref _jobsDone);
             if (done >= _totalJobs)
             {
-                _allPriorityDone.Set();
+                _allPriorityDone.TrySetResult();
             }
         }
 
-        public void WaitForAllPriority()
+        public Task WaitForAllPriorityAsync()
         {
-            _allPriorityDone.Wait();
+            return _allPriorityDone.Task;
         }
     }
 }

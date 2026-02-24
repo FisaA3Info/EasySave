@@ -120,7 +120,7 @@ namespace EasySave.Model
                 //wait for all jobs to finish priority files before copying normal files
                 if (_priorityManager != null && normalFiles.Count > 0)
                 {
-                    _priorityManager.WaitForAllPriority();
+                    await _priorityManager.WaitForAllPriorityAsync();
                 }
 
                 foreach (var file in normalFiles)
