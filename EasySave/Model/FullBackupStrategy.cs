@@ -136,17 +136,9 @@ namespace EasySave.Model
                     long encryptionTime = 0;
                     FileInfo tgtFile = new FileInfo(targetFilePath);
 
-                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) && !string.IsNullOrEmpty(_settings.EncryptionKey))
                     {
-                        Process encryptFile = new Process();
-                        encryptFile.StartInfo.CreateNoWindow = true;
-                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
-                        encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
-                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
-                        encryptFile.Start();
-
-                        await encryptFile.WaitForExitAsync();
-                        encryptionTime = encryptFile.ExitCode;
+                        encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, tgtFile.FullName, _settings.EncryptionKey);
                     }
 
                     // Log the copy operation

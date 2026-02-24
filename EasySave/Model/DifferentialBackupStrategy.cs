@@ -21,7 +21,7 @@ namespace EasySave.Model
 
         private BusinessSoftwareService _businessService;
 
-        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async void Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null)
         {
             _businessService = businessService;
             //check if target in source
@@ -144,17 +144,9 @@ namespace EasySave.Model
                     long encryptionTime = 0;
                     FileInfo tgtFile = new FileInfo(targetPath);
 
-                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) && !string.IsNullOrEmpty(_settings.EncryptionKey) && !string.IsNullOrEmpty(_settings.CryptoSoftPath))
                     {
-                        Process encryptFile = new Process();
-                        encryptFile.StartInfo.CreateNoWindow = true;
-                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
-                        encryptFile.StartInfo.ArgumentList.Add(targetPath);
-                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
-                        encryptFile.Start();
-
-                        await encryptFile.WaitForExitAsync();
-                        encryptionTime = encryptFile.ExitCode;
+                        encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, targetPath, _settings.EncryptionKey);
                     }
 
                     //write logs
