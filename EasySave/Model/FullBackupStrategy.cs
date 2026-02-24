@@ -9,6 +9,7 @@ using EasySave.Service;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime;
 using System.Text;
+using System.Linq;
 
 namespace EasySave.Model
 {
@@ -22,6 +23,7 @@ namespace EasySave.Model
         private bool _isError;
 
         private BusinessSoftwareService _businessService;
+        private PriorityFileManager _priorityManager;
 
         //get the App settings to get the crypsoft path and the exclusion list
         public FullBackupStrategy(AppSettings settings)
@@ -29,9 +31,10 @@ namespace EasySave.Model
             _settings = settings;
         }
 
-        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null)
+        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, PriorityFileManager priorityManager = null)
         {
                 _businessService = businessService;
+                _priorityManager = priorityManager;
                 var sourceDir = new DirectoryInfo(sourcePath);
 
                 // Verify if source directory exists
@@ -57,13 +60,13 @@ namespace EasySave.Model
                 UpdateState(jobName, stateTracker, "", "", BackupState.Active);
 
                 // Recursive execution
-                await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker);
+                await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker, true);
 
                 // Update final state
                 UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
             }
 
-        private async Task ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
+        private async Task ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, bool isRoot = false)
         {
             try
             {
@@ -95,75 +98,34 @@ namespace EasySave.Model
                     return;
                 }
 
-                foreach (var file in sourceDir.GetFiles())
+                //sort files: priority first, then non-priority
+                var allFiles = sourceDir.GetFiles();
+                var priorityExts = _settings.PriorityExtensions ?? new List<string>();
+
+                var priorityFiles = allFiles.Where(f => priorityExts.Contains(f.Extension, StringComparer.OrdinalIgnoreCase)).ToList();
+                var normalFiles = allFiles.Where(f => !priorityExts.Contains(f.Extension, StringComparer.OrdinalIgnoreCase)).ToList();
+
+                //copy priority files first
+                foreach(var file in priorityFiles)
                 {
-                    // check if business software started during backup and wait until it stops
-                    if (_businessService != null && _businessService.IsRunning())
-                    {
-                        UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Paused);
-                        var pauseLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -2, 0);
-                        Logger.Log(pauseLog);
+                    await CopyFile(jobName, file, targetPath, stateTracker);
+                }
 
-                        //wait until business software stops (checks every second)
-                        while (_businessService.IsRunning())
-                        {
-                            await Task.Delay(1000); 
-                        }
+                //signal priority done only when at root
+                if(isRoot && _priorityManager != null)
+                {
+                    _priorityManager.SignalPriorityDone();
+                }
 
-                        //resume backup
-                        UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Active);
-                    }
+                //wait for all jobs to finish priority files before copying normal files
+                if (_priorityManager != null && normalFiles.Count > 0)
+                {
+                    await _priorityManager.WaitForAllPriorityAsync();
+                }
 
-
-                    string targetFilePath = Path.Combine(targetPath, file.Name);
-
-                    // Update before copy
-                    UpdateState(jobName, stateTracker, file.FullName, targetFilePath, BackupState.Active);
-
-                    // Measure performance
-                    Stopwatch timer = new Stopwatch();
-                    timer.Start();
-
-                    // Copy file
-                    file.CopyTo(targetFilePath, true);
-
-                    timer.Stop();
-
-                    // Update stats
-                    _filesCopied++;
-                    _sizeCopied += file.Length;
-
-                    long encryptionTime = 0;
-                    FileInfo tgtFile = new FileInfo(targetFilePath);
-
-                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
-                    {
-                        Process encryptFile = new Process();
-                        encryptFile.StartInfo.CreateNoWindow = true;
-                        encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
-                        encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
-                        encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
-                        encryptFile.Start();
-
-                        await encryptFile.WaitForExitAsync();
-                        encryptionTime = encryptFile.ExitCode;
-                    }
-
-                    // Log the copy operation
-                    var logEntry = new LogEntry
-                    (
-                        DateTime.Now,
-                        jobName,
-                        file.FullName,
-                        targetFilePath,
-                        file.Length,
-                        timer.ElapsedMilliseconds,
-                        encryptionTime
-                    );
-                    Logger.Log(logEntry);
-
-                    // Update after copy
-                    UpdateState(jobName, stateTracker, file.FullName, targetFilePath, BackupState.Active);
+                foreach (var file in normalFiles)
+                {
+                    await CopyFile(jobName, file, targetPath, stateTracker);
                 }
 
                 foreach (var subDir in sourceDir.GetDirectories())
@@ -179,21 +141,90 @@ namespace EasySave.Model
                         continue;
                     }
 
-                    await ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker);
+                    await ExecuteRecursive(jobName, subDir.FullName, newTargetDir, stateTracker, false);
                 }
             }
             catch (Exception ex) {
                 _isError = true;
                 Console.WriteLine($"Critical Error: {ex.Message}");
                 UpdateState(jobName, stateTracker, "", "", BackupState.OnError);
+                _priorityManager?.SignalPriorityDone();
             }
+        }
+
+        private async Task CopyFile(string jobName, FileInfo file, string targetPath, StateTracker stateTracker)
+        {
+            //check if business software started during backup and wait until it stops
+            if (_businessService != null && _businessService.IsRunning())
+            {
+                UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Paused);
+                var pauseLog = new LogEntry(DateTime.Now, jobName, file.FullName, "", 0, -2, 0);
+                Logger.Log(pauseLog);
+
+                while (_businessService.IsRunning())
+                {
+                    await Task.Delay(1000);
+                }
+
+                UpdateState(jobName, stateTracker, file.FullName, "", BackupState.Active);
+            }
+
+            string targetFilePath = Path.Combine(targetPath, file.Name);
+
+            //update before copy
+            UpdateState(jobName, stateTracker, file.FullName, targetFilePath, BackupState.Active);
+
+            //measure performance
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            //copy file
+            file.CopyTo(targetFilePath, true);
+
+            timer.Stop();
+
+            //update stats
+            _filesCopied++;
+            _sizeCopied += file.Length;
+
+            long encryptionTime = 0;
+            FileInfo tgtFile = new FileInfo(targetFilePath);
+
+            if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+            {
+                Process encryptFile = new Process();
+                encryptFile.StartInfo.CreateNoWindow = true;
+                encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
+                encryptFile.StartInfo.ArgumentList.Add(tgtFile.FullName);
+                encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
+                encryptFile.Start();
+
+                await encryptFile.WaitForExitAsync();
+                encryptionTime = encryptFile.ExitCode;
+            }
+
+            //log the copy operation
+            var logEntry = new LogEntry
+            (
+                DateTime.Now,
+                jobName,
+                file.FullName,
+                targetFilePath,
+                file.Length,
+                timer.ElapsedMilliseconds,
+                encryptionTime
+            );
+            Logger.Log(logEntry);
+
+            //update after copy
+            UpdateState(jobName, stateTracker, file.FullName, targetFilePath, BackupState.Active);
         }
 
         private void UpdateState(string jobName, StateTracker stateTracker, string sourceFile, string targetFile, BackupState state)
         {
             if (stateTracker == null) return;
 
-            // Calculate progress (%)
+            //calculate progress (%)
             int progress = 0;
             if (_totalFiles > 0)
             {

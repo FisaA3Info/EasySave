@@ -16,5 +16,8 @@ namespace EasySave.Model
 
         // Log format
         public string LogFormat { get; set; } = "json";
+
+        // Priority extensions (copied first when parallel)
+        public List<string> PriorityExtensions { get; set; } = new List<string>();
     }
 }

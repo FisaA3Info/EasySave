@@ -26,6 +26,7 @@ namespace EasySave.ViewModel
         private StateTracker stateTracker;
         private BusinessSoftwareService _businessSoftwareService;
         private AppSettings settings;
+        private PriorityFileManager _priorityFileManager;
         public List<BackupJob> BackupJobs { get; set; }
 
         // path to the json that contains the jobs
@@ -166,7 +167,7 @@ namespace EasySave.ViewModel
             var job = BackupJobs[index - 1];
             try
             {
-                await job.Execute(stateTracker, _businessSoftwareService);
+                await job.Execute(stateTracker, _businessSoftwareService, _priorityFileManager);
                 return true;
             }
             catch (Exception e)
@@ -180,12 +181,14 @@ namespace EasySave.ViewModel
         //executes all the jobs in the list
         public async Task ExecuteAllJobs()
         {
+            _priorityFileManager = new PriorityFileManager(BackupJobs.Count);
             var tasks = new List<Task>();
             for (int i = 1; i <= BackupJobs.Count; i++)
             {
                 tasks.Add(ExecuteJob(i));
             }
             await Task.WhenAll(tasks);
+            _priorityFileManager = null;
         }
 
         //executes a range of jobs
@@ -201,12 +204,15 @@ namespace EasySave.ViewModel
             start = Math.Max(1, start);
             end = Math.Min(BackupJobs.Count, end);
 
+            int jobCount = end - start + 1;
+            _priorityFileManager = new PriorityFileManager(jobCount);
             var tasks = new List<Task>();
-            for (int i = start; i <= end; i++)
+            for(int i = start; i <= end; i++)
             {
                 tasks.Add(ExecuteJob(i));
             }
             await Task.WhenAll(tasks);
+            _priorityFileManager = null;
         }
 
         //executes specific jobs by its index
@@ -220,13 +226,15 @@ namespace EasySave.ViewModel
             var normalized = indexes
                 .Where(i => i >= 1 && i <= BackupJobs.Count)
                 .Distinct()
-                .OrderBy(i => i);
+                .OrderBy(i => i)
+                .ToList();
 
-            if (!normalized.Any())
+            if (normalized.Count == 0)
             {
                 return;
             }
 
+            _priorityFileManager = new PriorityFileManager(normalized.Count);
             var tasks = new List<Task>();
             foreach (var idx in normalized)
             {
@@ -234,6 +242,7 @@ namespace EasySave.ViewModel
                 tasks.Add(ExecuteJob(index));
             }
             await Task.WhenAll(tasks);
+            _priorityFileManager = null;
         }
     }
 }

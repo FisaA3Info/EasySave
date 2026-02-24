@@ -509,6 +509,10 @@
                                     </StackPanel>
                                 </Grid>
 
+								<!-- Priority extensions -->
+								<TextBlock Text="{Binding TextPriorityExtensions}" FontWeight="Bold" Margin="0,10,0,0"/>
+								<TextBox Text="{Binding PriorityExtensions}" Watermark=".docx;.pdf;.xlsx"/>
+								
 								<!-- Save Button -->
 								<Button Content="{Binding TextBtnSaveSettings}"
 										Classes="primary"

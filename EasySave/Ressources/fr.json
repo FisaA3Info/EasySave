@@ -75,5 +75,6 @@
   "txt_url_log_server": "URL du serveur de logs :",
   "txt_log_mode_indication": "• local : Logs uniquement en local \n• centralized : Logs uniquement sur le serveur\n• both : Logs en local ET sur le serveur",
   "browse": "Parcourir",
-  "browser_title": "Sélectionner un dossier"
+  "browser_title": "Sélectionner un dossier",
+  "priority_extensions": "Extensions prioritaires (séparées par des points-virgules)"
 }

@@ -75,5 +75,6 @@
   "txt_url_log_server": "Log server URL : ",
   "txt_log_mode_indication": "• local : Logs are only saved on your computer \n• centralized : Logs are only saved on the server \n• both : Logs are both on local AND on server",
   "browse": "Browse",
-  "browser_title": "Select a folder"
+  "browser_title": "Select a folder",
+  "priority_extensions": "Priority extensions (separated by ;)"
 }
