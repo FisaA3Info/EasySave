@@ -4,7 +4,6 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Formats.Tar;
 using System.IO;
 using System.Linq;
 
@@ -13,27 +12,27 @@ namespace EasySave.Model
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
         private readonly AppSettings _settings;
-        private LargeFileTransferManager _largeFileManager;
-
-        //get the App settings to get the crypsoft path and the exclusion list
-        public DifferentialBackupStrategy(AppSettings settings)
-        {
-            _settings = settings;
-        }
-
         private BusinessSoftwareService _businessService;
         private JobController _controller;
+        private LargeFileTransferManager _largeFileManager;
+        private PriorityFileManager _priorityManager;
         private int _totalFiles;
         private long _totalSize;
         private int _filesCopied;
         private long _sizeCopied;
 
-        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null)
-        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, PriorityFileManager priorityManager = null)
+        public DifferentialBackupStrategy(AppSettings settings)
+        {
+            _settings = settings;
+        }
+
+        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null, PriorityFileManager priorityManager = null)
         {
             _businessService = businessService;
-            _largeFileManager = largeFileManager;
             _controller = controller;
+            _largeFileManager = largeFileManager;
+            _priorityManager = priorityManager;
+
             //check if target in source
             DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
             DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
@@ -46,16 +45,11 @@ namespace EasySave.Model
                     isParent = true;
                     break;
                 }
-                else tgtDir = tgtDir.Parent;
+                tgtDir = tgtDir.Parent;
             }
 
-            //if so prevent from recursion
-            if (isParent)
-            {
-                return;
-            }
+            if (isParent) return;
 
-            // Verify if source directory exists
             if (!Directory.Exists(sourceDir))
             {
                 Console.WriteLine($"[Error] Source not found: {sourceDir}");
@@ -81,6 +75,7 @@ namespace EasySave.Model
             }
 
             _totalFiles = filesToCopy.Count;
+            _totalSize = totalSize;
             _filesCopied = 0;
             _sizeCopied = 0;
 
@@ -89,7 +84,6 @@ namespace EasySave.Model
 
             //sort priority files first then non priority files
             var priorityExts = _settings.PriorityExtensions ?? new List<string>();
-
             var priorityFiles = filesToCopy.Where(f => priorityExts.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase)).ToList();
             var normalFiles = filesToCopy.Where(f => !priorityExts.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase)).ToList();
 
@@ -98,64 +92,39 @@ namespace EasySave.Model
             {
                 // Wait if paused by user
                 _controller?.WaitIfPaused();
-
                 if (_controller != null && _controller.IsStopped)
                 {
-                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, "", "", BackupState.Inactive);
+                    UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
                     return;
                 }
 
-                // check if business software started during backup and wait until it stops
-                if (_businessService != null && _businessService.IsRunning())
-                {
-                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, f, "", BackupState.Paused);
-                    var pauseLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -2, 0);
-                    Logger.Log(pauseLog);
                 await CopyFile(jobName, f, sourceDir, targetDir, stateTracker);
             }
 
             //signal that priority files are done
-            if (priorityManager != null)
-            {
-                priorityManager.SignalPriorityDone();
-            }
+            _priorityManager?.SignalPriorityDone();
 
             //wait for all jobs to finish priority files
-            if (priorityManager != null && normalFiles.Count > 0)
+            if (_priorityManager != null && normalFiles.Count > 0)
             {
-                await priorityManager.WaitForAllPriorityAsync();
+                await _priorityManager.WaitForAllPriorityAsync();
             }
 
             //copy non priority files
             foreach (string f in normalFiles)
             {
+                _controller?.WaitIfPaused();
+                if (_controller != null && _controller.IsStopped)
+                {
+                    UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+                    return;
+                }
                 await CopyFile(jobName, f, sourceDir, targetDir, stateTracker);
             }
 
-            // Update final state
             UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
         }
 
-                    //creating directory for subdirectorys, starting timer after to measure copy time only
-                    Directory.CreateDirectory(targetFolder);
-                    timer.Start();
-
-                    // Lock large files
-                    long currentFileSize = new FileInfo(f).Length;
-                    if (_largeFileManager != null)
-                        await _largeFileManager.AcquireIfLargeAsync(currentFileSize);
-                    try
-                    {
-                        //Copy files
-                        File.Copy(f, targetPath, true);
-                    }
-                    finally
-                    {
-                        if (_largeFileManager != null)
-                            _largeFileManager.ReleaseIfLarge(currentFileSize);
-                    }
-
-                    timer.Stop();
         private async Task CopyFile(string jobName, string f, string sourceDir, string targetDir, StateTracker stateTracker)
         {
             //check if business software started during backup and pause if needed
@@ -165,13 +134,13 @@ namespace EasySave.Model
                 var pauseLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -2, 0);
                 Logger.Log(pauseLog);
 
-                //wait until business software is closed
                 while (_businessService.IsRunning())
                 {
                     await Task.Delay(1000);
                 }
                 UpdateState(jobName, stateTracker, f, "", BackupState.Active);
             }
+
             string relativePath = f.Substring(sourceDir.Length + 1);
             string targetPath = Path.Combine(targetDir, relativePath);
             string? targetFolder = Path.GetDirectoryName(targetPath);
@@ -179,61 +148,38 @@ namespace EasySave.Model
             try
             {
                 Stopwatch timer = new Stopwatch();
-
-                //creating directory for subdirectory, starting timer after to measure copy time only
                 Directory.CreateDirectory(targetFolder);
                 timer.Start();
-                File.Copy(f, targetPath, true);
+
+                long currentFileSize = new FileInfo(f).Length;
+                if (_largeFileManager != null)
+                    await _largeFileManager.AcquireIfLargeAsync(currentFileSize);
+                try
+                {
+                    File.Copy(f, targetPath, true);
+                }
+                finally
+                {
+                    if (_largeFileManager != null)
+                        _largeFileManager.ReleaseIfLarge(currentFileSize);
+                }
+
                 timer.Stop();
 
-                //update progress
                 long fileSize = new FileInfo(targetPath).Length;
                 _filesCopied++;
                 _sizeCopied += fileSize;
 
-                int progress = 0;
-                if (_totalFiles > 0)
-                {
-                    progress = (_filesCopied * 100) / _totalFiles;
-                }
-
-                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) && !string.IsNullOrEmpty(_settings.EncryptionKey) && !string.IsNullOrEmpty(_settings.CryptoSoftPath))
-                    {
-                        encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, targetPath, _settings.EncryptionKey);
-                    }
-                var activeState = new StateEntry
-                {
-                    JobName = jobName,
-                    TimeStamp = DateTime.Now,
-                    State = BackupState.Active,
-                    TotalFiles = _totalFiles,
-                    TotalSize = _totalSize,
-                    Progress = progress,
-                    FilesRemaining = _totalFiles - _filesCopied,
-                    SizeRemaining = _totalSize - _sizeCopied,
-                    CurrentSourceFile = f,
-                    CurrentTargetFile = targetPath
-                };
-
-                if (stateTracker != null)
-                {
-                    stateTracker.UpdateState(activeState);
-                }
+                UpdateState(jobName, stateTracker, f, targetPath, BackupState.Active);
 
                 long encryptionTime = 0;
                 FileInfo tgtFile = new FileInfo(targetPath);
 
-                if (_settings.EncryptedExtensions.Contains(tgtFile.Extension))
+                if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) &&
+                    !string.IsNullOrEmpty(_settings.EncryptionKey) &&
+                    !string.IsNullOrEmpty(_settings.CryptoSoftPath))
                 {
-                    Process encryptFile = new Process();
-                    encryptFile.StartInfo.CreateNoWindow = true;
-                    encryptFile.StartInfo.FileName = _settings.CryptoSoftPath;
-                    encryptFile.StartInfo.ArgumentList.Add(targetPath);
-                    encryptFile.StartInfo.ArgumentList.Add(_settings.EncryptionKey);
-                    encryptFile.Start();
-
-                    await encryptFile.WaitForExitAsync();
-                    encryptionTime = encryptFile.ExitCode;
+                    encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, targetPath, _settings.EncryptionKey);
                 }
 
                 var logEntry = new LogEntry
@@ -246,13 +192,14 @@ namespace EasySave.Model
                     timer.ElapsedMilliseconds,
                     encryptionTime
                 );
-
                 Logger.Log(logEntry);
             }
-            catch (Exception ex) {
-                Console.WriteLine($"Error : {ex}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
             }
         }
+
         private void UpdateState(string jobName, StateTracker stateTracker, string sourceFile, string targetFile, BackupState state)
         {
             if (stateTracker == null) return;

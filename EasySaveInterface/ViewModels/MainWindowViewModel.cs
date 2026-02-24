@@ -318,18 +318,18 @@ namespace EasySaveInterface.ViewModels
         {
             Logger.LogType = value.ToLower();
         }
-        partial void OnSelectedLogModeChanged(string value)
-        {
-            string mode = value switch
-            {
-                "Centralized" => "centralized",
-                "Both" => "both",
-                _ => "local"
-            };
-            Logger.LogMode = mode;
-            _settingsService.Settings.LogMode = mode;
-            _settingsService.Save();
-        }
+        //partial void OnSelectedLogModeChanged(string value)
+        //{
+        //    string mode = value switch
+        //    {
+        //        "Centralized" => "centralized",
+        //        "Both" => "both",
+        //        _ => "local"
+        //    };
+        //    Logger.LogMode = mode;
+        //    _settingsService.Settings.LogMode = mode;
+        //    _settingsService.Save();
+        //}
 
         // ===== Navigation commands =====
 
