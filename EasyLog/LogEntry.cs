@@ -21,7 +21,7 @@ namespace EasyLog
         //required for xml (else no xml log)
         public LogEntry() { }
 
-        public LogEntry (DateTime timeStamp, string backupName, string sourcePath, string targetPath, long fileSize, long transferTimeMs, long encryptionTimeMs)
+        public LogEntry (DateTime timeStamp, string backupName, string sourcePath, string targetPath, long fileSize, long transferTimeMs, long encryptionTimeMs, string machineName = "", string userName = "")
         {
             this.TimeStamp = timeStamp;
             this.BackupName = backupName;
@@ -30,6 +30,8 @@ namespace EasyLog
             this.FileSize = fileSize;
             this.TransferTimeMs = transferTimeMs;
             this.EncryptionTimeMs = encryptionTimeMs;
+            this.MachineName = !string.IsNullOrEmpty(machineName) ? machineName : Environment.MachineName;
+            this.UserName = !string.IsNullOrEmpty(userName) ? userName : Environment.UserName;
         }
     }
 }

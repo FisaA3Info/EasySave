@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace EasyLog
 {
@@ -21,6 +23,9 @@ namespace EasyLog
     {
         //============ attributes  =============
         private static readonly object _lock = new object();
+        private static string _logMode = "local";  // "local", "centralized", "both"
+        private static string _logServerUrl = "";
+        private static readonly HttpClient _httpClient = new HttpClient();
         private static string _logDir;
         private static string _logType;
 
@@ -51,6 +56,17 @@ namespace EasyLog
             }
             set { _logDir = value; }
         }
+        public static string LogMode
+        {
+            get => _logMode;
+            set => _logMode = value ?? "local";
+        }
+
+        public static string LogServerUrl
+        {
+            get => _logServerUrl;
+            set => _logServerUrl = value ?? "";
+        }
 
 
         //============  methods  =================
@@ -67,6 +83,31 @@ namespace EasyLog
             string fileName = $"{DateTime.Now:yyyy-MM-dd}.{LogType}";
             string fullPath = Path.Combine(LogDirectory, fileName);
             return fullPath;
+        }
+
+        private static async Task SendToServerAsync(LogEntry entry)
+        {
+            if (string.IsNullOrWhiteSpace(_logServerUrl))
+                return;
+
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = false };
+                string json = JsonSerializer.Serialize(entry, options);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                string url = _logServerUrl.TrimEnd('/') + "/api/logs";
+                var response = await _httpClient.PostAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.Error.WriteLine($"Log server returned {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to send log to server: {ex.Message}");
+            }
         }
 
         /// <summary>
