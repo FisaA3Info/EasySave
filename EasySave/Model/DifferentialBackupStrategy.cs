@@ -21,11 +21,13 @@ namespace EasySave.Model
         }
 
         private BusinessSoftwareService _businessService;
+        private JobController _controller;
 
-        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, LargeFileTransferManager largeFileManager = null)
+        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null)
         {
             _businessService = businessService;
             _largeFileManager = largeFileManager;
+            _controller = controller;
             //check if target in source
             DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
             DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
@@ -82,6 +84,11 @@ namespace EasySave.Model
             // Copy files.
             foreach (string f in filesToCopy)
             {
+                // Wait if paused by user
+                _controller?.WaitIfPaused();
+
+                if (_controller != null && _controller.IsStopped) return;
+
                 // check if business software started during backup and wait until it stops
                 if (_businessService != null && _businessService.IsRunning())
                 {

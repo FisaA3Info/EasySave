@@ -23,6 +23,7 @@ namespace EasySave.Model
 
         private BusinessSoftwareService _businessService;
         private LargeFileTransferManager _largeFileManager;
+        private JobController _controller;
 
         //get the App settings to get the crypsoft path and the exclusion list
         public FullBackupStrategy(AppSettings settings)
@@ -30,10 +31,11 @@ namespace EasySave.Model
             _settings = settings;
         }
 
-        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, LargeFileTransferManager largeFileManager = null)
+        public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null)
         {
                 _businessService = businessService;
                 _largeFileManager = largeFileManager;
+                _controller = controller;
                 var sourceDir = new DirectoryInfo(sourcePath);
 
                 // Verify if source directory exists
@@ -99,6 +101,12 @@ namespace EasySave.Model
 
                 foreach (var file in sourceDir.GetFiles())
                 {
+                    // Wait if paused by user
+                    _controller?.WaitIfPaused();
+
+              
+                    if (_controller != null && _controller.IsStopped) return;
+
                     // check if business software started during backup and wait until it stops
                     if (_businessService != null && _businessService.IsRunning())
                     {

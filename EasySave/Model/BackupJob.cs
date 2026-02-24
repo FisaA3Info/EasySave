@@ -25,6 +25,7 @@ namespace EasySave.Model
         public BackupType? Type { get; set; }
         public BackupState? State { get; set; }
         internal IBackupStrategy? Strategy { get; set; }
+        public JobController Controller { get; } = new JobController();
         private readonly AppSettings _settings;
 
         private int _progress;
@@ -59,7 +60,7 @@ namespace EasySave.Model
         // Called by StateTracker when state changes
         public void OnStateChanged(StateEntry entry)
         {
-            if (entry.JobName == Name)
+            if (entry.JobName == Name && !Controller.IsStopped)
             {
                 Progress = entry.Progress;
             }
@@ -71,11 +72,12 @@ namespace EasySave.Model
             {
                 Progress = 0;
                 State = BackupState.Active;
+                Controller.Reset();
 
                 // Listen to state changes for progress updates
                 stateTracker?.AttachObserver(this);
 
-                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService, largeFileManager);
+                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService, Controller, largeFileManager);
                 State = BackupState.Inactive;
             }
             catch (Exception)
