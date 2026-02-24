@@ -28,6 +28,7 @@ namespace EasySave.ViewModel
         private AppSettings settings;
         private PriorityFileManager _priorityFileManager;
         public List<BackupJob> BackupJobs { get; set; }
+        private LargeFileTransferManager _largeFileTransferManager;
 
         // path to the json that contains the jobs
         private static readonly string JobsFilePath = Path.Combine(
@@ -41,6 +42,7 @@ namespace EasySave.ViewModel
             this.stateTracker = stateTracker;
             this.settings = settings ?? new AppSettings();
             this._businessSoftwareService = businessSoftwareService;
+            this._largeFileTransferManager = new LargeFileTransferManager(this.settings.MaxLargeFileTransferSizeKb);
             BackupJobs = new List<BackupJob>();
             LoadJobs();  // Load existing jobs
         }
@@ -167,7 +169,7 @@ namespace EasySave.ViewModel
             var job = BackupJobs[index - 1];
             try
             {
-                await job.Execute(stateTracker, _businessSoftwareService, _priorityFileManager);
+                await job.Execute(stateTracker, _businessSoftwareService, _largeFileTransferManager, _priorityFileManager);
                 return true;
             }
             catch (Exception e)

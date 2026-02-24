@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,15 +10,37 @@ using EasySave.Service;
 
 namespace EasySave.Model
 {
-    public class BackupJob
+    public class BackupJob : INotifyPropertyChanged, IStateObserver
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public string? Name { get; set; }
         public string? SourceDir { get; set; }
         public string? TargetDir { get; set; }
         public BackupType? Type { get; set; }
         public BackupState? State { get; set; }
         internal IBackupStrategy? Strategy { get; set; }
+        public JobController Controller { get; } = new JobController();
         private readonly AppSettings _settings;
+
+        private int _progress;
+        public int Progress
+        {
+            get => _progress;
+            set
+            {
+                if (_progress != value)
+                {
+                    _progress = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public BackupJob(string name, string sourceDir, string targetDir, BackupType type, AppSettings settings)
         {
@@ -33,12 +57,27 @@ namespace EasySave.Model
                 Strategy = new DifferentialBackupStrategy(_settings);
         }
 
-        public async Task Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null, PriorityFileManager priorityManager = null)
+        // Called by StateTracker when state changes
+        public void OnStateChanged(StateEntry entry)
+        {
+            if (entry.JobName == Name && !Controller.IsStopped)
+            {
+                Progress = entry.Progress;
+            }
+        }
+
+        public async Task Execute(StateTracker stateTracker, BusinessSoftwareService businessService = null, LargeFileTransferManager largeFileManager = null, PriorityFileManager priorityManager = null)
         {
             try
             {
+                Progress = 0;
                 State = BackupState.Active;
-                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService, priorityManager);
+                Controller.Reset();
+
+                // Listen to state changes for progress updates
+                stateTracker?.AttachObserver(this);
+
+                await Strategy.Execute(Name, SourceDir, TargetDir, stateTracker, businessService, Controller, largeFileManager, priorityManager);
                 State = BackupState.Inactive;
             }
             catch (Exception)
@@ -58,8 +97,11 @@ namespace EasySave.Model
                     };
                     stateTracker.UpdateState(errorEntry);
                 }
-                // send the exception in the try catch executeJob in backup manager
                 throw;
+            }
+            finally
+            {
+                stateTracker?.DetachObserver(this);
             }
         }
 

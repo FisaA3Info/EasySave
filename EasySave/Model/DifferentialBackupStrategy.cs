@@ -13,6 +13,7 @@ namespace EasySave.Model
     internal class DifferentialBackupStrategy : IBackupStrategy
     {
         private readonly AppSettings _settings;
+        private LargeFileTransferManager _largeFileManager;
 
         //get the App settings to get the crypsoft path and the exclusion list
         public DifferentialBackupStrategy(AppSettings settings)
@@ -21,14 +22,18 @@ namespace EasySave.Model
         }
 
         private BusinessSoftwareService _businessService;
+        private JobController _controller;
         private int _totalFiles;
         private long _totalSize;
         private int _filesCopied;
         private long _sizeCopied;
 
+        public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null)
         public async Task Execute(string jobName, string sourceDir, string targetDir, StateTracker stateTracker, BusinessSoftwareService businessService = null, PriorityFileManager priorityManager = null)
         {
             _businessService = businessService;
+            _largeFileManager = largeFileManager;
+            _controller = controller;
             //check if target in source
             DirectoryInfo srcDir = new DirectoryInfo(sourceDir);
             DirectoryInfo tgtDir = new DirectoryInfo(targetDir);
@@ -91,6 +96,21 @@ namespace EasySave.Model
             //copy priority files first
             foreach (string f in priorityFiles)
             {
+                // Wait if paused by user
+                _controller?.WaitIfPaused();
+
+                if (_controller != null && _controller.IsStopped)
+                {
+                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, "", "", BackupState.Inactive);
+                    return;
+                }
+
+                // check if business software started during backup and wait until it stops
+                if (_businessService != null && _businessService.IsRunning())
+                {
+                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, f, "", BackupState.Paused);
+                    var pauseLog = new LogEntry(DateTime.Now, jobName, f, "", 0, -2, 0);
+                    Logger.Log(pauseLog);
                 await CopyFile(jobName, f, sourceDir, targetDir, stateTracker);
             }
 
@@ -116,6 +136,26 @@ namespace EasySave.Model
             UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
         }
 
+                    //creating directory for subdirectorys, starting timer after to measure copy time only
+                    Directory.CreateDirectory(targetFolder);
+                    timer.Start();
+
+                    // Lock large files
+                    long currentFileSize = new FileInfo(f).Length;
+                    if (_largeFileManager != null)
+                        await _largeFileManager.AcquireIfLargeAsync(currentFileSize);
+                    try
+                    {
+                        //Copy files
+                        File.Copy(f, targetPath, true);
+                    }
+                    finally
+                    {
+                        if (_largeFileManager != null)
+                            _largeFileManager.ReleaseIfLarge(currentFileSize);
+                    }
+
+                    timer.Stop();
         private async Task CopyFile(string jobName, string f, string sourceDir, string targetDir, StateTracker stateTracker)
         {
             //check if business software started during backup and pause if needed
@@ -157,6 +197,10 @@ namespace EasySave.Model
                     progress = (_filesCopied * 100) / _totalFiles;
                 }
 
+                    if (_settings.EncryptedExtensions.Contains(tgtFile.Extension) && !string.IsNullOrEmpty(_settings.EncryptionKey) && !string.IsNullOrEmpty(_settings.CryptoSoftPath))
+                    {
+                        encryptionTime = await CryptoSoftManager.EncryptAsync(_settings.CryptoSoftPath, targetPath, _settings.EncryptionKey);
+                    }
                 var activeState = new StateEntry
                 {
                     JobName = jobName,

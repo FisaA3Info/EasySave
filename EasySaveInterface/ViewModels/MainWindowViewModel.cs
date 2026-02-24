@@ -33,7 +33,7 @@ namespace EasySaveInterface.ViewModels
         ExecuteSelection,
         Delete,
         ListJobs,
-        Settings
+        Settings,
     }
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -112,6 +112,9 @@ namespace EasySaveInterface.ViewModels
         private string _businessSoftwareName = "";
 
         [ObservableProperty]
+        private string _maxLargeFileSizeText = "0";
+
+        [ObservableProperty]
         private string _priorityExtensions = "";
 
         [ObservableProperty]
@@ -176,6 +179,8 @@ namespace EasySaveInterface.ViewModels
         public string TextUserName => GetText("txt_user_name");
         public string TextUrlLogServer => GetText("txt_url_log_server");
         public string TextLogModeIndication => GetText("txt_log_mode_indication");
+        public string TextMaxLargeFile => GetText("txt_max_large_file");
+        public string TextPlaceholderMaxLargeFile => GetText("placeholder_max_large_file");
         public string TextBrowse => GetText("browse");
         public string TextBrowserTitle => GetText("browser_title");
 
@@ -281,18 +286,19 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextUserName));
             OnPropertyChanged(nameof(TextUrlLogServer));
             OnPropertyChanged(nameof(TextLogModeIndication));
+            OnPropertyChanged(nameof(TextMaxLargeFile));
+            OnPropertyChanged(nameof(TextPlaceholderMaxLargeFile));
             OnPropertyChanged(nameof(TextPriorityExtensions));
             OnPropertyChanged(nameof(TextBrowse));
             OnPropertyChanged(nameof(TextBrowserTitle));
 
-            // Mettre à jour les noms de types traduits
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
             BackupTypeConverter.DifferentialText = GetText("BackupSelectionDifferential");
             BackupTypeNames.Clear();
             BackupTypeNames.Add(GetText("BackupSelectionFull"));
             BackupTypeNames.Add(GetText("BackupSelectionDifferential"));
 
-            RefreshJobList();
+            ForceRefreshJobList();
         }
 
         private string GetText(string key)
@@ -434,6 +440,174 @@ namespace EasySaveInterface.ViewModels
             RefreshJobList();
         }
 
+        private int _runningJobCount = 0;
+
+        private void AppendStatus(string msg)
+        {
+            if (string.IsNullOrEmpty(StatusMessage))
+                StatusMessage = msg;
+            else
+                StatusMessage = StatusMessage + "\n" + msg;
+        }
+
+        [RelayCommand]
+        private async Task PlayJobAsync(BackupJob job)
+        {
+            if (job == null) return;
+
+            string jobName = job.Name ?? "";
+
+            // If paused, resume
+            if (job.State == BackupState.Active && job.Controller.IsPaused)
+            {
+                job.Controller.Resume();
+                AppendStatus(string.Format(GetText("job_resumed"), jobName));
+                return;
+            }
+
+            // If already running, do nothing
+            if (job.State == BackupState.Active)
+                return;
+
+            if (!CheckSourceDirs(new List<BackupJob> { job }))
+                return;
+
+            int index = _backupManager.BackupJobs.IndexOf(job) + 1;
+
+            if (_runningJobCount == 0)
+                StatusMessage = "";
+
+            _runningJobCount++;
+            AppendStatus(string.Format(GetText("executing_job"), jobName));
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _backupManager.ExecuteJob(index);
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        _runningJobCount--;
+                        if (job.Controller.IsStopped)
+                        {
+                            job.Progress = 0;
+                        }
+                        else
+                        {
+                            AppendStatus(string.Format(GetText("job_completed"), jobName));
+                        }
+                    });
+                }
+                catch
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        _runningJobCount--;
+                        AppendStatus(string.Format(GetText("job_failed"), jobName));
+                    });
+                }
+            });
+        }
+
+        [RelayCommand]
+        private void PauseJob(BackupJob job)
+        {
+            if (job == null) return;
+            if (job.State != BackupState.Active) return;
+
+            job.Controller.Pause();
+            AppendStatus(string.Format(GetText("job_paused"), job.Name ?? ""));
+        }
+
+        [RelayCommand]
+        private void StopJob(BackupJob job)
+        {
+            if (job == null) return;
+            if (job.State != BackupState.Active) return;
+
+            job.Controller.Stop();
+            job.Progress = 0;
+            AppendStatus(string.Format(GetText("job_stopped"), job.Name ?? ""));
+        }
+
+        [RelayCommand]
+        private void PlayAllJobs()
+        {
+            if (_backupManager.BackupJobs.Count == 0) { StatusMessage = GetText("no_jobs"); return; }
+
+            bool anyResumed = false;
+            bool anyStarted = false;
+
+            foreach (var job in Jobs.ToList())
+            {
+                if (job.State == BackupState.Active && job.Controller.IsStopped) continue;
+
+                if (job.State == BackupState.Active && job.Controller.IsPaused)
+                {
+                    job.Controller.Resume();
+                    anyResumed = true;
+                    continue;
+                }
+
+                if (job.State == BackupState.Active) continue;
+
+                if (!Directory.Exists(job.SourceDir)) continue;
+
+                int index = _backupManager.BackupJobs.IndexOf(job) + 1;
+                anyStarted = true;
+                _runningJobCount++;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _backupManager.ExecuteJob(index);
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            _runningJobCount--;
+                            if (job.Controller.IsStopped)
+                                job.Progress = 0;
+                            else if (_runningJobCount == 0)
+                                StatusMessage = GetText("all_completed");
+                        });
+                    }
+                    catch
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => _runningJobCount--);
+                    }
+                });
+            }
+
+            if (anyResumed && !anyStarted)
+                StatusMessage = GetText("all_resumed");
+            else if (anyStarted)
+                StatusMessage = GetText("all_started");
+        }
+
+        [RelayCommand]
+        private void PauseAllJobs()
+        {
+            foreach (var job in Jobs)
+            {
+                if (job.State == BackupState.Active && !job.Controller.IsPaused)
+                    job.Controller.Pause();
+            }
+            StatusMessage = GetText("all_paused");
+        }
+
+        [RelayCommand]
+        private void StopAllJobs()
+        {
+            foreach (var job in Jobs)
+            {
+                if (job.State == BackupState.Active)
+                {
+                    job.Controller.Stop();
+                    job.Progress = 0;
+                }
+            }
+            StatusMessage = GetText("all_stopped");
+        }
+
         [RelayCommand]
         private async Task ExecuteAllJobsAsync()
         {
@@ -548,24 +722,74 @@ namespace EasySaveInterface.ViewModels
             return true;
         }
 
+        [ObservableProperty]
+        private int _globalProgress = 0;
+
+        private void UpdateGlobalProgress()
+        {
+            if (Jobs.Count == 0) { GlobalProgress = 0; return; }
+            GlobalProgress = (int)Jobs.Average(j => j.Progress);
+        }
+
+        private void OnJobProgressChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(BackupJob.Progress)) return;
+
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                UpdateGlobalProgress();
+            else
+                Avalonia.Threading.Dispatcher.UIThread.Post(UpdateGlobalProgress);
+        }
+
         [RelayCommand]
         private void RefreshJobList()
         {
-            Jobs.Clear();
-            foreach (var job in _backupManager.BackupJobs)
+            var backupJobs = _backupManager.BackupJobs;
+
+            bool same = Jobs.Count == backupJobs.Count &&
+                        Jobs.Zip(backupJobs, (a, b) => a == b).All(x => x);
+            if (same)
             {
+                UpdateGlobalProgress();
+                return;
+            }
+
+            foreach (var job in Jobs)
+                job.PropertyChanged -= OnJobProgressChanged;
+
+            Jobs.Clear();
+            foreach (var job in backupJobs)
+            {
+                job.PropertyChanged += OnJobProgressChanged;
                 Jobs.Add(job);
             }
             OnPropertyChanged(nameof(HasJobs));
+            UpdateGlobalProgress();
         }
 
-        private void LoadSettings()
+        private void ForceRefreshJobList()
+        {
+            foreach (var job in Jobs)
+                job.PropertyChanged -= OnJobProgressChanged;
+
+            Jobs.Clear();
+            foreach (var job in _backupManager.BackupJobs)
+            {
+                job.PropertyChanged += OnJobProgressChanged;
+                Jobs.Add(job);
+            }
+            OnPropertyChanged(nameof(HasJobs));
+            UpdateGlobalProgress();
+        }
+
+private void LoadSettings()
         {
             CryptoSoftPath = _settingsService.Settings.CryptoSoftPath;
             EncryptionKey = _settingsService.Settings.EncryptionKey;
             EncryptedExtensions = string.Join(";", _settingsService.Settings.EncryptedExtensions);
             BusinessSoftwareName = _settingsService.Settings.BusinessSoftwareName;
             SelectedLogFormat = _settingsService.Settings.LogFormat.ToUpper();
+            MaxLargeFileSizeText = _settingsService.Settings.MaxLargeFileTransferSizeKb.ToString();
             PriorityExtensions = string.Join(";", _settingsService.Settings.PriorityExtensions);
         }
 
@@ -588,6 +812,8 @@ namespace EasySaveInterface.ViewModels
             _settingsService.Settings.EncryptedExtensions = extensionList;
             _settingsService.Settings.BusinessSoftwareName = BusinessSoftwareName;
             _settingsService.Settings.LogFormat = SelectedLogFormat.ToLower();
+            if (long.TryParse(MaxLargeFileSizeText, out long sizeKb))
+                _settingsService.Settings.MaxLargeFileTransferSizeKb = sizeKb;
 
             // get priority extensions
             var priorityList = new List<string>();
