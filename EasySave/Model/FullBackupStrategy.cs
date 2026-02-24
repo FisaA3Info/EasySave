@@ -33,39 +33,40 @@ namespace EasySave.Model
 
         public async Task Execute(string jobName, string sourcePath, string targetPath, StateTracker stateTracker, BusinessSoftwareService businessService = null, JobController controller = null, LargeFileTransferManager largeFileManager = null)
         {
-                _businessService = businessService;
-                _largeFileManager = largeFileManager;
-                _controller = controller;
-                var sourceDir = new DirectoryInfo(sourcePath);
+            _isError = false;
+            _businessService = businessService;
+            _largeFileManager = largeFileManager;
+            _controller = controller;
+            var sourceDir = new DirectoryInfo(sourcePath);
 
-                // Verify if source directory exists
-                if (!sourceDir.Exists)
-                {
-                    Console.WriteLine($"[Error] Source not found: {sourcePath}");
-                    return;
-                }
-                // prevent progress bar display
-                if (_isError)
-                {
-                    return;
-                }
-
-                // Caculate stats
-                var (fileCount, totalSize) = BackupFileInfo.CalculateDirectoryStats(sourcePath);
-                _totalFiles = fileCount;
-                _totalSize = totalSize;
-                _filesCopied = 0;
-                _sizeCopied = 0;
-
-                // Update initial state
-                UpdateState(jobName, stateTracker, "", "", BackupState.Active);
-
-                // Recursive execution
-                await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker);
-
-                // Update final state
-                UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+            // Verify if source directory exists
+            if (!sourceDir.Exists)
+            {
+                Console.WriteLine($"[Error] Source not found: {sourcePath}");
+                return;
             }
+            // prevent progress bar display
+            if (_isError)
+            {
+                return;
+            }
+
+            // Caculate stats
+            var (fileCount, totalSize) = BackupFileInfo.CalculateDirectoryStats(sourcePath);
+            _totalFiles = fileCount;
+            _totalSize = totalSize;
+            _filesCopied = 0;
+            _sizeCopied = 0;
+
+            // Update initial state
+            UpdateState(jobName, stateTracker, "", "", BackupState.Active);
+
+            // Recursive execution
+            await ExecuteRecursive(jobName, sourcePath, targetPath, stateTracker);
+
+            // Update final state
+            UpdateState(jobName, stateTracker, "", "", BackupState.Inactive);
+        }
 
         private async Task ExecuteRecursive(string jobName, string sourcePath, string targetPath, StateTracker stateTracker)
         {

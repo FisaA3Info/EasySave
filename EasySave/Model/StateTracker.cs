@@ -30,20 +30,25 @@ namespace EasySave.Model
             LoadState();
         }
 
-        //Observer Management Section
+        //Observer Management Section + lock for async
         public void AttachObserver(IStateObserver observer)
         {
-            if(observer == null) return;
-            if (!observers.Contains(observer))
+            if (observer == null) return;
+            lock (_lock)
             {
-                observers.Add(observer);
+                if (!observers.Contains(observer))
+                {
+                    observers.Add(observer);
+                }
             }
         }
-           
         public void DetachObserver(IStateObserver observer)
         {
             if (observer == null) return;
-            observers.Remove(observer);
+            lock (_lock)
+            {
+                observers.Remove(observer);
+            }
         }
 
         private void NotifyObservers(StateEntry entry)

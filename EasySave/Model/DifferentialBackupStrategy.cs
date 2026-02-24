@@ -87,7 +87,11 @@ namespace EasySave.Model
                 // Wait if paused by user
                 _controller?.WaitIfPaused();
 
-                if (_controller != null && _controller.IsStopped) return;
+                if (_controller != null && _controller.IsStopped)
+                {
+                    UpdateState(jobName, stateTracker, totalFiles, totalSize, filesCopied, sizeCopied, "", "", BackupState.Inactive);
+                    return;
+                }
 
                 // check if business software started during backup and wait until it stops
                 if (_businessService != null && _businessService.IsRunning())
