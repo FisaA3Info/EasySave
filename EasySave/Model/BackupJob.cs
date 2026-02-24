@@ -60,7 +60,7 @@ namespace EasySave.Model
         // Called by StateTracker when state changes
         public void OnStateChanged(StateEntry entry)
         {
-            if (entry.JobName == Name)
+            if (entry.JobName == Name && !Controller.IsStopped)
             {
                 Progress = entry.Progress;
             }

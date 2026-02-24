@@ -467,7 +467,86 @@ namespace EasySaveInterface.ViewModels
             if (job.State != BackupState.Active) return;
 
             job.Controller.Stop();
+            job.Progress = 0;
             AppendStatus(string.Format(GetText("job_stopped"), job.Name ?? ""));
+        }
+
+        [RelayCommand]
+        private void PlayAllJobs()
+        {
+            if (_backupManager.BackupJobs.Count == 0) { StatusMessage = GetText("no_jobs"); return; }
+
+            bool anyResumed = false;
+            bool anyStarted = false;
+
+            foreach (var job in Jobs.ToList())
+            {
+                if (job.State == BackupState.Active && job.Controller.IsStopped) continue;
+
+                if (job.State == BackupState.Active && job.Controller.IsPaused)
+                {
+                    job.Controller.Resume();
+                    anyResumed = true;
+                    continue;
+                }
+
+                if (job.State == BackupState.Active) continue;
+
+                if (!Directory.Exists(job.SourceDir)) continue;
+
+                int index = _backupManager.BackupJobs.IndexOf(job) + 1;
+                anyStarted = true;
+                _runningJobCount++;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _backupManager.ExecuteJob(index);
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            _runningJobCount--;
+                            if (job.Controller.IsStopped)
+                                job.Progress = 0;
+                            else if (_runningJobCount == 0)
+                                StatusMessage = GetText("all_completed");
+                        });
+                    }
+                    catch
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => _runningJobCount--);
+                    }
+                });
+            }
+
+            if (anyResumed && !anyStarted)
+                StatusMessage = GetText("all_resumed");
+            else if (anyStarted)
+                StatusMessage = GetText("all_started");
+        }
+
+        [RelayCommand]
+        private void PauseAllJobs()
+        {
+            foreach (var job in Jobs)
+            {
+                if (job.State == BackupState.Active && !job.Controller.IsPaused)
+                    job.Controller.Pause();
+            }
+            StatusMessage = GetText("all_paused");
+        }
+
+        [RelayCommand]
+        private void StopAllJobs()
+        {
+            foreach (var job in Jobs)
+            {
+                if (job.State == BackupState.Active)
+                {
+                    job.Controller.Stop();
+                    job.Progress = 0;
+                }
+            }
+            StatusMessage = GetText("all_stopped");
         }
 
         [RelayCommand]
@@ -584,15 +663,49 @@ namespace EasySaveInterface.ViewModels
             return true;
         }
 
+        [ObservableProperty]
+        private int _globalProgress = 0;
+
+        private void UpdateGlobalProgress()
+        {
+            if (Jobs.Count == 0) { GlobalProgress = 0; return; }
+            GlobalProgress = (int)Jobs.Average(j => j.Progress);
+        }
+
+        private void OnJobProgressChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(BackupJob.Progress)) return;
+
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                UpdateGlobalProgress();
+            else
+                Avalonia.Threading.Dispatcher.UIThread.Post(UpdateGlobalProgress);
+        }
+
         [RelayCommand]
         private void RefreshJobList()
         {
-            Jobs.Clear();
-            foreach (var job in _backupManager.BackupJobs)
+            var backupJobs = _backupManager.BackupJobs;
+
+            bool same = Jobs.Count == backupJobs.Count &&
+                        Jobs.Zip(backupJobs, (a, b) => a == b).All(x => x);
+            if (same)
             {
+                UpdateGlobalProgress();
+                return;
+            }
+
+            foreach (var job in Jobs)
+                job.PropertyChanged -= OnJobProgressChanged;
+
+            Jobs.Clear();
+            foreach (var job in backupJobs)
+            {
+                job.PropertyChanged += OnJobProgressChanged;
                 Jobs.Add(job);
             }
             OnPropertyChanged(nameof(HasJobs));
+            UpdateGlobalProgress();
         }
 
         private void LoadSettings()
