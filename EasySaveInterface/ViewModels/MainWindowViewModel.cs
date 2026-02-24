@@ -39,6 +39,7 @@ namespace EasySaveInterface.ViewModels
     {
         private readonly BackupManager _backupManager;
         private readonly StateTracker _stateTracker;
+        private readonly SettingsService _settingsService;
 
         // Job list
         [ObservableProperty]
@@ -213,7 +214,15 @@ namespace EasySaveInterface.ViewModels
             _settingsService = new SettingsService();
             var businessService = new BusinessSoftwareService(_settingsService.Settings.BusinessSoftwareName);
             _backupManager = new BackupManager(_stateTracker, _settingsService.Settings, businessService);
+            // Set logger configuration from settings
+            Logger.LogType = _settingsService.Settings.LogFormat;
+            Logger.LogMode = _settingsService.Settings.LogMode;
+            Logger.LogServerUrl = _settingsService.Settings.LogServerUrl;
             LoadSettings();
+            
+
+           
+
             LoadLanguage("fr");
             RefreshJobList();
         }
@@ -304,6 +313,18 @@ namespace EasySaveInterface.ViewModels
         partial void OnSelectedLogFormatChanged(string value)
         {
             Logger.LogType = value.ToLower();
+        }
+        partial void OnSelectedLogModeChanged(string value)
+        {
+            string mode = value switch
+            {
+                "Centralized" => "centralized",
+                "Both" => "both",
+                _ => "local"
+            };
+            Logger.LogMode = mode;
+            _settingsService.Settings.LogMode = mode;
+            _settingsService.Save();
         }
 
         // ===== Navigation commands =====
