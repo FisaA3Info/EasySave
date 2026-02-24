@@ -116,7 +116,25 @@ namespace EasyLog
         /// 
         /// </summary>
         /// <param name="entry"></param>
+        /// 
+
         public static void Log(LogEntry entry)
+        {
+            // Ecriture locale si mode "local" ou "both"
+            if (_logMode == "local" || _logMode == "both")
+            {
+                WriteLocal(entry);
+            }
+
+            // Envoi au serveur si mode "centralized" ou "both"
+            if (_logMode == "centralized" || _logMode == "both")
+            {
+                // Fire-and-forget : on ne bloque pas l'execution du backup
+                _ = Task.Run(() => SendToServerAsync(entry));
+            }
+        }
+
+        public static void WriteLocal(LogEntry entry)
         {
             //protects from concurrent conflicts (in case but will be utile for multithreading)
             lock (_lock)

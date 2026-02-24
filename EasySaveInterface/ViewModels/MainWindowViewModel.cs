@@ -38,6 +38,7 @@ namespace EasySaveInterface.ViewModels
     {
         private readonly BackupManager _backupManager;
         private readonly StateTracker _stateTracker;
+        private readonly SettingsService _settingsService;
 
         // Job list
         [ObservableProperty]
@@ -95,6 +96,20 @@ namespace EasySaveInterface.ViewModels
 
         [ObservableProperty]
         private string _selectedLogFormat = "JSON";
+
+        [ObservableProperty]
+        private string _selectedLogMode = "Local";
+
+        [ObservableProperty]
+        private string _logServerUrl = "";
+
+        [ObservableProperty]
+        private string _machineName = "";
+
+        [ObservableProperty]
+        private string _userName = "";
+
+        public ObservableCollection<string> LogModes { get; } = new() { "Local", "Centralized", "Both" };
 
         public ObservableCollection<string> Languages { get; } = new() { "Français", "English" };
         public ObservableCollection<string> LogFormats { get; } = new() { "JSON", "XML" };
@@ -159,9 +174,15 @@ namespace EasySaveInterface.ViewModels
         public MainWindowViewModel()
         {
             _stateTracker = new StateTracker();
-            var settingsService = new SettingsService();
-            var businessService = new BusinessSoftwareService(settingsService.Settings.BusinessSoftwareName);
-            _backupManager = new BackupManager(_stateTracker, settingsService.Settings, businessService);
+            _settingsService = new SettingsService();
+            var businessService = new BusinessSoftwareService(_settingsService.Settings.BusinessSoftwareName);
+            _backupManager = new BackupManager(_stateTracker, _settingsService.Settings, businessService);
+
+            // Set logger configuration from settings
+            Logger.LogType = _settingsService.Settings.LogFormat;
+            Logger.LogMode = _settingsService.Settings.LogMode;
+            Logger.LogServerUrl = _settingsService.Settings.LogServerUrl;
+
             LoadLanguage("fr");
             RefreshJobList();
         }
@@ -236,6 +257,18 @@ namespace EasySaveInterface.ViewModels
         partial void OnSelectedLogFormatChanged(string value)
         {
             Logger.LogType = value.ToLower();
+        }
+        partial void OnSelectedLogModeChanged(string value)
+        {
+            string mode = value switch
+            {
+                "Centralized" => "centralized",
+                "Both" => "both",
+                _ => "local"
+            };
+            Logger.LogMode = mode;
+            _settingsService.Settings.LogMode = mode;
+            _settingsService.Save();
         }
 
         // ===== Navigation commands =====
