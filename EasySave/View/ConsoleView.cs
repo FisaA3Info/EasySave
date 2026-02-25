@@ -15,7 +15,7 @@ namespace EasySave.View
             backupManager = manager;
             language = new LanguageManager();
         }
-        public void DisplayMenu()
+        public async Task DisplayMenu()
         {
             bool IsRunning = true;
             while (IsRunning)
@@ -34,7 +34,7 @@ namespace EasySave.View
                 DisplayMessage("quit");
                 Console.Write(language.GetText("your_choice") + " ");
 
-                IsRunning = UserInput();
+                IsRunning = await UserInput();
             }
         }
 
@@ -79,7 +79,7 @@ namespace EasySave.View
         }
 
 
-        public bool UserInput()
+        public async Task<bool> UserInput()
         {
             string choice = Console.ReadLine();
             Console.WriteLine();
@@ -132,13 +132,13 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             break;
                         }
-                        backupManager.ExecuteJob(index);
+                        await backupManager.ExecuteJob(index);
                     }
                     break;
 
                 case "3":
                     // CHOICE EXECUTE ALL 
-                    backupManager.ExecuteAllJobs();
+                    await backupManager.ExecuteAllJobs();
                     break;
 
 
@@ -160,7 +160,7 @@ namespace EasySave.View
                             DisplayMessage("invalid_choice");
                             break;
                         }
-                        backupManager.ExecuteRange(nb_start_range, nb_end_range);
+                        await backupManager.ExecuteRange(nb_start_range, nb_end_range);
                     }
                     break;
 
@@ -211,7 +211,7 @@ namespace EasySave.View
                     // execute if jobs
                     if (selectedJobs.Count > 0)
                     {
-                        backupManager.ExecuteSelection(selectedJobs);
+                        await backupManager.ExecuteSelection(selectedJobs);
                     }
                     else
                     {

@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EasySave.Model
 {
     public class StateEntry
     {
-        public string JobName { get; set; }
+        public string JobName { get; set; } = "";
         public DateTime TimeStamp { get; set; }
         public BackupState State { get; set; }
         public int TotalFiles { get; set; }
@@ -14,8 +12,8 @@ namespace EasySave.Model
         public int Progress { get; set; }
         public int FilesRemaining { get; set; }
         public long SizeRemaining { get; set; }
-        public string CurrentSourceFile { get; set; }
-        public string CurrentTargetFile { get; set; }
+        public string CurrentSourceFile { get; set; } = "";
+        public string CurrentTargetFile { get; set; } = "";
 
         public StateEntry()
         {

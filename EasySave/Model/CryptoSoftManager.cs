@@ -29,8 +29,6 @@ namespace EasySave.Model
                 process.Start();
 
                 var outputTask = process.StandardOutput.ReadToEndAsync();
-                //error not used, to implement in view soon pls
-                var errorTask = process.StandardError.ReadToEndAsync();
 
                 await process.WaitForExitAsync();
 

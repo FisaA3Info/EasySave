@@ -3,6 +3,7 @@ using EasySave.Model;
 using EasySave.Service;
 using EasySave.View;
 using EasySave.ViewModel;
+using System.Threading.Tasks;
 
 class Program
 {
@@ -20,17 +21,17 @@ class Program
         // CLI mode or interactive mode
         if (args.Length > 0)
         {
-            ExecuteFromArgs(args[0], manager);
+            ExecuteFromArgs(args[0], manager).GetAwaiter().GetResult();
         }
         else
         {
             var view = new ConsoleView(manager);
-            view.DisplayMenu();
+            view.DisplayMenu().GetAwaiter().GetResult();
         }
     }
 
     /// Parse and execute jobs from CLI argument : - or ;
-    static void ExecuteFromArgs(string arg, BackupManager manager)
+    static async Task ExecuteFromArgs(string arg, BackupManager manager)
     {
         //check if there are jobs
         if (manager.BackupJobs.Count == 0)
@@ -43,18 +44,18 @@ class Program
         // Check for range format
         if (arg.Contains("-"))
         {
-            ParseAndExecuteRange(arg, manager);
+            await ParseAndExecuteRange(arg, manager);
         }
         // check for selection format
         else if (arg.Contains(";"))
         {
-            ParseAndExecuteSelection(arg, manager);
+            await ParseAndExecuteSelection(arg, manager);
         }
         else
         {
             if (int.TryParse(arg, out int index))
             {
-                manager.ExecuteJob(index);
+                await manager.ExecuteJob(index);
             }
             else
             {
@@ -65,7 +66,7 @@ class Program
     }
 
     /// Parse range and execute
-    static void ParseAndExecuteRange(string arg, BackupManager manager)
+    static async Task ParseAndExecuteRange(string arg, BackupManager manager)
     {
         string[] parts = arg.Split('-');
 
@@ -73,7 +74,7 @@ class Program
             int.TryParse(parts[0], out int start) &&
             int.TryParse(parts[1], out int end))
         {
-            manager.ExecuteRange(start, end);
+            await manager.ExecuteRange(start, end);
         }
         else
         {
@@ -85,7 +86,7 @@ class Program
 
     /// Parse selection and execute
 
-    static void ParseAndExecuteSelection(string arg, BackupManager manager)
+    static async Task ParseAndExecuteSelection(string arg, BackupManager manager)
     {
         string[] parts = arg.Split(";");
         List<int> indices = new List<int>();
@@ -104,7 +105,7 @@ class Program
 
         if (indices.Count > 0)
         {
-            manager.ExecuteSelection(indices);
+            await manager.ExecuteSelection(indices);
         }
         else
         {
