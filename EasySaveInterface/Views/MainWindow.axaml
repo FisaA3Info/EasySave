@@ -126,7 +126,7 @@
 											 Text="{Binding NewJobSource}"
 											 Height="36"/>
 										<Button Grid.Column="1"
-												Content="Parcourir"
+												Content="{Binding TextBrowse}"
 												Click="SelectFolder"
 												Tag= "source"
 												Classes="browse"
@@ -146,7 +146,7 @@
 											 Text="{Binding NewJobTarget}"
 											 Height="36"/>
 										<Button Grid.Column="1"
-												Content="Parcourir"
+												Content="{Binding TextBrowse}"
 												Click="SelectFolder"
 												Tag="target"
 												Classes="browse"
