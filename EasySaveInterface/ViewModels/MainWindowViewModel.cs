@@ -328,8 +328,8 @@ namespace EasySaveInterface.ViewModels
         {
             string mode = value switch
             {
-                "Centralized" => "centralized",
-                "Both" => "both",
+                "centralized" => "centralized",
+                "both" => "both",
                 _ => "local"
             };
             Logger.LogMode = mode;
