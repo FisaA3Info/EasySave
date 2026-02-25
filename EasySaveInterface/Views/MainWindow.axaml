@@ -282,7 +282,7 @@
 
 					<Border Background="#2D2D30" CornerRadius="6" Padding="12" BorderBrush="#3F3F46" BorderThickness="1">
 						<StackPanel Spacing="6">
-							<TextBlock Text="Progression globale" Foreground="#CCCCCC" FontSize="12"/>
+							<TextBlock Text="{Binding TextGlobalProgress}" Foreground="#CCCCCC" FontSize="12"/>
 							<Grid ColumnDefinitions="*,Auto">
 								<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding GlobalProgress}" Height="14" Foreground="#4EC9B0" CornerRadius="3"/>
 								<TextBlock Grid.Column="1" Text="{Binding GlobalProgress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
@@ -301,28 +301,35 @@
 
                         <TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC" FontSize="13"/>
 
-                        <Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
-                            <ItemsControl ItemsSource="{Binding Jobs}" Name="JobsItemsControl">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="model:BackupJob">
-                                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
-                                            <TextBlock Foreground="#007ACC"
-                                                       FontWeight="Bold"
-                                                       Width="30">
-                                                <TextBlock.Text>
-                                                    <MultiBinding Converter="{StaticResource ItemIndexConverter}">
-                                                        <Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
-                                                        <Binding />
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="-" Foreground="#666666"/>
-                                            <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                        <Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="250">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="model:BackupJob">
+                                            <StackPanel Spacing="4" Margin="0,5">
+                                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                                    <TextBlock Foreground="#007ACC" FontWeight="Bold" Width="30">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource ItemIndexConverter}">
+                                                                <Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                                <Binding />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+                                                    <Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+                                                        <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+                                                    </Border>
+                                                </StackPanel>
+                                                <Grid ColumnDefinitions="*,Auto" Margin="35,2,10,0">
+                                                    <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
                         </Border>
 
                         <StackPanel Spacing="8">
@@ -336,11 +343,24 @@
                                      HorizontalAlignment="Left"/>
                         </StackPanel>
 
-                        <Button Content="{Binding TextBtnExecuteRange}"
-                                Classes="primary"
-                                Command="{Binding ExecuteRangeCommand}"
-                                HorizontalAlignment="Left"
-                                IsEnabled="{Binding !IsExecuting}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+                                    Command="{Binding PlayRangeJobsCommand}"/>
+                            <Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+                                    Command="{Binding PauseAllJobsCommand}"/>
+                            <Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+                                    Command="{Binding StopAllJobsCommand}"/>
+                        </StackPanel>
+
+                        <Border Background="#2D2D30" CornerRadius="6" Padding="12" BorderBrush="#3F3F46" BorderThickness="1">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{Binding TextGlobalProgress}" Foreground="#CCCCCC" FontSize="12"/>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding GlobalProgress}" Height="14" Foreground="#4EC9B0" CornerRadius="3"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding GlobalProgress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
 					<!-- ========== PAGE: Execute Selection ========== -->
@@ -353,28 +373,35 @@
 
 						<TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC" FontSize="13"/>
 
-						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
-							<ItemsControl ItemsSource="{Binding Jobs}">
-								<ItemsControl.ItemTemplate>
-									<DataTemplate x:DataType="model:BackupJob">
-										<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
-											<TextBlock Foreground="#007ACC"
-													   FontWeight="Bold"
-													   Width="30">
-												<TextBlock.Text>
-													<MultiBinding Converter="{StaticResource ItemIndexConverter}">
-														<Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
-														<Binding />
-													</MultiBinding>
-												</TextBlock.Text>
-											</TextBlock>
-											<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-											<TextBlock Text="-" Foreground="#666666"/>
-											<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-										</StackPanel>
-									</DataTemplate>
-								</ItemsControl.ItemTemplate>
-							</ItemsControl>
+						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="250">
+							<ScrollViewer>
+								<ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="model:BackupJob">
+											<StackPanel Spacing="4" Margin="0,5">
+												<StackPanel Orientation="Horizontal" Spacing="10">
+													<TextBlock Foreground="#007ACC" FontWeight="Bold" Width="30">
+														<TextBlock.Text>
+															<MultiBinding Converter="{StaticResource ItemIndexConverter}">
+																<Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+																<Binding />
+															</MultiBinding>
+														</TextBlock.Text>
+													</TextBlock>
+													<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+													<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+														<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+													</Border>
+												</StackPanel>
+												<Grid ColumnDefinitions="*,Auto" Margin="35,2,10,0">
+													<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+													<TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+												</Grid>
+											</StackPanel>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</ScrollViewer>
 						</Border>
 
 						<StackPanel Spacing="8">
@@ -388,11 +415,24 @@
 									 HorizontalAlignment="Left"/>
 						</StackPanel>
 
-						<Button Content="{Binding TextBtnExecuteSelection}"
-								Classes="primary"
-								Command="{Binding ExecuteSelectedJobsCommand}"
-								HorizontalAlignment="Left"
-								IsEnabled="{Binding !IsExecuting}"/>
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+									Command="{Binding PlaySelectionJobsCommand}"/>
+							<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+									Command="{Binding PauseAllJobsCommand}"/>
+							<Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+									Command="{Binding StopAllJobsCommand}"/>
+						</StackPanel>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="12" BorderBrush="#3F3F46" BorderThickness="1">
+							<StackPanel Spacing="6">
+								<TextBlock Text="{Binding TextGlobalProgress}" Foreground="#CCCCCC" FontSize="12"/>
+								<Grid ColumnDefinitions="*,Auto">
+									<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding GlobalProgress}" Height="14" Foreground="#4EC9B0" CornerRadius="3"/>
+									<TextBlock Grid.Column="1" Text="{Binding GlobalProgress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+								</Grid>
+							</StackPanel>
+						</Border>
 					</StackPanel>
 
 					<!-- ========== PAGE: Delete ========== -->
