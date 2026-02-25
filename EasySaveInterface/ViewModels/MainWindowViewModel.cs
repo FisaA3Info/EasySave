@@ -183,6 +183,7 @@ namespace EasySaveInterface.ViewModels
         public string TextPlaceholderMaxLargeFile => GetText("placeholder_max_large_file");
         public string TextBrowse => GetText("browse");
         public string TextBrowserTitle => GetText("browser_title");
+        public string TextGlobalProgress => GetText("global_progress");
 
         public bool HasJobs => Jobs.Count > 0;
 
@@ -300,6 +301,7 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(TextPriorityExtensions));
             OnPropertyChanged(nameof(TextBrowse));
             OnPropertyChanged(nameof(TextBrowserTitle));
+            OnPropertyChanged(nameof(TextGlobalProgress));
 
             BackupTypeConverter.FullText = GetText("BackupSelectionFull");
             BackupTypeConverter.DifferentialText = GetText("BackupSelectionDifferential");
@@ -450,6 +452,7 @@ namespace EasySaveInterface.ViewModels
         }
 
         private int _runningJobCount = 0;
+        private List<BackupJob> _currentRunJobs = new();
 
         private void AppendStatus(string msg)
         {
@@ -480,6 +483,9 @@ namespace EasySaveInterface.ViewModels
 
             if (!CheckSourceDirs(new List<BackupJob> { job }))
                 return;
+
+            _currentRunJobs = new List<BackupJob> { job };
+            foreach (var j in Jobs) j.Progress = 0;
 
             int index = _backupManager.BackupJobs.IndexOf(job) + 1;
 
@@ -544,6 +550,9 @@ namespace EasySaveInterface.ViewModels
         {
             if (_backupManager.BackupJobs.Count == 0) { StatusMessage = GetText("no_jobs"); return; }
 
+            _currentRunJobs = Jobs.ToList();
+            foreach (var j in Jobs) j.Progress = 0;
+
             bool anyResumed = false;
             bool anyStarted = false;
 
@@ -562,6 +571,7 @@ namespace EasySaveInterface.ViewModels
 
                 if (!Directory.Exists(job.SourceDir)) continue;
 
+                job.Progress = 0;
                 int index = _backupManager.BackupJobs.IndexOf(job) + 1;
                 anyStarted = true;
                 _runningJobCount++;
@@ -615,6 +625,159 @@ namespace EasySaveInterface.ViewModels
                 }
             }
             StatusMessage = GetText("all_stopped");
+        }
+
+        [RelayCommand]
+        private void PlayRangeJobs()
+        {
+            var parts = SelectedIndicesText.Split(';', ',');
+            if (parts.Length < 2
+                || !int.TryParse(parts[0].Trim(), out int start)
+                || !int.TryParse(parts[1].Trim(), out int end))
+            {
+                StatusMessage = GetText("invalid_choice");
+                return;
+            }
+
+            int maxJob = _backupManager.BackupJobs.Count;
+            if (start < 1 || end < 1 || start > maxJob || end > maxJob)
+            {
+                StatusMessage = GetText("job_not_found");
+                return;
+            }
+
+            if (start > end) (start, end) = (end, start);
+
+            _currentRunJobs = Jobs.Skip(start - 1).Take(end - start + 1).ToList();
+            foreach (var j in Jobs) j.Progress = 0;
+
+            bool anyResumed = false;
+            bool anyStarted = false;
+
+            for (int i = start - 1; i <= end - 1; i++)
+            {
+                var job = Jobs[i];
+                int capturedIndex = i + 1;
+
+                if (job.State == BackupState.Active && job.Controller.IsStopped) continue;
+                if (job.State == BackupState.Active && job.Controller.IsPaused)
+                {
+                    job.Controller.Resume();
+                    anyResumed = true;
+                    continue;
+                }
+                if (job.State == BackupState.Active) continue;
+                if (!Directory.Exists(job.SourceDir)) continue;
+
+                job.Progress = 0;
+                anyStarted = true;
+                _runningJobCount++;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _backupManager.ExecuteJob(capturedIndex);
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            _runningJobCount--;
+                            if (job.Controller.IsStopped)
+                                job.Progress = 0;
+                            else if (_runningJobCount == 0)
+                                StatusMessage = GetText("all_completed");
+                        });
+                    }
+                    catch
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => _runningJobCount--);
+                    }
+                });
+            }
+
+            if (anyResumed && !anyStarted)
+                StatusMessage = GetText("all_resumed");
+            else if (anyStarted)
+                StatusMessage = GetText("all_started");
+            else
+                StatusMessage = GetText("no_jobs");
+        }
+
+        [RelayCommand]
+        private void PlaySelectionJobs()
+        {
+            var indices = new List<int>();
+            if (!string.IsNullOrWhiteSpace(SelectedIndicesText))
+            {
+                foreach (var part in SelectedIndicesText.Split(';', ','))
+                {
+                    if (int.TryParse(part.Trim(), out int idx))
+                        indices.Add(idx);
+                }
+            }
+
+            if (indices.Count == 0)
+            {
+                StatusMessage = GetText("no_selection");
+                return;
+            }
+
+            int maxJob = _backupManager.BackupJobs.Count;
+            if (indices.Any(i => i < 1 || i > maxJob))
+            {
+                StatusMessage = GetText("job_not_found");
+                return;
+            }
+
+            _currentRunJobs = indices.Select(i => Jobs[i - 1]).ToList();
+            foreach (var j in Jobs) j.Progress = 0;
+
+            bool anyResumed = false;
+            bool anyStarted = false;
+
+            foreach (int idx in indices)
+            {
+                var job = Jobs[idx - 1];
+                int capturedIdx = idx;
+
+                if (job.State == BackupState.Active && job.Controller.IsStopped) continue;
+                if (job.State == BackupState.Active && job.Controller.IsPaused)
+                {
+                    job.Controller.Resume();
+                    anyResumed = true;
+                    continue;
+                }
+                if (job.State == BackupState.Active) continue;
+                if (!Directory.Exists(job.SourceDir)) continue;
+
+                job.Progress = 0;
+                anyStarted = true;
+                _runningJobCount++;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _backupManager.ExecuteJob(capturedIdx);
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            _runningJobCount--;
+                            if (job.Controller.IsStopped)
+                                job.Progress = 0;
+                            else if (_runningJobCount == 0)
+                                StatusMessage = GetText("all_completed");
+                        });
+                    }
+                    catch
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => _runningJobCount--);
+                    }
+                });
+            }
+
+            if (anyResumed && !anyStarted)
+                StatusMessage = GetText("all_resumed");
+            else if (anyStarted)
+                StatusMessage = GetText("all_started");
+            else
+                StatusMessage = GetText("no_selection");
         }
 
         [RelayCommand]
@@ -737,7 +900,8 @@ namespace EasySaveInterface.ViewModels
         private void UpdateGlobalProgress()
         {
             if (Jobs.Count == 0) { GlobalProgress = 0; return; }
-            GlobalProgress = (int)Jobs.Average(j => j.Progress);
+            var toAverage = _currentRunJobs.Count > 0 ? _currentRunJobs : Jobs.ToList();
+            GlobalProgress = (int)toAverage.Average(j => j.Progress);
         }
 
         private void OnJobProgressChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
