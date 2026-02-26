@@ -88,6 +88,11 @@
 						<Button Classes="menu-button" Command="{Binding GoToListJobsCommand}">
 							<TextBlock Text="{Binding TextListJobs}" TextWrapping="Wrap"/>
 						</Button>
+
+						<Button Classes="menu-button" Command="{Binding GoToSettingsCommand}">
+							<TextBlock Text="{Binding TextSettings}" TextWrapping="Wrap"/>
+						</Button>
+						
 					</StackPanel>
 				</ScrollViewer>
 			</Border>
@@ -115,16 +120,42 @@
 
 								<StackPanel>
 									<TextBlock Text="{Binding TextPromptSource}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
-									<TextBox Watermark="Ex: C:\Users\Documents"
-										 Text="{Binding NewJobSource}"
-										 Height="36"/>
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBox Grid.Column="0"
+											Watermark="Ex: C:\Users\Documents"
+											 Text="{Binding NewJobSource}"
+											 Height="36"/>
+										<Button Grid.Column="1"
+												Content="{Binding TextBrowse}"
+												Click="SelectFolder"
+												Tag= "source"
+												Classes="browse"
+												Height="36"
+												Padding="15,0"
+												Margin="8,0,0,0"
+												VerticalContentAlignment="Center"
+												HorizontalContentAlignment="Center"/>
+									</Grid>
 								</StackPanel>
 
 								<StackPanel>
 									<TextBlock Text="{Binding TextPromptTarget}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
-									<TextBox Watermark="Ex: D:\Backups\Documents"
-										 Text="{Binding NewJobTarget}"
-										 Height="36"/>
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBox  Grid.Column="0"
+											Watermark="Ex: D:\Backups\Documents"
+											 Text="{Binding NewJobTarget}"
+											 Height="36"/>
+										<Button Grid.Column="1"
+												Content="{Binding TextBrowse}"
+												Click="SelectFolder"
+												Tag="target"
+												Classes="browse"
+												Height="36"
+												Padding="15,0"
+												Margin="8,0,0,0"
+												VerticalContentAlignment="Center"
+												HorizontalContentAlignment="Center"/>
+									</Grid>
 								</StackPanel>
 
 								<StackPanel>
@@ -156,37 +187,49 @@
 
 						<TextBlock Text="{Binding TextSelectJobExecute}" Foreground="#CCCCCC" FontSize="13"/>
 
-						<ListBox ItemsSource="{Binding Jobs}"
-                                 SelectedIndex="{Binding SelectedJobIndex}"
-                                 MinHeight="200"
-                                 MaxHeight="350">
-							<ListBox.ItemTemplate>
-								<DataTemplate x:DataType="model:BackupJob">
-									<StackPanel Spacing="5">
-										<StackPanel Orientation="Horizontal" Spacing="10">
-											<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
-											<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
-												<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
-											</Border>
-										</StackPanel>
-										<StackPanel Orientation="Horizontal" Spacing="4">
-											<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelSource}" Foreground="#888888" FontSize="11"/>
-											<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
-										</StackPanel>
-										<StackPanel Orientation="Horizontal" Spacing="4">
-											<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelTarget}" Foreground="#888888" FontSize="11"/>
-											<TextBlock Text="{Binding TargetDir}" Foreground="#888888" FontSize="11"/>
-										</StackPanel>
-									</StackPanel>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
-
-						<Button Content="{Binding TextBtnExecute}"
-                                Classes="primary"
-                                Command="{Binding ExecuteJobCommand}"
-                                HorizontalAlignment="Left"
-                                IsEnabled="{Binding HasJobSelected}"/>
+						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="350">
+							<ScrollViewer>
+								<ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="model:BackupJob">
+											<Grid ColumnDefinitions="*,Auto" Margin="0,5">
+												<StackPanel Grid.Column="0" Spacing="5">
+													<StackPanel Orientation="Horizontal" Spacing="10">
+														<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+														<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+															<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+														</Border>
+													</StackPanel>
+													<StackPanel Orientation="Horizontal" Spacing="4">
+														<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelSource}" Foreground="#888888" FontSize="11"/>
+														<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
+													</StackPanel>
+													<StackPanel Orientation="Horizontal" Spacing="4">
+														<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelTarget}" Foreground="#888888" FontSize="11"/>
+														<TextBlock Text="{Binding TargetDir}" Foreground="#888888" FontSize="11"/>
+													</StackPanel>
+													<Grid ColumnDefinitions="*,Auto" Margin="0,2,10,0">
+														<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+														<TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+													</Grid>
+												</StackPanel>
+												<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+													<Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+															Command="{Binding $parent[Window].DataContext.PlayJobCommand}"
+															CommandParameter="{Binding}"/>
+													<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+															Command="{Binding $parent[Window].DataContext.PauseJobCommand}"
+															CommandParameter="{Binding}"/>
+													<Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+																Command="{Binding $parent[Window].DataContext.StopJobCommand}"
+																CommandParameter="{Binding}"/>
+												</StackPanel>
+											</Grid>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</ScrollViewer>
+						</Border>
 					</StackPanel>
 
 					<!-- ========== PAGE: Execute All ========== -->
@@ -197,29 +240,56 @@
                                    Foreground="#FFFFFF"
                                    Margin="0,0,0,10"/>
 
-                        <TextBlock Text="{Binding TextJobsWillExecute}" Foreground="#CCCCCC" FontSize="13"/>
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+								Command="{Binding PlayAllJobsCommand}"/>
+						<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+								Command="{Binding PauseAllJobsCommand}"/>
+						<Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+								Command="{Binding StopAllJobsCommand}"/>
+					</StackPanel>
 
-                        <Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
-                            <ItemsControl ItemsSource="{Binding Jobs}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="model:BackupJob">
-                                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
-                                            <TextBlock Text="-" Foreground="#007ACC" FontSize="16" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="-" Foreground="#666666"/>
-                                            <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Border>
+					<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="350">
+						<ScrollViewer>
+							<ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="model:BackupJob">
+										<StackPanel Spacing="5" Margin="0,5">
+											<StackPanel Orientation="Horizontal" Spacing="10">
+												<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+												<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+													<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+												</Border>
+											</StackPanel>
+											<StackPanel Orientation="Horizontal" Spacing="4">
+												<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelSource}" Foreground="#888888" FontSize="11"/>
+												<TextBlock Text="{Binding SourceDir}" Foreground="#888888" FontSize="11"/>
+											</StackPanel>
+											<StackPanel Orientation="Horizontal" Spacing="4">
+												<TextBlock Text="{Binding $parent[Window].DataContext.TextLabelTarget}" Foreground="#888888" FontSize="11"/>
+												<TextBlock Text="{Binding TargetDir}" Foreground="#888888" FontSize="11"/>
+											</StackPanel>
+											<Grid ColumnDefinitions="*,Auto" Margin="0,2,10,0">
+												<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+												<TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+											</Grid>
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</ScrollViewer>
+					</Border>
 
-                        <Button Content="{Binding TextBtnExecuteAll}"
-                                Classes="primary"
-                                Command="{Binding ExecuteAllJobsCommand}"
-                                HorizontalAlignment="Left"
-                                IsEnabled="{Binding HasJobs}"/>
-                    </StackPanel>
+					<Border Background="#2D2D30" CornerRadius="6" Padding="12" BorderBrush="#3F3F46" BorderThickness="1">
+						<StackPanel Spacing="6">
+							<TextBlock Text="{Binding TextGlobalProgress}" Foreground="#CCCCCC" FontSize="12"/>
+							<Grid ColumnDefinitions="*,Auto">
+								<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding GlobalProgress}" Height="14" Foreground="#4EC9B0" CornerRadius="3"/>
+								<TextBlock Grid.Column="1" Text="{Binding GlobalProgress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+							</Grid>
+						</StackPanel>
+					</Border>
+				</StackPanel>
 
 					<!-- ========== PAGE: Execute Range ========== -->
 					<StackPanel IsVisible="{Binding IsExecuteRangePage}" Spacing="15">
@@ -231,65 +301,138 @@
 
                         <TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC" FontSize="13"/>
 
-                        <Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1">
-                            <ItemsControl ItemsSource="{Binding Jobs}" Name="JobsItemsControl">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="model:BackupJob">
-                                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5">
-                                            <TextBlock Foreground="#007ACC"
-                                                       FontWeight="Bold"
-                                                       Width="30">
-                                                <TextBlock.Text>
-                                                    <MultiBinding Converter="{StaticResource ItemIndexConverter}">
-                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                                        <Binding />
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="-" Foreground="#666666"/>
-                                            <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                        <Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="250">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="model:BackupJob">
+                                            <StackPanel Spacing="4" Margin="0,5">
+                                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                                    <TextBlock Foreground="#007ACC" FontWeight="Bold" Width="30">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource ItemIndexConverter}">
+                                                                <Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                                <Binding />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+                                                    <Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+                                                        <TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+                                                    </Border>
+                                                </StackPanel>
+                                                <Grid ColumnDefinitions="*,Auto" Margin="35,2,10,0">
+                                                    <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
                         </Border>
 
                         <StackPanel Spacing="8">
                             <TextBlock Text="{Binding TextEnterNumbersSemicolon}"
                                        Foreground="#CCCCCC"
                                        FontSize="12"/>
-                            <TextBox Watermark="Ex: 1;3;4"
+                            <TextBox Watermark="Ex: 1;3"
                                      Text="{Binding SelectedIndicesText}"
                                      Width="250"
                                      Height="36"
                                      HorizontalAlignment="Left"/>
                         </StackPanel>
 
-                        <Button Content="{Binding TextBtnExecuteRange}"
-                                Classes="primary"
-                                Command="{Binding ExecuteRangeCommand}"
-                                HorizontalAlignment="Left"
-                                IsEnabled="{Binding !IsExecuting}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+                                    Command="{Binding PlayRangeJobsCommand}"/>
+                            <Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+                                    Command="{Binding PauseAllJobsCommand}"/>
+                            <Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+                                    Command="{Binding StopAllJobsCommand}"/>
+                        </StackPanel>
+
+                        <Border Background="#2D2D30" CornerRadius="6" Padding="12" BorderBrush="#3F3F46" BorderThickness="1">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{Binding TextGlobalProgress}" Foreground="#CCCCCC" FontSize="12"/>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding GlobalProgress}" Height="14" Foreground="#4EC9B0" CornerRadius="3"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding GlobalProgress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
 					<!-- ========== PAGE: Execute Selection ========== -->
-					<StackPanel IsVisible="{Binding IsExecuteSelectionPage}" Spacing="12">
-						<TextBlock Text="{Binding TextExecuteSpecific}" FontWeight="Bold" FontSize="18"/>
-						<TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC"/>
-						<ItemsControl ItemsSource="{Binding Jobs}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate x:DataType="model:BackupJob">
-									<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
-										<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-										<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" Foreground="#AAAAAA"/>
-									</StackPanel>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-						<TextBlock Text="{Binding TextEnterNumbersSemicolon}" Foreground="#CCCCCC" Margin="0,5,0,0"/>
-						<TextBox Watermark="ex: 1;3;5" Text="{Binding SelectedIndicesText}" Width="250" HorizontalAlignment="Left"/>
-						<Button Content="{Binding TextBtnExecuteSelection}" Command="{Binding ExecuteSelectedJobsCommand}" HorizontalAlignment="Left"/>
+					<StackPanel IsVisible="{Binding IsExecuteSelectionPage}" Spacing="15">
+						<TextBlock Text="{Binding TextExecuteSpecific}"
+								   FontWeight="Bold"
+								   FontSize="22"
+								   Foreground="#FFFFFF"
+								   Margin="0,0,0,10"/>
+
+						<TextBlock Text="{Binding TextJobsAvailable}" Foreground="#CCCCCC" FontSize="13"/>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="15" BorderBrush="#3F3F46" BorderThickness="1" MaxHeight="250">
+							<ScrollViewer>
+								<ItemsControl ItemsSource="{Binding Jobs}" Margin="0,0,15,0">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="model:BackupJob">
+											<StackPanel Spacing="4" Margin="0,5">
+												<StackPanel Orientation="Horizontal" Spacing="10">
+													<TextBlock Foreground="#007ACC" FontWeight="Bold" Width="30">
+														<TextBlock.Text>
+															<MultiBinding Converter="{StaticResource ItemIndexConverter}">
+																<Binding Path="ItemsSource" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+																<Binding />
+															</MultiBinding>
+														</TextBlock.Text>
+													</TextBlock>
+													<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+													<Border Background="#007ACC" CornerRadius="3" Padding="5,2">
+														<TextBlock Text="{Binding Type, Converter={StaticResource BackupTypeConverter}}" FontSize="10" Foreground="White"/>
+													</Border>
+												</StackPanel>
+												<Grid ColumnDefinitions="*,Auto" Margin="35,2,10,0">
+													<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="14" Foreground="#007ACC" CornerRadius="3"/>
+													<TextBlock Grid.Column="1" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+												</Grid>
+											</StackPanel>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</ScrollViewer>
+						</Border>
+
+						<StackPanel Spacing="8">
+							<TextBlock Text="{Binding TextEnterNumbersSemicolon}"
+									   Foreground="#CCCCCC"
+									   FontSize="12"/>
+							<TextBox Watermark="Ex: 1;3;5"
+									 Text="{Binding SelectedIndicesText}"
+									 Width="250"
+									 Height="36"
+									 HorizontalAlignment="Left"/>
+						</StackPanel>
+
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<Button Content="&#9654;" Background="#2EA043" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+									Command="{Binding PlaySelectionJobsCommand}"/>
+							<Button Content="&#10074;&#10074;" Background="#D29922" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+									Command="{Binding PauseAllJobsCommand}"/>
+							<Button Content="&#9632;" Background="#D13438" Foreground="White" Padding="8,4" CornerRadius="3" FontSize="12"
+									Command="{Binding StopAllJobsCommand}"/>
+						</StackPanel>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="12" BorderBrush="#3F3F46" BorderThickness="1">
+							<StackPanel Spacing="6">
+								<TextBlock Text="{Binding TextGlobalProgress}" Foreground="#CCCCCC" FontSize="12"/>
+								<Grid ColumnDefinitions="*,Auto">
+									<ProgressBar Grid.Column="0" Minimum="0" Maximum="100" Value="{Binding GlobalProgress}" Height="14" Foreground="#4EC9B0" CornerRadius="3"/>
+									<TextBlock Grid.Column="1" Text="{Binding GlobalProgress, StringFormat={}{0}%}" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+								</Grid>
+							</StackPanel>
+						</Border>
 					</StackPanel>
 
 					<!-- ========== PAGE: Delete ========== -->
@@ -369,6 +512,138 @@
 									</DataTemplate>
 								</ItemsControl.ItemTemplate>
 							</ItemsControl>
+						</Border>
+					</StackPanel>
+
+				<!-- ========== PAGE: Settings ========== -->
+					<StackPanel IsVisible="{Binding IsSettingsPage}" Spacing="15">
+						<TextBlock Text="{Binding TextSettingsTitle}"
+								   FontWeight="Bold"
+								   FontSize="22"
+								   Foreground="#FFFFFF"
+								   Margin="0,0,0,10"/>
+
+						<Border Background="#2D2D30" CornerRadius="6" Padding="20" BorderBrush="#3F3F46" BorderThickness="1">
+							<StackPanel Spacing="20">
+
+								<!-- CryptoSoft Path -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextCryptoSoftPath}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"/>
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBox Grid.Column="0"
+												Watermark="Ex: C:\CryptoSoft\CryptoSoft.exe"
+												 Text="{Binding CryptoSoftPath}"
+												 Height="36"/>
+										<Button Grid.Column="1"
+													Content="{Binding TextBrowse}"
+													Click="SelectFolder"
+													Tag="crypto"
+													Classes="browse"
+													Height="36"
+													Padding="15,0"
+													Margin="8,0,0,0"
+													VerticalContentAlignment="Center"
+													HorizontalContentAlignment="Center"/>
+									</Grid>
+								</StackPanel>
+
+								<!-- Encryption Key -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextEncryptionKey}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: HonkHonk"
+											 Text="{Binding EncryptionKey}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Encrypted Extensions -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextEncryptedExtensions}" 
+											   Foreground="#CCCCCC" 
+											   FontSize="12" 
+											   Margin="0,0,0,5"
+											   TextWrapping="Wrap"/>
+									<TextBox Watermark="Ex: .txt;.doc;.pdf"
+											 Text="{Binding EncryptedExtensions}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Business Software Name -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextBusinessSoftware}"
+											   Foreground="#CCCCCC"
+											   FontSize="12"
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: MyBusinessApp"
+											 Text="{Binding BusinessSoftwareName}"
+											 Height="36"/>
+								</StackPanel>
+
+								<!-- Large File Threshold -->
+								<StackPanel>
+									<TextBlock Text="{Binding TextMaxLargeFile}"
+											   Foreground="#CCCCCC"
+											   FontSize="12"
+											   Margin="0,0,0,5"/>
+									<TextBox Watermark="Ex: 1024 (0 = pas de limite)"
+											 Text="{Binding MaxLargeFileSizeText}"
+											 Height="36"/>
+								</StackPanel>
+
+                            <StackPanel Spacing="15">
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding TextLogMode}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <ComboBox ItemsSource="{Binding LogModes}"
+                                              SelectedItem="{Binding SelectedLogMode}"
+                                              Height="36"
+                                              HorizontalAlignment="Stretch"/>
+                                    <TextBlock Text="{Binding TextLogModeIndication}" Foreground="#808080" FontSize="10" Margin="0,5,0,0" />
+                                </StackPanel>
+
+                                <StackPanel IsVisible="{Binding SelectedLogMode, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="{Binding TextUrlLogServer}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                    <TextBox Watermark="Ex: http://192.168.1.100:5000/"
+                                             Text="{Binding LogServerUrl}"
+                                             Height="36"
+                                             IsEnabled="{Binding SelectedLogMode, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                </StackPanel>
+
+                                <Grid ColumnDefinitions="*,*">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding TextMachineName}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding MachineName}"
+                                                 Height="36"
+                                                 IsReadOnly="True"
+                                                 Background="#1E1E1E"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding TextUserName}" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding UserName}"
+                                                 Height="36"
+                                                 IsReadOnly="True"
+                                                 Background="#1E1E1E"/>
+                                    </StackPanel>
+                                </Grid>
+
+								<!-- Priority extensions -->
+								<TextBlock Text="{Binding TextPriorityExtensions}" FontWeight="Bold" Margin="0,10,0,0"/>
+								<TextBox Text="{Binding PriorityExtensions}" Watermark=".docx;.pdf;.xlsx"/>
+								
+								<!-- Save Button -->
+								<Button Content="{Binding TextBtnSaveSettings}"
+										Classes="primary"
+										Command="{Binding SaveSettingsCommand}"
+										HorizontalAlignment="Left"
+										Margin="0,10,0,0"/>
+							</StackPanel>
+								</StackPanel>
 						</Border>
 					</StackPanel>
 
