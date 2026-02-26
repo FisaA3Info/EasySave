@@ -205,6 +205,9 @@ namespace EasySaveInterface.ViewModels
             OnPropertyChanged(nameof(ShowJobList));
             StatusMessage = "";
             SelectedJobIndex = -1;
+
+            foreach (var j in Jobs) j.Progress = 0;
+            GlobalProgress = 0;
         }
 
         public MainWindowViewModel()
