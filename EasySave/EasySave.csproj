@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Folder Include="Controller\" />
+    <Folder Include="CryptoSoft\" />
     <Folder Include="ViewModel\" />
     <ProjectReference Include="..\EasyLog\EasyLog.csproj" />
 	<None Update="Ressources\*.json">

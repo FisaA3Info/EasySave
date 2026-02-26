@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace EasyLog
 {
@@ -21,6 +23,9 @@ namespace EasyLog
     {
         //============ attributes  =============
         private static readonly object _lock = new object();
+        private static string _logMode = "local";  // "local", "centralized", "both"
+        private static string _logServerUrl = "";
+        private static readonly HttpClient _httpClient = new HttpClient();
         private static string _logDir;
         private static string _logType;
 
@@ -51,6 +56,17 @@ namespace EasyLog
             }
             set { _logDir = value; }
         }
+        public static string LogMode
+        {
+            get => _logMode;
+            set => _logMode = value ?? "local";
+        }
+
+        public static string LogServerUrl
+        {
+            get => _logServerUrl;
+            set => _logServerUrl = value ?? "";
+        }
 
 
         //============  methods  =================
@@ -69,13 +85,56 @@ namespace EasyLog
             return fullPath;
         }
 
+        private static async Task SendToServerAsync(LogEntry entry)
+        {
+            if (string.IsNullOrWhiteSpace(_logServerUrl))
+                return;
+
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = false };
+                string json = JsonSerializer.Serialize(entry, options);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                string url = _logServerUrl.TrimEnd('/') + "/api/logs";
+                var response = await _httpClient.PostAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.Error.WriteLine($"Log server returned {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to send log to server: {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// 
         /// Singleton that creates or write in the Daily Log file
         /// 
         /// </summary>
         /// <param name="entry"></param>
+        /// 
+
         public static void Log(LogEntry entry)
+        {
+            // Ecriture locale si mode "local" ou "both"
+            if (_logMode == "local" || _logMode == "both")
+            {
+                WriteLocal(entry);
+            }
+
+            // Envoi au serveur si mode "centralized" ou "both"
+            if (_logMode == "centralized" || _logMode == "both")
+            {
+                // Fire-and-forget : on ne bloque pas l'execution du backup
+                _ = Task.Run(() => SendToServerAsync(entry));
+            }
+        }
+
+        public static void WriteLocal(LogEntry entry)
         {
             //protects from concurrent conflicts (in case but will be utile for multithreading)
             lock (_lock)

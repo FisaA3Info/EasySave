@@ -2,6 +2,7 @@ using EasySave.Model;
 using EasySave.Service;
 using EasyLog;
 using System;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +26,9 @@ namespace EasySave.ViewModel
         private StateTracker stateTracker;
         private BusinessSoftwareService _businessSoftwareService;
         private AppSettings settings;
+        private PriorityFileManager _priorityFileManager;
         public List<BackupJob> BackupJobs { get; set; }
+        private LargeFileTransferManager _largeFileTransferManager;
 
         // path to the json that contains the jobs
         private static readonly string JobsFilePath = Path.Combine(
@@ -39,6 +42,7 @@ namespace EasySave.ViewModel
             this.stateTracker = stateTracker;
             this.settings = settings ?? new AppSettings();
             this._businessSoftwareService = businessSoftwareService;
+            this._largeFileTransferManager = new LargeFileTransferManager(this.settings.MaxLargeFileTransferSizeKb);
             BackupJobs = new List<BackupJob>();
             LoadJobs();  // Load existing jobs
         }
@@ -154,7 +158,7 @@ namespace EasySave.ViewModel
         }
 
         //uses the managejob method to execute itself
-        public bool ExecuteJob(int index)
+        public async Task<bool> ExecuteJob(int index)
         {
 
             if (index < 1 || index > BackupJobs.Count)
@@ -163,27 +167,9 @@ namespace EasySave.ViewModel
             }
 
             var job = BackupJobs[index - 1];
-
-            // Check if business software is running before launching
-            if (_businessSoftwareService != null && _businessSoftwareService.IsRunning())
-            {
-                // Log the blocked attempt
-                var logEntry = new LogEntry(
-                    DateTime.Now, 
-                    job.Name ?? "", 
-                    "", 
-                    "",
-                    0, 
-                    -1,
-                    -1
-                );
-                Logger.Log(logEntry);
-                return false;
-            }
-
             try
             {
-                job.Execute(stateTracker, _businessSoftwareService);
+                await job.Execute(stateTracker, _businessSoftwareService, _largeFileTransferManager, _priorityFileManager);
                 return true;
             }
             catch (Exception e)
@@ -195,20 +181,20 @@ namespace EasySave.ViewModel
         }
 
         //executes all the jobs in the list
-        public void ExecuteAllJobs()
+        public async Task ExecuteAllJobs()
         {
+            _priorityFileManager = new PriorityFileManager(BackupJobs.Count);
+            var tasks = new List<Task>();
             for (int i = 1; i <= BackupJobs.Count; i++)
             {
-                var ok = ExecuteJob(i);
-                if (!ok)
-                {
-                    break;
-                }
+                tasks.Add(ExecuteJob(i));
             }
+            await Task.WhenAll(tasks);
+            _priorityFileManager = null;
         }
 
         //executes a range of jobs
-        public void ExecuteRange(int start, int end)
+        public async Task ExecuteRange(int start, int end)
         {
             if (BackupJobs.Count == 0)
             {
@@ -220,17 +206,19 @@ namespace EasySave.ViewModel
             start = Math.Max(1, start);
             end = Math.Min(BackupJobs.Count, end);
 
-            for (int i = start; i <= end; i++)
+            int jobCount = end - start + 1;
+            _priorityFileManager = new PriorityFileManager(jobCount);
+            var tasks = new List<Task>();
+            for(int i = start; i <= end; i++)
             {
-                if (!ExecuteJob(i))
-                {
-                    break;
-                }
+                tasks.Add(ExecuteJob(i));
             }
+            await Task.WhenAll(tasks);
+            _priorityFileManager = null;
         }
 
         //executes specific jobs by its index
-        public void ExecuteSelection(List<int> indexes)
+        public async Task ExecuteSelection(List<int> indexes)
         {
             if (indexes == null || indexes.Count == 0)
             {
@@ -240,20 +228,23 @@ namespace EasySave.ViewModel
             var normalized = indexes
                 .Where(i => i >= 1 && i <= BackupJobs.Count)
                 .Distinct()
-                .OrderBy(i => i);
+                .OrderBy(i => i)
+                .ToList();
 
-            if (!normalized.Any())
+            if (normalized.Count == 0)
             {
                 return;
             }
 
+            _priorityFileManager = new PriorityFileManager(normalized.Count);
+            var tasks = new List<Task>();
             foreach (var idx in normalized)
             {
-                if (!ExecuteJob(idx))
-                {
-                    break;
-                }
+                int index = idx;
+                tasks.Add(ExecuteJob(index));
             }
+            await Task.WhenAll(tasks);
+            _priorityFileManager = null;
         }
     }
 }

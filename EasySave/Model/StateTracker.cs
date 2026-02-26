@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace EasySave.Model
@@ -11,6 +10,7 @@ namespace EasySave.Model
         public string FilePath { get; set; }
         public List<StateEntry> States { get; private set; }
         private List<IStateObserver> observers;
+        private readonly object _lock = new object();
 
         public StateTracker(string filePath = null)
         {
@@ -29,20 +29,25 @@ namespace EasySave.Model
             LoadState();
         }
 
-        //Observer Management Section
+        //Observer Management Section + lock for async
         public void AttachObserver(IStateObserver observer)
         {
-            if(observer == null) return;
-            if (!observers.Contains(observer))
+            if (observer == null) return;
+            lock (_lock)
             {
-                observers.Add(observer);
+                if (!observers.Contains(observer))
+                {
+                    observers.Add(observer);
+                }
             }
         }
-           
         public void DetachObserver(IStateObserver observer)
         {
             if (observer == null) return;
-            observers.Remove(observer);
+            lock (_lock)
+            {
+                observers.Remove(observer);
+            }
         }
 
         private void NotifyObservers(StateEntry entry)
@@ -56,15 +61,18 @@ namespace EasySave.Model
         // StateTracker base method 
         public void UpdateState(StateEntry entry)
         {
-            //Stock the result of FirstOrDefault on States which return the first value that statify the search or return null
-            var existing = States.FirstOrDefault(search => search.JobName == entry.JobName);
-            if (existing != null)
+            lock (_lock)
             {
-                States.Remove(existing);
+                //Stock the result of FirstOrDefault on States which return the first value that statify the search or return null
+                var existing = States.FirstOrDefault(search => search.JobName == entry.JobName);
+                if (existing != null)
+                {
+                    States.Remove(existing);
+                }
+                States.Add(entry);
+                SaveState();
+                NotifyObservers(entry);
             }
-            States.Add(entry);
-            SaveState();
-            NotifyObservers(entry);
         }
 
         public void SaveState()
